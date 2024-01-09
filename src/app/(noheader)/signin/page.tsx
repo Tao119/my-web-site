@@ -5,7 +5,7 @@ import { Button } from 'src/components/button'
 
 interface Props {}
 
-const Signin = ({ signIn }: Props) => {
+const Signin = () => {
   const router = useRouter()
 
   const [err, setErr] = useState('')
