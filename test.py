@@ -37,7 +37,6 @@ class PairGenerator:
         return pair[0].name in pair[1].preference or pair[1].name in pair[0].preference
 
 
-# 会員リストを作成 (仮のデータ)
 members_data = [{"name": f"Member{i}", "level": str(
     random.randint(1, 5)), "preference": set()} for i in range(30)]
 
