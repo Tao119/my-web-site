@@ -26,7 +26,7 @@ const CodeExecution = () => {
         setOutput(`エラー: ${error.error}`);
       }
     } catch (error) {
-      setOutput(`エラー: ${error.message}`);
+      // setOutput(`エラー: ${error.message}`);
     }
   };
 

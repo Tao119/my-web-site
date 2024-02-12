@@ -106,12 +106,13 @@ const Page = () => {
           style={{fontSize:"20px"}}
             type="number"
             placeholder="スコアを入力"
-            value={addScore}
+            value={addScore||""}
             onChange={(e) => setAddScore(parseInt(e.target.value))}
           />
           <Button
             label="登録"
             onClick={() => {
+              if(!addScore) return
               const s = { ...state };
               const sc = s.data[nowPlayer] + addScore;
               s.data[nowPlayer] = sc > 50 ? 25 : sc;
