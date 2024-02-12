@@ -156,6 +156,7 @@ const Page = () => {
             addClass="u-bg-bl u-wt u-ml36"
             onClick={() => {
               setState({ turns: 0, data: {} });
+              setFinish(false);
             }}
           />
         </>
