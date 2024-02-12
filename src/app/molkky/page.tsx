@@ -38,7 +38,6 @@ const Page = () => {
 
   useEffect(() => {
     localStorage.setItem(APP_KEY, JSON.stringify(state));
-    console.log(localStorage);
   }, [state]);
   return (
     <>

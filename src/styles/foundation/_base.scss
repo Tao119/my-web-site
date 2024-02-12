@@ -38,17 +38,17 @@ li {
 }
 
 h1 {
-    font-size: $fs-title;
+    font-size: $fs-title !important;
 }
 
 h2 {
-    font-size: $fs-sub_title;
+    font-size: $fs-sub_title !important;
 }
 
 h3 {
-    font-size: $fs-medium;
+    font-size: $fs-medium !important;
 }
 
 h4 {
-    font-size: $fs-text;
+    font-size: $fs-text !important;
 }
