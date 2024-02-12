@@ -7,8 +7,10 @@ const Karuta = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch('/api/getUserData')
+        const response = await fetch('/api/getUserData', {method: 'GET'})
+        
         const data = await response.json()
+        console.log(data)
         setUserData(data)
       } catch (error) {
         console.error('Error fetching user data:', error)
