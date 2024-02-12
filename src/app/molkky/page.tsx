@@ -18,7 +18,7 @@ const Page = () => {
   const [name, setName] = useState("");
   const [names, setNames] = useState<Set<string>>(new Set());
 
-  const [addScore, setAddScore] = useState<number|null>(null);
+  const [addScore, setAddScore] = useState<number | null>(null);
   const [finish, setFinish] = useState(false);
 
   const players = Object.keys(state.data);
@@ -38,22 +38,22 @@ const Page = () => {
 
   useEffect(() => {
     localStorage.setItem(APP_KEY, JSON.stringify(state));
-    console.log(localStorage)
+    console.log(localStorage);
   }, [state]);
   return (
     <>
       {num == 0 ? (
         <>
-          <div style={{width:"100%"}}>
-            <div style={{fontSize:"20px"}}>ユーザーを追加</div>
+          <div style={{ width: "100%" }}>
+            <div style={{ fontSize: "20px" }}>ユーザーを追加</div>
             <input
-            style={{fontSize:"20px", margin:"20px"}}
+              style={{ fontSize: "20px", margin: "20px" }}
               placeholder="ユーザー名を入力"
               value={name}
               onChange={(e) => setName(e.target.value)}
             />
             <Button
-            addClass="u-bg-bl u-wt"
+              addClass="u-bg-bl u-wt"
               label="追加"
               onClick={() => {
                 setNames(names.add(name));
@@ -63,7 +63,7 @@ const Page = () => {
             <ul>
               {Array.from(names).map((n, index) => (
                 <li
-                style={{fontSize:"20px", margin:"20px"}}
+                  style={{ fontSize: "20px", margin: "20px" }}
                   key={index}
                   onClick={() => {
                     if (confirm("削除しますか？")) {
@@ -92,27 +92,39 @@ const Page = () => {
         </>
       ) : !finish ? (
         <>
-          <ul  style={{display:"flex",flexDirection:"row"}}>
+          <ul style={{ display: "flex", flexDirection: "row" }}>
             {players.map((n, index) => (
-              <li style={{display:"flex",flexDirection:"column"}} key={index}>
-                <div style={{fontSize:"20px", margin:"20px", flex:1}}>{n}</div>
-                <div className={50-state.data[n]<=12?"u-re":""} style={{fontSize:"20px", margin:"20px",flex:1}}>{state.data[n]}</div>
+              <li
+                style={{ display: "flex", flexDirection: "column" }}
+                key={index}
+              >
+                <div style={{ fontSize: "20px", margin: "20px", flex: 1 }}>
+                  {n}
+                </div>
+                <div
+                  className={50 - state.data[n] <= 12 ? "u-re" : ""}
+                  style={{ fontSize: "20px", margin: "20px", flex: 1 }}
+                >
+                  {state.data[n]}
+                </div>
               </li>
             ))}
           </ul>
 
-          <div style={{fontSize:"20px", margin:"0 100px"}}>{nowPlayer}の番です</div>
+          <div style={{ fontSize: "20px", margin: "0 100px" }}>
+            {nowPlayer}の番です
+          </div>
           <input
-          style={{fontSize:"20px"}}
+            style={{ fontSize: "20px" }}
             type="number"
             placeholder="スコアを入力"
-            value={addScore||""}
+            value={addScore || ""}
             onChange={(e) => setAddScore(parseInt(e.target.value))}
           />
           <Button
             label="登録"
             onClick={() => {
-              if(!addScore) return
+              if (!addScore) return;
               const s = { ...state };
               const sc = s.data[nowPlayer] + addScore;
               s.data[nowPlayer] = sc > 50 ? 25 : sc;
@@ -137,15 +149,20 @@ const Page = () => {
             label="もう一度"
             onClick={() => {
               const a: Molkky = { turns: 0, data: {} };
-                players.forEach((n) => {
-                  a.data[n] = 0;
-                });
-                setState(a);
-                setFinish(false)
+              players.forEach((n) => {
+                a.data[n] = 0;
+              });
+              setState(a);
+              setFinish(false);
+            }}
+          />
+          <Button
+            label="トップへ戻る"
+            onClick={() => {
+              setState({ turns: 0, data: {} });
             }}
           />
         </>
-        
       )}
     </>
   );
