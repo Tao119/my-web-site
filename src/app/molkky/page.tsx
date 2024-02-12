@@ -138,15 +138,10 @@ const Page = () => {
         </>
       ) : (
         <>
-          <div>{nowPlayer}の勝ちです</div>
-          {players.map((n) => {
-            <div>
-              <div>{n}</div>
-              <div>{state.data[n]}</div>
-            </div>;
-          })}
+          <div style={{ fontSize: "20px" }}>{nowPlayer}の勝ちです</div>
           <Button
             label="もう一度"
+            addClass="u-bg-bl u-wt u-ml36"
             onClick={() => {
               const a: Molkky = { turns: 0, data: {} };
               players.forEach((n) => {
@@ -158,6 +153,7 @@ const Page = () => {
           />
           <Button
             label="トップへ戻る"
+            addClass="u-bg-bl u-wt u-ml36"
             onClick={() => {
               setState({ turns: 0, data: {} });
             }}
