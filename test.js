@@ -277,6 +277,7 @@ function drawSled(x, y, d) {
     translate(x, y);
     scale(d, 1)
 
+    
     fill(0);
     rectMode(CENTER);
     rect(0, 0, 80, 30);
