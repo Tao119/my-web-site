@@ -7,7 +7,7 @@ const APP_KEY = "molkky";
 type Molkky = {
   turns: number;
   data: {
-    [name: string]: number;
+    [name: string]: number[];
   };
 };
 
@@ -41,28 +41,30 @@ const Page = () => {
   }, [state]);
   return (
     <>
-      {num == 0 ? (
-        <>
-          <div style={{ width: "100%" }}>
-            <div style={{ fontSize: "20px" }}>ユーザーを追加</div>
+      <div className="p-molkky">
+        {num == 0 ? (
+          <>
+            <div className="p-molkky__title">ユーザーを追加</div>
+            <div className="p-molkky__input-name-label">ユーザー名</div>
             <input
-              style={{ fontSize: "20px", margin: "20px" }}
-              placeholder="ユーザー名を入力"
+              className="p-molkky__input-name"
+              placeholder="user name"
               value={name}
               onChange={(e) => setName(e.target.value)}
             />
             <Button
-              addClass="u-bg-bl u-wt"
+              addClass="p-molkky__add"
               label="追加"
               onClick={() => {
                 setNames(names.add(name));
                 setName("");
               }}
             />
-            <ul>
+            <div className="p-molkky__input-users-label">ユーザー一覧</div>
+            <ul className="p-molkky__users">
               {Array.from(names).map((n, index) => (
                 <li
-                  style={{ fontSize: "20px", margin: "20px" }}
+                  className="p-molkky__user-column"
                   key={index}
                   onClick={() => {
                     if (confirm("削除しますか？")) {
@@ -78,88 +80,103 @@ const Page = () => {
             </ul>
             <Button
               label="開始"
-              addClass="u-bg-bl u-wt"
+              addClass="p-molkky__start"
               onClick={() => {
-                const a: Molkky = { turns: 0, data: {} };
-                names.forEach((n) => {
-                  a.data[n] = 0;
-                });
-                setState(a);
+                if (confirm("開始しますか？")) {
+                  const a: Molkky = { turns: 0, data: {} };
+                  names.forEach((n) => {
+                    a.data[n] = [0];
+                  });
+                  setState(a);
+                }
               }}
             />
-          </div>
-        </>
-      ) : !finish ? (
-        <>
-          <ul style={{ display: "flex", flexDirection: "row" }}>
-            {players.map((n, index) => (
-              <li
-                style={{ display: "flex", flexDirection: "column" }}
-                key={index}
-              >
-                <div style={{ fontSize: "20px", margin: "20px", flex: 1 }}>
-                  {n}
+          </>
+        ) : (
+          <>
+            <div className="p-molkky__playing">
+              {!finish ? (
+                <div className="p-molkky__menu">
+                  <div className="p-molkky__now-player">
+                    {nowPlayer}の番です
+                  </div>
+                  <input
+                    className="p-molkky__score-input"
+                    type="number"
+                    placeholder="スコアを入力"
+                    value={addScore || ""}
+                    onChange={(e) => setAddScore(parseInt(e.target.value))}
+                  />
+                  <Button
+                    label="登録"
+                    addClass="p-molkky__score-add"
+                    onClick={() => {
+                      if (!addScore) return;
+                      const s = { ...state };
+                      const sc = s.data[nowPlayer].slice(-1)[0] + addScore;
+                      s.data[nowPlayer].push(sc > 50 ? 25 : sc);
+
+                      sc == 50 ? setFinish(true) : s.turns++;
+
+                      setAddScore(null);
+                      setState(s);
+                    }}
+                  />
                 </div>
-                <div
-                  className={50 - state.data[n] <= 12 ? "u-re" : ""}
-                  style={{ fontSize: "20px", margin: "20px", flex: 1 }}
-                >
-                  {state.data[n]}
+              ) : (
+                <div className="p-molkky__menu">
+                  <div className="p-molkky__win-player">{nowPlayer}の勝ちです</div>
+                  <Button
+                    label="もう一度"
+                    addClass="p-molkky__score-add u-wt u-bg-bl"
+                    onClick={() => {
+                      const a: Molkky = { turns: 0, data: {} };
+                      players.forEach((n) => {
+                        a.data[n] = [0];
+                      });
+                      setState(a);
+                      setFinish(false);
+                    }}
+                  />
+                  <Button
+                    label="トップへ戻る"
+                    addClass="p-molkky__score-add"
+                    onClick={() => {
+                      setState({ turns: 0, data: {} });
+                      setFinish(false);
+                    }}
+                  />
                 </div>
-              </li>
-            ))}
-          </ul>
-
-          <div style={{ fontSize: "20px", margin: "0 100px" }}>
-            {nowPlayer}の番です
-          </div>
-          <input
-            style={{ fontSize: "20px" }}
-            type="number"
-            placeholder="スコアを入力"
-            value={addScore || ""}
-            onChange={(e) => setAddScore(parseInt(e.target.value))}
-          />
-          <Button
-            label="登録"
-            onClick={() => {
-              if (!addScore) return;
-              const s = { ...state };
-              const sc = s.data[nowPlayer] + addScore;
-              s.data[nowPlayer] = sc > 50 ? 25 : sc;
-
-              sc == 50 ? setFinish(true) : s.turns++;
-
-              setAddScore(null);
-              setState(s);
-            }}
-          />
-        </>
-      ) : (
-        <>
-          <div style={{ fontSize: "20px" }}>{nowPlayer}の勝ちです</div>
-          <Button
-            label="もう一度"
-            addClass="u-bg-bl u-wt u-ml36"
-            onClick={() => {
-              const a: Molkky = { turns: 0, data: {} };
-              players.forEach((n) => {
-                a.data[n] = 0;
-              });
-              setState(a);
-              setFinish(false);
-            }}
-          />
-          <Button
-            label="トップへ戻る"
-            addClass="u-bg-bl u-wt u-ml36"
-            onClick={() => {
-              setState({ turns: 0, data: {} });
-              setFinish(false);
-            }}
-          />
-        </>
-      )}
+              )}
+              <ul className="p-molkky__table">
+                {players.map((n, index) => (
+                  <li className="p-molkky__row" key={index}>
+                    <div className="p-molkky__name">{n}</div>
+                    <ol className={"p-molkky__scores"}>
+                      {state.data[n].map((num, index) => (
+                        <li
+                          key={index}
+                          className={`p-molkky__score-cell ${
+                            50 - num <= 12 ? "u-re" : ""
+                          }`}
+                        >
+                          {num}
+                        </li>
+                      ))}
+                    </ol>
+                    <div
+                      key={state.data[n].length}
+                      className={"p-molkky__last-cell"}
+                    >
+                      {state.data[n].slice(-1)[0]}
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </>
+        )}
+      </div>
     </>
   );
 };
