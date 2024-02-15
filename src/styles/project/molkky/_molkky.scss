@@ -1,0 +1,185 @@
+@use "../../foundation" as *;
+
+.p-molkky {
+    @include contentBox(90%, 90%, $white);
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    &__title {
+        width: 100%;
+        text-align: left;
+        font-size: $fs-title;
+        font-weight: bold;
+        padding: 30px;
+        margin-bottom: 50px;
+    }
+
+    &__input-name-label {
+        width: 300px;
+        text-align: left;
+        font-size: $fs-medium;
+        color: $dark-gray;
+    }
+
+    &__input-name {
+        width: 300px;
+        height: 60px;
+        font-size: $fs-medium;
+        padding-left: 20px;
+        text-align: left;
+        border-radius: 6px;
+        border: 1px solid $gray;
+        margin: 10px;
+    }
+
+    &__add {
+        font-size: $fs-medium;
+        width: 200px;
+        height: 50px;
+        background-color: $light-blue;
+        color: $light-gray;
+        margin: 10px;
+    }
+
+    &__input-users-label {
+        width: 300px;
+        text-align: left;
+        font-size: $fs-medium;
+        color: $dark-gray;
+        margin: 20px 0;
+    }
+
+    &__users {
+        @include contentBox(300px, 200px, $white);
+        margin: 10px;
+        overflow-y: scroll;
+    }
+
+    &__user-column {
+        width: 100%;
+        padding: 10px 10px;
+        text-align: left;
+        font-size: $fs-medium;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    &__start {
+        font-size: $fs-medium;
+        width: 200px;
+        height: 50px;
+        background-color: $green;
+        color: $black;
+        margin: 10px;
+    }
+
+    &__playing {
+        display: flex;
+        flex-direction: row;
+        width: 100%;
+        height: 100%;
+        align-items: center;
+    }
+
+    &__menu {
+        flex-shrink: 0;
+        padding: 10px;
+        width: 400px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    &__table {
+        flex-grow: 1;
+        margin: 30px 20px;
+        display: flex;
+        flex-direction: column;
+        font-size: $fs-title;
+        overflow-x: scroll;
+        border: 1px solid $gray;
+    }
+
+    &__row {
+        display: flex;
+        flex-direction: row;
+        width: 100%;
+        position: relative;
+    }
+
+    &__name {
+        flex-shrink: 0;
+        font-weight: bold;
+        padding: 10px 5px;
+        width: 100px;
+        position: sticky;
+        left: 0;
+        border-right: 1px solid $gray;
+        background-color: $white;
+    }
+
+    &__scores {
+        flex-shrink: 0;
+        display: flex;
+        flex-direction: row;
+    }
+
+    &__score-cell {
+        padding: 10px 5px;
+        width: 50px;
+
+
+    }
+
+    &__last-cell {
+        position: absolute;
+        right: 0;
+        top: 0;
+        width: 50px;
+        height: 100%;
+        background-color: $white;
+        border-left: 1px solid $gray;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    &__score-input {
+        font-size: $fs-title;
+        width: 300px;
+        height: 60px;
+        font-size: $fs-medium;
+        padding-left: 20px;
+        text-align: left;
+        border-radius: 6px;
+        border: 1px solid $gray;
+    }
+
+    &__now-player {
+        font-size: $fs-title;
+        margin: 20px 0;
+        text-align: left;
+        padding-left: 20px;
+        width: 300px;
+    }
+
+    &__win-player {
+        font-size: $fs-title;
+        margin: 20px 0;
+        text-align: left;
+        padding-left: 20px;
+        width: 200px;
+    }
+
+    &__score-add {
+        font-size: $fs-title;
+        width: 200px;
+        height: 50px;
+        background-color: $green;
+        margin: 20px 0;
+        color: $black;
+    }
+}
