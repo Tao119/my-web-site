@@ -555,7 +555,8 @@ const Page = () => {
                     className="p-ito__rooms"
                     key={i}
                     onClick={async () => {
-                      if (!confirm("入室しますか？")) return;
+                      if (r.step == "待機中" && !confirm("入室しますか？"))
+                        return;
                       setShowAllRooms(false);
                       joinRoom(r.id);
                     }}
