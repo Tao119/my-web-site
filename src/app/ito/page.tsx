@@ -28,6 +28,13 @@ type GameData = {
   theme: string;
 };
 
+type Room = {
+  owner: string;
+  step: string;
+  id: string;
+  num: number;
+};
+
 enum GameStep {
   waiting = 0,
   selectTheme = 1,
@@ -71,9 +78,12 @@ const Page = () => {
     setInputTheme("");
     setShowNumber(false);
   };
+  const gameStepJa = ["待機中", "進行中", "進行中", "進行中", "進行中", "終了"];
 
   const [tapped, setTapped] = useState<{ [index: number]: boolean }>({});
   const [tappedNum, setTappedNum] = useState(true);
+  const [showAllRoom, setShowAllRooms] = useState(false);
+  const [rooms, setRooms] = useState<Room[]>([]);
 
   const players = gameData.players
     ? Object.keys(gameData.players).map((key) => {
@@ -133,6 +143,23 @@ const Page = () => {
 
     return () => unsubscribe();
   }, [state.roomId]);
+
+  const getRooms = async () => {
+    const db = getDatabase();
+    const allRef = ref(db, `rooms`);
+    const snapshot = await get(allRef);
+    const tmpRooms: Room[] = [];
+    snapshot.forEach((s) => {
+      const roomData = s.val();
+      tmpRooms.push({
+        owner: roomData.owner ?? "",
+        step: gameStepJa[parseInt(roomData.step ?? 0)],
+        id: s.key,
+        num: Object.keys(roomData.players).length,
+      });
+    });
+    setRooms(tmpRooms);
+  };
 
   const joinName = async () => {
     if (inputName !== "" && confirm(`${inputName} で登録しますか？`)) {
@@ -220,15 +247,15 @@ const Page = () => {
     setState({ ...state, ...{ roomId: roomId.toString(), isOwner: true } });
   };
 
-  const joinRoom = async () => {
+  const joinRoom = async (id: string) => {
     const db = getDatabase();
-    const roomRef = ref(db, `rooms/${inputRoomId}`);
+    const roomRef = ref(db, `rooms/${id}`);
 
     const snapshot = await get(roomRef);
     if (!snapshot.exists()) {
       return alert("ルームidが存在しません");
     }
-    setState({ ...state, ...{ roomId: inputRoomId.toString() } });
+    setState({ ...state, ...{ roomId: id.toString() } });
   };
 
   const seeNumber = async () => {
@@ -501,10 +528,46 @@ const Page = () => {
             onChange={(e) => setInputRoomId(e.target.value)}
           />
           <Button
-            addClass="p-ito__button  u-wt u-bg-bl"
+            addClass="p-ito__button  u-wt u-bg-bl u-mb36"
             label="ルーム参加"
-            onClick={() => joinRoom()}
+            onClick={() => joinRoom(inputRoomId)}
           />
+          <Button
+            addClass="p-ito__button  u-wt u-bg-gy"
+            label="ルーム検索"
+            onClick={() => {
+              getRooms();
+              setShowAllRooms(true);
+            }}
+          />
+          {showAllRoom ? (
+            <div className="p-ito__popup">
+              <div
+                className="p-ito__popup-close"
+                onClick={() => setShowAllRooms(false)}
+              >
+                ×
+              </div>
+              <div className="p-ito__popup-title">ルーム一覧</div>
+              <ul className="p-ito__roomlist">
+                {rooms.map((r, i) => (
+                  <li
+                    className="p-ito__rooms"
+                    key={i}
+                    onClick={async () => {
+                      if (!confirm("入室しますか？")) return;
+                      setShowAllRooms(false);
+                      joinRoom(r.id);
+                    }}
+                  >
+                    <div>{`owner: ${r.owner}`}</div>
+                    <div>{`count: ${r.num}`}</div>
+                    <div>{`step: ${r.step}`}</div>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
         </div>
       ) : !state.urName ? (
         <div className="p-ito__out">
@@ -516,9 +579,14 @@ const Page = () => {
             onChange={(e) => setInputName(e.target.value)}
           ></input>
           <Button
-            addClass="p-ito__button u-bg-gr u-bk"
+            addClass="p-ito__button u-bg-gr u-bk u-mb36"
             label="決定"
             onClick={() => joinName()}
+          />
+          <Button
+            addClass="p-ito__button u-bg-gy u-wt"
+            label="戻る"
+            onClick={() => initializeGame()}
           />
         </div>
       ) : (
