@@ -66,6 +66,15 @@
         padding: 10px;
     }
 
+    &__userlist-2 {
+        width: 80%;
+        height: 200px;
+        overflow-y: auto;
+        border-radius: 5px;
+        border: 1px solid $dark-gray;
+        padding: 10px;
+    }
+
     &__users {
         font-size: 20px;
     }
