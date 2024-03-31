@@ -25,14 +25,16 @@ type GameData = {
   };
   chat: { name: string; message: string }[];
   step: number;
+  theme: string;
 };
 
 enum GameStep {
   waiting = 0,
-  openNumber = 1,
-  choiceWord = 2,
-  predictOrder = 3,
-  showAnswer = 4,
+  selectTheme = 1,
+  openNumber = 2,
+  choiceWord = 3,
+  predictOrder = 4,
+  showAnswer = 5,
 }
 
 enum UserGameStep {
@@ -50,6 +52,7 @@ const Page = () => {
   const [inputName, setInputName] = useState("");
   const [inputRoomId, setInputRoomId] = useState("");
   const [inputWord, setInputWord] = useState("");
+  const [inputTheme, setInputTheme] = useState("");
   const [showNumber, setShowNumber] = useState(false);
 
   const [gameData, setGameData] = useState<GameData>({
@@ -57,6 +60,7 @@ const Page = () => {
     players: {},
     chat: [],
     step: 0,
+    theme: "",
   });
 
   const initializeGame = () => {
@@ -64,10 +68,12 @@ const Page = () => {
     setInputName("");
     setInputRoomId("");
     setInputWord("");
+    setInputTheme("");
     setShowNumber(false);
   };
 
   const [tapped, setTapped] = useState<{ [index: number]: boolean }>({});
+  const [tappedNum, setTappedNum] = useState(true);
 
   const players = gameData.players
     ? Object.keys(gameData.players).map((key) => {
@@ -104,7 +110,6 @@ const Page = () => {
         let roomRef = ref(db, `rooms/${roomId}`);
 
         const snapshot = await get(roomRef);
-        console.log(snapshot.exists());
         if (!snapshot.exists()) {
           initializeGame();
         }
@@ -237,6 +242,12 @@ const Page = () => {
       userGameStep: step,
     }));
   };
+  const setTheme = async () => {
+    const db = getDatabase();
+    const roomRef = ref(db, `rooms/${state.roomId}`);
+    const theme = inputTheme;
+    await update(roomRef, { theme });
+  };
 
   const sendWord = async () => {
     if (!confirm("送信しますか？")) return;
@@ -290,10 +301,42 @@ const Page = () => {
                 label="開始する"
                 onClick={() => {
                   if (!confirm("開始しますか？")) return;
-                  updateGameStep(GameStep.openNumber);
+                  updateGameStep(GameStep.selectTheme);
                 }}
               />
             ) : null}
+            <Button
+              addClass="p-ito__logout u-wt u-bg-re"
+              label="退出する"
+              onClick={logOut}
+            />
+          </>
+        );
+      case GameStep.selectTheme:
+        return (
+          <>
+            {state.isOwner ? (
+              <>
+                <input
+                  className="p-ito__button u-mb36"
+                  placeholder="お題を入力"
+                  type="text"
+                  value={inputTheme}
+                  onChange={(e) => setInputTheme(e.target.value)}
+                />
+                <Button
+                  addClass="p-ito__button u-bk u-bg-gr"
+                  label="開始する"
+                  onClick={() => {
+                    if (!confirm("決定しますか？")) return;
+                    setTheme();
+                    updateGameStep(GameStep.openNumber);
+                  }}
+                />
+              </>
+            ) : (
+              <div className="p-ito__sent">ホストがお題設定中</div>
+            )}
           </>
         );
       case GameStep.openNumber:
@@ -404,7 +447,6 @@ const Page = () => {
                       className="p-ito__users"
                       key={i}
                       onClick={() => {
-                        console.log(tapped[i]);
                         setTapped((prev) => ({
                           ...prev,
                           [i]: !tapped[i] ?? true,
@@ -435,8 +477,14 @@ const Page = () => {
       <div className="p-ito__title">ITO</div>
       <div className="p-ito__urname">{`name: ${state.urName ?? ""}`}</div>
       <div className="p-ito__roomid">{`id: ${state.roomId ?? ""}`}</div>
-      <div className="p-ito__urnum">{`number: ${
-        state.userGameStep ? state.urNum ?? "" : ""
+      <div className="p-ito__theme">{`theme: ${gameData.theme ?? ""}`}</div>
+      <div
+        className="p-ito__urnum"
+        onClick={() => {
+          if (state.userGameStep) setTappedNum(!tappedNum);
+        }}
+      >{`number: ${
+        state.userGameStep && tappedNum ? state.urNum ?? "" : ""
       }`}</div>
       {!state.roomId ? (
         <div className="p-ito__out">
@@ -474,14 +522,7 @@ const Page = () => {
           />
         </div>
       ) : (
-        <div className="p-ito__out">
-          {gameView()}
-          <Button
-            addClass="p-ito__logout u-wt u-bg-re"
-            label="退出する"
-            onClick={logOut}
-          />
-        </div>
+        <div className="p-ito__out">{gameView()}</div>
       )}
     </>
   );
