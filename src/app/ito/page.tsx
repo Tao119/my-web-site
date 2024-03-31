@@ -6,7 +6,7 @@ import { getFirebaseApp } from "src/lib/firebase";
 import { format } from "date-fns";
 import { ja } from "date-fns/locale";
 import { Button } from "src/components/button";
-import { get, set, off, onValue, update } from "firebase/database";
+import { get, set, off, onValue, update, remove } from "firebase/database";
 
 getFirebaseApp();
 
@@ -251,6 +251,13 @@ const Page = () => {
     }));
   };
 
+  const logOut = async () => {
+    const db = getDatabase();
+    const playerRef = ref(db, `rooms/${state.roomId}/players/${state.urName}`);
+    await remove(playerRef);
+    initializeGame();
+  };
+
   const gameView = () => {
     switch (gameData.step) {
       case GameStep.waiting:
@@ -453,7 +460,14 @@ const Page = () => {
           />
         </div>
       ) : (
-        <div className="p-ito__out">{gameView()}</div>
+        <div className="p-ito__out">
+          {gameView()}
+          <Button
+            addClass="p-ito__logout u-wt u-bg-re"
+            label="退出する"
+            onClick={logOut}
+          />
+        </div>
       )}
     </>
   );
