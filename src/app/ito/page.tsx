@@ -20,7 +20,9 @@ type ITO = {
 
 type GameData = {
   owner: string;
-  players: { [name: string]: { step: number; num: number; word: string } };
+  players: {
+    [name: string]: { step: number; num: number; word: string; prenum: number };
+  };
   chat: { name: string; message: string }[];
   step: number;
 };
@@ -178,6 +180,13 @@ const Page = () => {
     await update(roomRef, { step });
   };
 
+  const updatePrenum = async (num: number, ref_: string) => {
+    const db = getDatabase();
+    const prenum = num;
+    const roomRef = ref(db, ref_);
+    await update(roomRef, { prenum });
+  };
+
   const generateRandomRoomId = () => {
     const min = 100000;
     const max = 999999;
@@ -243,7 +252,7 @@ const Page = () => {
       case GameStep.waiting:
         return (
           <>
-            <ul className="p-ito__userlist u-mb36">
+            <ul className="p-ito__userlist-2 u-mb36">
               {players.map((p, i) => (
                 <li className="p-ito__users" key={i}>
                   {p.name}
@@ -318,12 +327,23 @@ const Page = () => {
       case GameStep.predictOrder:
         return (
           <div className="p-ito__out">
-            <ul className="p-ito__userlist u-mb36">
+            <ul className="p-ito__userlist-2 u-mb36">
               {players.map((p, i) => (
-                <li
-                  className="p-ito__users"
-                  key={i}
-                >{`${p.name}: ${p.word}`}</li>
+                <li className="p-ito__users" key={i}>
+                  {`${p.name}: ${p.word}`}
+                  {/* {state.isOwner ? (
+                    <input
+                      type="number"
+                      value={p.prenum ?? 0}
+                      onChange={(e) => {
+                        updatePrenum(
+                          parseInt(e.target.value),
+                          `rooms/${state.roomId}/${p.name}`
+                        );
+                      }}
+                    />
+                  ) : null} */}
+                </li>
               ))}
             </ul>
             {state.isOwner ? (
@@ -343,12 +363,13 @@ const Page = () => {
           <div className="p-ito__out">
             <div className="p-ito__in">
               <ul className="p-ito__userlist u-mb36">
-                {players.map((p, i) => (
-                  <li
-                    className="p-ito__users"
-                    key={i}
-                  >{`${p.name}: ${p.word}`}</li>
-                ))}
+                {players
+                  .sort((a, b) => b.prenum ?? 0 - a.prenum ?? 0)
+                  .map((p, i) => (
+                    <li className="p-ito__users" key={i}>
+                      {`${p.name}: ${p.word}`}{" "}
+                    </li>
+                  ))}
               </ul>
               <ul className="p-ito__userlist u-mb36">
                 {players
