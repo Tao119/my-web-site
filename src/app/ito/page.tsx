@@ -252,9 +252,23 @@ const Page = () => {
   };
 
   const logOut = async () => {
+    if (!confirm("退出しますか？")) return;
     const db = getDatabase();
     const playerRef = ref(db, `rooms/${state.roomId}/players/${state.urName}`);
-    await remove(playerRef);
+    const roomRef = ref(db, `rooms/${state.roomId}`);
+
+    if (players.length == 1) {
+      await remove(roomRef);
+    } else {
+      await remove(playerRef);
+    }
+    initializeGame();
+  };
+
+  const quitGame = async () => {
+    const db = getDatabase();
+    const roomRef = ref(db, `rooms/${state.roomId}`);
+    await remove(roomRef);
     initializeGame();
   };
 
@@ -378,7 +392,7 @@ const Page = () => {
                   .sort((a, b) => b.prenum ?? 0 - a.prenum ?? 0)
                   .map((p, i) => (
                     <li className="p-ito__users" key={i}>
-                      {`${p.name}: ${p.word}`}{" "}
+                      {`${p.name}: ${p.word}`}
                     </li>
                   ))}
               </ul>
@@ -407,7 +421,7 @@ const Page = () => {
             <Button
               addClass="p-ito__button u-wt u-bg-bl"
               label="終了する"
-              onClick={() => initializeGame()}
+              onClick={quitGame}
             />
           </div>
         );
