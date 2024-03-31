@@ -91,27 +91,26 @@ const Page = () => {
     if (typeof window !== "undefined") {
       setAppState(localStorage.getItem(APP_KEY));
     }
-    initializeGame();
   }, []);
 
-  // useEffect(() => {
-  //   appState ? setState(JSON.parse(appState)) : null;
-  //   const checkRoomId = async () => {
-  //     const db = getDatabase();
-  //     let roomId = generateRandomRoomId();
-  //     let roomRef = ref(db, `rooms/${roomId}`);
+  useEffect(() => {
+    appState ? setState(JSON.parse(appState)) : null;
+    const checkRoomId = async () => {
+      const db = getDatabase();
+      let roomId = generateRandomRoomId();
+      let roomRef = ref(db, `rooms/${roomId}`);
 
-  //     const snapshot = await get(roomRef);
-  //     if (!snapshot.exists()) {
-  //       setState((prevState) => ({ ...prevState, roomId: undefined }));
-  //     }
-  //   };
-  //   checkRoomId();
-  // }, [appState]);
+      const snapshot = await get(roomRef);
+      if (!snapshot.exists()) {
+        initializeGame();
+      }
+    };
+    checkRoomId();
+  }, [appState]);
 
-  // useEffect(() => {
-  //   localStorage.setItem(APP_KEY, JSON.stringify(state));
-  // }, [state]);
+  useEffect(() => {
+    localStorage.setItem(APP_KEY, JSON.stringify(state));
+  }, [state]);
 
   useEffect(() => {
     const db = getDatabase();
