@@ -95,18 +95,6 @@ const Page = () => {
 
   useEffect(() => {
     appState ? setState(JSON.parse(appState)) : null;
-    const checkRoomId = async () => {
-      const db = getDatabase();
-      let roomId = generateRandomRoomId();
-      let roomRef = ref(db, `rooms/${roomId}`);
-
-      const snapshot = await get(roomRef);
-      console.log(snapshot.exists());
-      if (!snapshot.exists()) {
-        initializeGame();
-      }
-    };
-    checkRoomId();
   }, [appState]);
 
   useEffect(() => {
@@ -116,6 +104,19 @@ const Page = () => {
   useEffect(() => {
     const db = getDatabase();
     const roomRef = ref(db, `rooms/${state.roomId}`);
+
+    const checkRoomId = async () => {
+      const db = getDatabase();
+      let roomId = state.roomId;
+      let roomRef = ref(db, `rooms/${roomId}`);
+
+      const snapshot = await get(roomRef);
+      console.log(snapshot.exists());
+      if (!snapshot.exists()) {
+        initializeGame();
+      }
+    };
+    if (state.roomId) checkRoomId();
 
     const unsubscribe = onValue(roomRef, (snapshot) => {
       const data = snapshot.val();
