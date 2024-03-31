@@ -101,6 +101,7 @@ const Page = () => {
       let roomRef = ref(db, `rooms/${roomId}`);
 
       const snapshot = await get(roomRef);
+      console.log(snapshot.exists());
       if (!snapshot.exists()) {
         initializeGame();
       }
