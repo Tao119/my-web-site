@@ -18,6 +18,7 @@ const Page = () => {
   const [name, setName] = useState("");
   const [names, setNames] = useState<Set<string>>(new Set());
 
+  const [addScoreStr, setAddScoreStr] = useState("");
   const [addScore, setAddScore] = useState<number | null>(null);
   const [finish, setFinish] = useState(false);
 
@@ -39,6 +40,20 @@ const Page = () => {
   useEffect(() => {
     localStorage.setItem(APP_KEY, JSON.stringify(state));
   }, [state]);
+
+  useEffect(() => {
+    setAddScore(parseValue(addScoreStr));
+  }, [addScoreStr]);
+
+  const parseValue = (value: string) => {
+    const parsed = parseInt(value, 10);
+    if (Number.isNaN(parsed)) {
+      return null;
+    }
+
+    return parsed;
+  };
+
   return (
     <>
       <div className="p-molkky">
@@ -102,30 +117,38 @@ const Page = () => {
                   </div>
                   <input
                     className="p-molkky__score-input"
-                    type="number"
+                    type="text"
                     placeholder="スコアを入力"
-                    value={addScore || ""}
-                    onChange={(e) => setAddScore(parseInt(e.target.value))}
+                    value={addScoreStr}
+                    onChange={(e) => {
+                      setAddScoreStr(e.target.value);
+                    }}
                   />
                   <Button
                     label="登録"
                     addClass="p-molkky__score-add"
                     onClick={() => {
-                      if (!addScore) return;
+                      if (addScore == null) return;
+                      if (0 > addScore || addScore > 12) {
+                        alert("0~12の数字を入力してください");
+                        return;
+                      }
                       const s = { ...state };
                       const sc = s.data[nowPlayer].slice(-1)[0] + addScore;
                       s.data[nowPlayer].push(sc > 50 ? 25 : sc);
 
                       sc == 50 ? setFinish(true) : s.turns++;
 
-                      setAddScore(null);
+                      setAddScoreStr("");
                       setState(s);
                     }}
                   />
                 </div>
               ) : (
                 <div className="p-molkky__menu">
-                  <div className="p-molkky__win-player">{nowPlayer}の勝ちです</div>
+                  <div className="p-molkky__win-player">
+                    {nowPlayer}の勝ちです
+                  </div>
                   <Button
                     label="もう一度"
                     addClass="p-molkky__score-add u-wt u-bg-bl"
@@ -150,27 +173,29 @@ const Page = () => {
               )}
               <ul className="p-molkky__table">
                 {players.map((n, index) => (
-                  <li className="p-molkky__row" key={index}>
-                    <div className="p-molkky__name">{n}</div>
-                    <ol className={"p-molkky__scores"}>
-                      {state.data[n].map((num, index) => (
-                        <li
-                          key={index}
-                          className={`p-molkky__score-cell ${
-                            50 - num <= 12 ? "u-re" : ""
-                          }`}
-                        >
-                          {num}
-                        </li>
-                      ))}
-                    </ol>
+                  <>
+                    <li className="p-molkky__row" key={index}>
+                      <div className="p-molkky__name">{n}</div>
+                      <ol className={"p-molkky__scores"}>
+                        {state.data[n].map((num, index) => (
+                          <li
+                            key={index}
+                            className={`p-molkky__score-cell ${
+                              50 - num <= 12 ? "u-re" : ""
+                            }`}
+                          >
+                            {num}
+                          </li>
+                        ))}
+                      </ol>
+                    </li>
                     <div
                       key={state.data[n].length}
                       className={"p-molkky__last-cell"}
                     >
                       {state.data[n].slice(-1)[0]}
                     </div>
-                  </li>
+                  </>
                 ))}
               </ul>
             </div>
