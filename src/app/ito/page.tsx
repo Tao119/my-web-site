@@ -91,27 +91,31 @@ const Page = () => {
     if (typeof window !== "undefined") {
       setAppState(localStorage.getItem(APP_KEY));
     }
-    initializeGame();
   }, []);
 
-  // useEffect(() => {
-  //   appState ? setState(JSON.parse(appState)) : null;
-  //   const checkRoomId = async () => {
-  //     const db = getDatabase();
-  //     let roomId = generateRandomRoomId();
-  //     let roomRef = ref(db, `rooms/${roomId}`);
+  useEffect(() => {
+    if (appState) {
+      const s = JSON.parse(appState);
+      setState(s);
 
-  //     const snapshot = await get(roomRef);
-  //     if (!snapshot.exists()) {
-  //       setState((prevState) => ({ ...prevState, roomId: undefined }));
-  //     }
-  //   };
-  //   checkRoomId();
-  // }, [appState]);
+      const checkRoomId = async () => {
+        const db = getDatabase();
+        let roomId = s.roomId;
+        let roomRef = ref(db, `rooms/${roomId}`);
 
-  // useEffect(() => {
-  //   localStorage.setItem(APP_KEY, JSON.stringify(state));
-  // }, [state]);
+        const snapshot = await get(roomRef);
+        console.log(snapshot.exists());
+        if (!snapshot.exists()) {
+          initializeGame();
+        }
+      };
+      if (s.roomId) checkRoomId();
+    }
+  }, [appState]);
+
+  useEffect(() => {
+    localStorage.setItem(APP_KEY, JSON.stringify(state));
+  }, [state]);
 
   useEffect(() => {
     const db = getDatabase();
