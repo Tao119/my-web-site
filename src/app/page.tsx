@@ -3,7 +3,10 @@ import { Dispatch, SetStateAction, useContext } from "react";
 
 const Page = () => {
   return (
-    <div className="p-home" style={{ padding: "100px" }}>
+    <div
+      className="p-home"
+      style={{ padding: "100px", display: "flex", flexDirection: "column" }}
+    >
       <Link href="molkky" style={{ fontSize: "30px" }}>
         MOLKKY
       </Link>
