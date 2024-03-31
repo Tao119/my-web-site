@@ -26,12 +26,20 @@
         left: 20px
     }
 
-    &__urnum {
+    &__theme {
         position: absolute;
         font-size: 20px;
         top: 190px;
         left: 20px
     }
+
+    &__urnum {
+        position: absolute;
+        font-size: 20px;
+        top: 230px;
+        left: 20px
+    }
+
 
     &__out {
         display: flex;
