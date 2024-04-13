@@ -1,0 +1,114 @@
+@use "../../foundation" as *;
+
+.p-hattari {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    overflow: hidden;
+
+    &__header {
+        height: 100px;
+        width: 100%;
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 18px;
+        padding: 0 20px;
+        position: sticky;
+
+    }
+
+    &__header-img {
+        height: 30px;
+        width: 30px;
+    }
+
+    &__main {
+        height: calc(100% - 200px);
+        width: 100%;
+        overflow-y: hidden;
+        padding: 10px 0;
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+    }
+
+    &__main-box {
+        @include contentBox($width: 90%, $height: auto, $color: $white, $scrollable: false);
+    }
+
+    &__money {
+        height: 200px;
+        width: 100%;
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        background-color: $pale-blue;
+    }
+
+    &__money-header {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        width: 100%;
+    }
+
+    &__money-title,
+    &__money-value {
+        font-size: 25px;
+        margin-bottom: 20px;
+    }
+
+    &__money-date {
+        font-size: 15px;
+        color: $dark-gray;
+    }
+
+    &__money-busho,
+    &__money-kouza {
+        font-size: 15px;
+        margin-bottom: 20px;
+    }
+
+    &__menu {
+        height: 150px;
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        padding: 10px;
+    }
+
+    &__history {
+        height: 500px;
+        width: 100%;
+    }
+
+    &__history-header {
+        padding: 10px;
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 15px;
+    }
+
+    &__footer {
+        height: 100px;
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 18px;
+        padding: 0 20px;
+        position: sticky;
+        bottom: 0;
+        box-shadow: 0 0 5px rgba(0, 0, 0, 0.4);
+    }
+
+}
