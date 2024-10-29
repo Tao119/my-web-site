@@ -11,14 +11,30 @@ export interface HalloweenImage {
   image: StaticImageData;
   name: string;
   detail: string;
+  text?: string;
 }
 
 export const halloweenImages: HalloweenImage[] = [
-  { image: image1, name: "かむり・かわち・しまとー", detail: "かぼちゃ" },
-  { image: image2, name: "きよ・どーん", detail: "バナナ" },
-  { image: image3, name: "しーぷ", detail: "Dハロ" },
-  { image: image4, name: "たお", detail: "パーリー" },
-  { image: image5, name: "こなん", detail: "はんにん" },
-  { image: image6, name: "キティ", detail: "キティ" },
-  { image: image7, name: "りょうさん", detail: "おばけ" },
+  {
+    image: image1,
+    name: "かむり・かわち・しまとー",
+    detail: "かぼちゃ",
+    text: "かぼちゃぐんだん",
+  },
+  {
+    image: image2,
+    name: "きよ・どーん",
+    detail: "バナナ",
+    text: "バナナぐんだん",
+  },
+  { image: image3, name: "しーぷ", detail: "ディズニー", text: "じぇーけー" },
+  {
+    image: image4,
+    name: "たお",
+    detail: "パーティーピーポー",
+    text: "レッツパーティー",
+  },
+  { image: image5, name: "こなん", detail: "はんにん", text: "こなん" },
+  { image: image6, name: "キティ", detail: "キティ", text: "きてぃ" },
+  { image: image7, name: "りょうさん", detail: "おばけ", text: "てづくり" },
 ];

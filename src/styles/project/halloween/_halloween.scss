@@ -54,6 +54,12 @@
     }
 
     &__box-text {
+        transform: rotateY(180deg);
+        font-size: 2vw;
+    }
+
+
+    &__box-detail {
         font-size: 2vw;
     }
 
@@ -74,6 +80,10 @@
         }
 
         transition: 0.2s;
+
+        &.is-flipped {
+            transform: rotateY(180deg);
+        }
     }
 
 
