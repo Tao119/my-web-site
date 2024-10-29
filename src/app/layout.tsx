@@ -16,10 +16,6 @@ export default function RootLayout({
           rel="stylesheet"
           href="https://cdn.jsdelivr.net/npm/destyle.css@1.0.15/destyle.css"
         />
-        <script
-          type="module"
-          src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"
-        ></script>
       </head>
       <body>{children}</body>
     </html>
