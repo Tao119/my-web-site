@@ -501,7 +501,7 @@ const Page = () => {
 
   return (
     <>
-      <div className="p-ito__title">ITO</div>
+      <div className="p-ito__title">カウントナンバー</div>
       <div className="p-ito__urname">{`name: ${state.urName ?? ""}`}</div>
       <div className="p-ito__roomid">{`id: ${state.roomId ?? ""}`}</div>
       <div className="p-ito__theme">{`theme: ${gameData.theme ?? ""}`}</div>

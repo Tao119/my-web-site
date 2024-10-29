@@ -1,0 +1,98 @@
+@use "../../foundation" as *;
+
+.p-halloween {
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    overflow: hidden;
+    position: relative;
+    overflow-y: auto;
+    -ms-scrollbar: none;
+    scrollbar-width: none;
+    font-family: var(--font-halloween);
+
+
+    &__background {
+        width: 100%;
+        object-fit: cover;
+        height: auto;
+        position: absolute;
+        z-index: -1;
+    }
+
+    &__title {
+        margin: 18px 0;
+        font-size: calc($fs-title * 2);
+        text-shadow: 1px 1px 0 $white, -1px -1px 0 $white,
+            -1px 1px 0 $white, 1px -1px 0 $white,
+            0px 1px 0 $white, 0-1px 0 $white,
+            -1px 0 0 $white, 1px 0 0 $white;
+    }
+
+    &__images {
+        width: 100vw;
+        height: auto;
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: center;
+        align-items: flex-start;
+    }
+
+    &__box-image {
+        height: 70%;
+        width: 90%;
+        object-fit: cover;
+    }
+
+    &__box-name {
+        font-size: 3vw;
+        height: 5vw;
+    }
+
+    &__box-text {
+        transform: rotateY(180deg);
+        font-size: 2vw;
+    }
+
+
+    &__box-detail {
+        font-size: 2vw;
+    }
+
+    &__box {
+        @include contentBox($width: 40vw, $height: 30vw, $color: $white, $scrollable: false);
+        display: flex;
+        padding: 1vw;
+        flex-direction: column;
+        justify-content: flex-start;
+        align-items: center;
+        margin: 2vw;
+
+
+        &:hover {
+            transform: translateY(-7px);
+            box-shadow: 0 0 4px rgba(0, 0, 0, 0.4);
+            transition: 0.3s;
+        }
+
+        transition: 0.2s;
+
+        &.is-flipped {
+            transform: rotateY(180deg);
+        }
+    }
+
+
+    &__link-button {
+        margin: 18px 0;
+        width: 40vw;
+        height: 15vh;
+        font-size: 3vw;
+        background-color: yellow;
+        border: none;
+    }
+}
