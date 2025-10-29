@@ -1,0 +1,257 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* CSS Variables for Neobrutalism Design System */
+:root {
+    /* Primary Colors */
+    --navy-blue: #1e3a8a;
+    --navy-blue-light: #3b82f6;
+    --navy-blue-dark: #1e40af;
+
+    /* Neobrutalism Accent Colors */
+    --neon-yellow: #fbbf24;
+    --electric-pink: #ec4899;
+    --lime-green: #84cc16;
+    --orange: #f97316;
+
+    /* Base Colors */
+    --white: #ffffff;
+    --black: #000000;
+    --gray-100: #f3f4f6;
+    --gray-900: #111827;
+
+    /* Dark Mode Colors */
+    --dark-bg: #0f172a;
+    --dark-surface: #1e293b;
+    --dark-text: #f1f5f9;
+
+    /* Default Theme Colors (Dark) */
+    --text-primary: #ffffff;
+    --text-secondary: rgba(255, 255, 255, 0.8);
+    --bg-primary: #0f172a;
+    --bg-secondary: rgba(255, 255, 255, 0.05);
+
+    /* Typography */
+    --font-primary: "Inter", "Noto Sans JP", sans-serif;
+    --font-mono: "JetBrains Mono", monospace;
+    --font-display: "Space Grotesk", sans-serif;
+
+    /* Responsive Font Sizes */
+    --text-xs: clamp(0.75rem, 0.7rem + 0.25vw, 0.875rem);
+    --text-sm: clamp(0.875rem, 0.8rem + 0.375vw, 1rem);
+    --text-base: clamp(1rem, 0.9rem + 0.5vw, 1.125rem);
+    --text-lg: clamp(1.125rem, 1rem + 0.625vw, 1.25rem);
+    --text-xl: clamp(1.25rem, 1.1rem + 0.75vw, 1.5rem);
+    --text-2xl: clamp(1.5rem, 1.3rem + 1vw, 1.875rem);
+    --text-3xl: clamp(1.875rem, 1.6rem + 1.375vw, 2.25rem);
+    --text-4xl: clamp(2.25rem, 1.9rem + 1.75vw, 3rem);
+
+    /* Transitions */
+    --transition-neo: 0.15s ease-out;
+    --transition-bounce: 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+
+    /* Responsive Breakpoints */
+    --breakpoint-xs: 475px;
+    --breakpoint-sm: 640px;
+    --breakpoint-md: 768px;
+    --breakpoint-lg: 1024px;
+    --breakpoint-xl: 1280px;
+    --breakpoint-2xl: 1536px;
+}
+
+/* Dark Mode Variables */
+.dark {
+    --background: var(--dark-bg);
+    --foreground: var(--dark-text);
+    --surface: var(--dark-surface);
+    --text-primary: #ffffff;
+    --text-secondary: rgba(255, 255, 255, 0.8);
+    --bg-primary: #0f172a;
+    --bg-secondary: rgba(255, 255, 255, 0.05);
+}
+
+/* Light Mode Variables */
+.light {
+    --text-primary: #1a237e;
+    --text-secondary: rgba(26, 35, 126, 0.8);
+    --bg-primary: #ffffff;
+    --bg-secondary: rgba(26, 35, 126, 0.05);
+}
+
+/* Base Styles */
+* {
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: var(--font-primary);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Neobrutalism Component Classes */
+@layer components {
+    /* Button Styles */
+    .neo-button {
+        @apply bg-white border-4 border-black font-bold px-6 py-3 
+            shadow-neo hover:shadow-neo-sm 
+            hover:translate-x-[2px] hover:translate-y-[2px] 
+            transition-all duration-150 cursor-pointer
+            focus:outline-none focus:ring-4 focus:ring-neon-yellow;
+    }
+
+    .neo-button-primary {
+        @apply neo-button bg-navy-900 text-white border-navy-900
+            hover:bg-navy-800 hover:border-navy-800;
+    }
+
+    .neo-button-secondary {
+        @apply neo-button bg-neon-yellow text-black border-black
+            hover:bg-yellow-300;
+    }
+
+    .neo-button-accent {
+        @apply neo-button bg-neon-pink text-white border-black
+            hover:bg-pink-600;
+    }
+
+    /* Card Styles */
+    .neo-card {
+        @apply bg-white border-4 border-black shadow-neo-lg p-6 rounded-neo;
+    }
+
+    .neo-card-dark {
+        @apply neo-card bg-dark-surface border-white text-dark-text;
+    }
+
+    .neo-card-accent {
+        @apply neo-card bg-neon-lime text-black;
+    }
+
+    /* Input Styles */
+    .neo-input {
+        @apply border-4 border-black bg-white px-4 py-3 rounded-neo
+            focus:outline-none focus:shadow-neo 
+            transition-all duration-150 font-medium;
+    }
+
+    .neo-input-dark {
+        @apply neo-input bg-dark-surface border-white text-dark-text
+            placeholder:text-gray-400;
+    }
+
+    /* Typography Styles */
+    .neo-heading {
+        @apply font-display font-black tracking-tight;
+    }
+
+    .neo-text {
+        @apply font-sans font-medium;
+    }
+
+    /* Layout Styles */
+    .neo-container {
+        @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+    }
+
+    .neo-section {
+        @apply py-16 md:py-24 lg:py-32;
+    }
+
+    /* Grid Styles */
+    .neo-grid {
+        @apply grid gap-6 md:gap-8 lg:gap-10;
+    }
+
+    .neo-grid-responsive {
+        @apply neo-grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4;
+    }
+
+    /* Animation Classes */
+    .neo-hover-lift {
+        @apply transition-all duration-150 hover:-translate-y-1 hover:shadow-neo-xl;
+    }
+
+    .neo-hover-press {
+        @apply transition-all duration-150 active:translate-x-[2px] active:translate-y-[2px] active:shadow-neo-sm;
+    }
+
+    /* Glassmorphism Effects */
+    .glass-card {
+        @apply backdrop-blur-md bg-white/10 border border-white/20 rounded-lg;
+    }
+
+    .glass-card-dark {
+        @apply backdrop-blur-md bg-black/10 border border-black/20 rounded-lg;
+    }
+}
+
+/* Utility Classes */
+@layer utilities {
+    /* Responsive Typography */
+    .text-responsive-xs { font-size: var(--text-xs); }
+    .text-responsive-sm { font-size: var(--text-sm); }
+    .text-responsive-base { font-size: var(--text-base); }
+    .text-responsive-lg { font-size: var(--text-lg); }
+    .text-responsive-xl { font-size: var(--text-xl); }
+    .text-responsive-2xl { font-size: var(--text-2xl); }
+    .text-responsive-3xl { font-size: var(--text-3xl); }
+    .text-responsive-4xl { font-size: var(--text-4xl); }
+
+    /* Responsive Padding */
+    .padding-responsive {
+        @apply px-4 py-6 sm:px-6 sm:py-8 md:px-8 md:py-12 lg:px-12 lg:py-16;
+    }
+
+    /* Responsive Margin */
+    .margin-responsive {
+        @apply mx-4 my-6 sm:mx-6 sm:my-8 md:mx-8 md:my-12 lg:mx-12 lg:my-16;
+    }
+
+    /* Hide scrollbar */
+    .hide-scrollbar {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
+    .hide-scrollbar::-webkit-scrollbar {
+        display: none;
+    }
+
+    /* Custom animations */
+    .animate-typing {
+        animation: typing 3.5s steps(40, end), blink-caret 0.75s step-end infinite;
+        border-right: 3px solid black;
+        white-space: nowrap;
+        overflow: hidden;
+    }
+
+    .animate-shadow-pulse {
+        animation: shadowPulse 2s ease-in-out infinite;
+    }
+}
+
+/* Print Styles */
+@media print {
+    .neo-button,
+    .neo-card {
+        box-shadow: none !important;
+        border: 2px solid black !important;
+    }
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}

@@ -1,0 +1,422 @@
+// ============================================================================
+// Hero Section Styles
+// ============================================================================
+
+.hero-section {
+    position: relative;
+    height: 100vh;
+    min-height: 600px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    margin-top: 0; // Remove any top margin to allow full height
+
+    // Ensure hero section starts from the very top when it's the first element
+    &:first-child {
+        margin-top: 0;
+        // Account for the negative margin from portfolio layout
+        box-sizing: border-box;
+    }
+
+    // Background layers
+    &__background {
+        position: absolute;
+        inset: 0;
+        z-index: 0;
+
+        &--parallax {
+            background: linear-gradient(135deg,
+                    var(--navy-blue) 0%,
+                    var(--navy-blue-light) 25%,
+                    var(--navy-blue-dark) 50%,
+                    var(--navy-blue) 75%,
+                    var(--dark-bg) 100%);
+            will-change: transform;
+        }
+
+        &--animated {
+            background: linear-gradient(45deg,
+                    var(--navy-blue),
+                    var(--navy-blue-light),
+                    var(--navy-blue-dark),
+                    var(--navy-blue));
+            background-size: 400% 400%;
+            animation: gradientShift 8s ease infinite;
+        }
+
+        &--gradient {
+            background: linear-gradient(135deg,
+                    var(--navy-blue) 0%,
+                    var(--navy-blue-light) 50%,
+                    var(--navy-blue-dark) 100%);
+        }
+    }
+
+    // Overlay for text readability
+    &__overlay {
+        position: absolute;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.2);
+        z-index: 10;
+    }
+
+    // Decorative elements
+    &__decorations {
+        position: absolute;
+        inset: 0;
+        z-index: 20;
+        pointer-events: none;
+
+        .decoration {
+            position: absolute;
+
+            &--square {
+                border: 4px solid rgba(255, 255, 255, 0.3);
+                animation: float 6s ease-in-out infinite;
+            }
+
+            &--circle {
+                border: 4px solid rgba(236, 72, 153, 0.3);
+                border-radius: 50%;
+                animation: float 6s ease-in-out infinite;
+            }
+
+            &--triangle {
+                background: rgba(251, 191, 36, 0.4);
+                transform: rotate(45deg);
+                animation: float 6s ease-in-out infinite;
+            }
+
+            &--diamond {
+                background: rgba(132, 204, 22, 0.4);
+                transform: rotate(45deg);
+                animation: float 6s ease-in-out infinite;
+            }
+        }
+    }
+
+    // Main content
+    &__content {
+        position: relative;
+        z-index: 30;
+        text-align: center;
+        color: white;
+        padding: 0 1rem;
+        max-width: 1200px;
+        margin: 0 auto;
+
+        @media (min-width: 640px) {
+            padding: 0 1.5rem;
+        }
+
+        @media (min-width: 1024px) {
+            padding: 0 2rem;
+        }
+    }
+
+    // Typography
+    &__title {
+        font-family: var(--font-display);
+        font-weight: 700;
+        line-height: 1.1;
+        margin-bottom: 1rem;
+
+        // Responsive font sizes
+        font-size: clamp(2.5rem, 8vw, 8rem);
+
+        @media (min-width: 640px) {
+            margin-bottom: 1.5rem;
+        }
+
+        @media (min-width: 1024px) {
+            margin-bottom: 2rem;
+        }
+    }
+
+    &__subtitle {
+        font-weight: 600;
+        color: rgba(191, 219, 254, 1); // blue-100
+        margin-bottom: 1.5rem;
+
+        // Responsive font sizes
+        font-size: clamp(1.25rem, 4vw, 2.5rem);
+
+        @media (min-width: 640px) {
+            margin-bottom: 2rem;
+        }
+
+        @media (min-width: 1024px) {
+            margin-bottom: 3rem;
+        }
+    }
+
+    &__catchphrase {
+        color: rgba(239, 246, 255, 1); // blue-50
+        line-height: 1.6;
+        margin-bottom: 2rem;
+        max-width: 800px;
+        margin-left: auto;
+        margin-right: auto;
+
+        // Responsive font sizes
+        font-size: clamp(1rem, 2.5vw, 1.5rem);
+
+        @media (min-width: 640px) {
+            margin-bottom: 2.5rem;
+        }
+
+        @media (min-width: 1024px) {
+            margin-bottom: 4rem;
+        }
+    }
+
+    // CTA Buttons
+    &__cta {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        align-items: center;
+        justify-content: center;
+
+        @media (min-width: 640px) {
+            flex-direction: row;
+            gap: 1.5rem;
+        }
+
+        .neo-button {
+            width: 100%;
+
+            @media (min-width: 640px) {
+                width: auto;
+            }
+        }
+    }
+
+    // Scroll indicator
+    &__scroll-indicator {
+        position: absolute;
+        bottom: 2rem;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 30;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        color: white;
+        animation: pulse 2s ease-in-out infinite;
+
+        &-text {
+            font-size: 0.875rem;
+            margin-bottom: 0.5rem;
+            display: none;
+
+            @media (min-width: 640px) {
+                display: block;
+            }
+        }
+
+        &-icon {
+            width: 1.5rem;
+            height: 2.5rem;
+            border: 2px solid white;
+            border-radius: 1.25rem;
+            display: flex;
+            justify-content: center;
+            position: relative;
+
+            &::after {
+                content: '';
+                width: 0.25rem;
+                height: 0.75rem;
+                background: white;
+                border-radius: 0.125rem;
+                margin-top: 0.5rem;
+                animation: bounce 1s infinite;
+            }
+        }
+    }
+}
+
+// ============================================================================
+// Animations
+// ============================================================================
+
+@keyframes gradientShift {
+    0% {
+        background-position: 0% 50%;
+    }
+
+    50% {
+        background-position: 100% 50%;
+    }
+
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+@keyframes float {
+
+    0%,
+    100% {
+        transform: translateY(0px);
+    }
+
+    50% {
+        transform: translateY(-20px);
+    }
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.7;
+    }
+}
+
+@keyframes bounce {
+
+    0%,
+    20%,
+    53%,
+    80%,
+    100% {
+        transform: translate3d(0, 0, 0);
+    }
+
+    40%,
+    43% {
+        transform: translate3d(0, -8px, 0);
+    }
+
+    70% {
+        transform: translate3d(0, -4px, 0);
+    }
+
+    90% {
+        transform: translate3d(0, -2px, 0);
+    }
+}
+
+// ============================================================================
+// Responsive Adjustments
+// ============================================================================
+
+// Mobile specific adjustments
+@media (max-width: 639px) {
+    .hero-section {
+        min-height: 500px;
+
+        &__decorations .decoration {
+            display: none; // Hide decorations on mobile for performance
+        }
+    }
+}
+
+// Tablet adjustments
+@media (min-width: 640px) and (max-width: 1023px) {
+    .hero-section {
+        &__decorations .decoration {
+            &:nth-child(n+3) {
+                display: none; // Show only first 2 decorations on tablet
+            }
+        }
+    }
+}
+
+// Large screen adjustments
+@media (min-width: 1024px) {
+    .hero-section {
+        &__content {
+            max-width: 1400px;
+        }
+    }
+}
+
+// Ultra-wide screen adjustments
+@media (min-width: 1536px) {
+    .hero-section {
+        &__content {
+            max-width: 1600px;
+        }
+    }
+}
+
+// ============================================================================
+// Dark Mode Support
+// ============================================================================
+
+[data-theme="dark"] {
+    .hero-section {
+        &__background {
+
+            &--parallax,
+            &--animated,
+            &--gradient {
+                filter: brightness(0.8);
+            }
+        }
+
+        &__overlay {
+            background: rgba(0, 0, 0, 0.4);
+        }
+    }
+}
+
+// ============================================================================
+// Reduced Motion Support
+// ============================================================================
+
+@media (prefers-reduced-motion: reduce) {
+    .hero-section {
+        &__background--animated {
+            animation: none;
+            background: linear-gradient(135deg,
+                    var(--navy-blue) 0%,
+                    var(--navy-blue-light) 50%,
+                    var(--navy-blue-dark) 100%);
+        }
+
+        &__decorations .decoration {
+            animation: none;
+        }
+
+        &__scroll-indicator {
+            animation: none;
+
+            &-icon::after {
+                animation: none;
+            }
+        }
+    }
+
+    .float,
+    .pulse,
+    .bounce {
+        animation: none !important;
+    }
+}
+
+// ============================================================================
+// High Contrast Mode Support
+// ============================================================================
+
+@media (prefers-contrast: high) {
+    .hero-section {
+        &__overlay {
+            background: rgba(0, 0, 0, 0.6);
+        }
+
+        &__title,
+        &__subtitle,
+        &__catchphrase {
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+        }
+    }
+}

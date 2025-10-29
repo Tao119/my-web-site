@@ -1,0 +1,322 @@
+@use "../../foundation/variable" as *;
+@use "../../foundation/mixin" as *;
+
+// 最適化された画像コンポーネントのスタイル
+.optimized-image-wrapper {
+    position: relative;
+    overflow: hidden;
+
+    &.loading {
+        .optimized-image {
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out;
+        }
+    }
+
+    &.loaded {
+        .optimized-image {
+            opacity: 1;
+            transition: opacity 0.3s ease-in-out;
+        }
+
+        .optimized-image-skeleton {
+            opacity: 0;
+            pointer-events: none;
+        }
+    }
+}
+
+.optimized-image {
+    transition: opacity 0.3s ease-in-out;
+}
+
+.optimized-image-skeleton {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: skeleton-loading 1.5s infinite;
+    transition: opacity 0.3s ease-in-out;
+}
+
+.optimized-image-error {
+    border: 2px dashed #d1d5db;
+    border-radius: 8px;
+    font-family: system-ui, -apple-system, sans-serif;
+}
+
+// スケルトンアニメーション
+@keyframes skeleton-loading {
+    0% {
+        background-position: -200% 0;
+    }
+
+    100% {
+        background-position: 200% 0;
+    }
+}
+
+// アバター画像のスタイル
+.avatar-image {
+    border-radius: 50%;
+    border: 3px solid rgba($accent-blue, 0.2);
+    transition: all 0.3s ease;
+
+    &:hover {
+        border-color: $accent-blue;
+        transform: scale(1.05);
+    }
+}
+
+// サムネイル画像のスタイル
+.thumbnail-image {
+    border-radius: 12px;
+    transition: all 0.3s ease;
+
+    &:hover {
+        transform: scale(1.02);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+    }
+}
+
+// ヒーロー画像のスタイル
+.hero-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+// ダークモード対応
+.admin-dark-theme {
+    .optimized-image-skeleton {
+        background: linear-gradient(90deg, #374151 25%, #4b5563 50%, #374151 75%);
+        background-size: 200% 100%;
+    }
+
+    .optimized-image-error {
+        background-color: #374151;
+        border-color: #4b5563;
+        color: #d1d5db;
+    }
+}
+
+// レスポンシブ対応
+@include mq(sp) {
+    .avatar-image {
+        &:hover {
+            transform: none; // モバイルではホバー効果を無効化
+        }
+    }
+
+    .thumbnail-image {
+        &:hover {
+            transform: none;
+            box-shadow: none;
+        }
+    }
+}
+
+// Image Gallery
+.image-gallery {
+    &__item {
+        position: relative;
+        aspect-ratio: 1;
+        border-radius: 8px;
+        overflow: hidden;
+        cursor: pointer;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+
+        &:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+
+            .image-gallery__caption {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        &:focus {
+            outline: 2px solid $accent-blue;
+            outline-offset: 2px;
+        }
+    }
+
+    &__image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.3s ease;
+
+        .image-gallery__item:hover & {
+            transform: scale(1.05);
+        }
+    }
+
+    &__caption {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: linear-gradient(transparent, rgba(0, 0, 0, 0.8));
+        color: white;
+        padding: 1rem;
+        font-size: 0.875rem;
+        opacity: 0;
+        transform: translateY(10px);
+        transition: all 0.3s ease;
+    }
+
+    // Modal
+    &__modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.9);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 10000;
+        animation: fadeIn 0.3s ease;
+
+        &:focus {
+            outline: none;
+        }
+    }
+
+    &__modal-content {
+        position: relative;
+        max-width: 90vw;
+        max-height: 90vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    &__modal-close {
+        position: absolute;
+        top: -50px;
+        right: 0;
+        background: none;
+        border: none;
+        color: white;
+        font-size: 2rem;
+        cursor: pointer;
+        padding: 0.5rem;
+        z-index: 1;
+        transition: opacity 0.2s ease;
+
+        &:hover {
+            opacity: 0.7;
+        }
+
+        &:focus {
+            outline: 2px solid white;
+            outline-offset: 2px;
+        }
+    }
+
+    &__modal-image {
+        max-width: 100%;
+        max-height: 80vh;
+        object-fit: contain;
+    }
+
+    &__modal-caption {
+        color: white;
+        text-align: center;
+        padding: 1rem;
+        font-size: 1rem;
+        max-width: 600px;
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+// Thumbnail Image Container
+.thumbnail-image-container {
+    position: relative;
+    overflow: hidden;
+    border-radius: 8px;
+    background: $gray-100;
+
+    .thumbnail-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.3s ease;
+    }
+
+    &:hover .thumbnail-image {
+        transform: scale(1.05);
+    }
+}
+
+// Mobile optimizations
+@include mq(sp) {
+    .image-gallery {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.5rem;
+
+        &__item {
+            aspect-ratio: 1;
+
+            &:hover {
+                transform: none;
+                box-shadow: none;
+            }
+        }
+
+        &__modal-content {
+            max-width: 95vw;
+            max-height: 95vh;
+        }
+
+        &__modal-close {
+            top: -40px;
+            font-size: 1.5rem;
+        }
+
+        &__modal-caption {
+            font-size: 0.875rem;
+            padding: 0.75rem;
+        }
+    }
+
+    .thumbnail-image-container:hover .thumbnail-image {
+        transform: none;
+    }
+}
+
+// Reduced motion対応
+@media (prefers-reduced-motion: reduce) {
+
+    .optimized-image,
+    .optimized-image-skeleton,
+    .avatar-image,
+    .thumbnail-image,
+    .image-gallery__item,
+    .image-gallery__image,
+    .image-gallery__caption {
+        transition: none !important;
+        animation: none !important;
+        transform: none !important;
+    }
+
+    .image-gallery__modal {
+        animation: none;
+    }
+}

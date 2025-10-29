@@ -1,0 +1,167 @@
+@use "../../foundation/variable" as *;
+@use "../../foundation/mixin" as *;
+
+.c-career {
+  width: 100%;
+  max-width: 1000px;
+  margin: 0 auto;
+
+  &--loading {
+    padding: 60px;
+    text-align: center;
+    color: $accent-light;
+    font-size: 1.1rem;
+  }
+
+  &__title {
+    font-size: 2rem;
+    color: $white;
+    margin-bottom: 40px;
+    text-align: center;
+    position: relative;
+    
+    &::after {
+      content: "";
+      position: absolute;
+      bottom: -10px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 60px;
+      height: 3px;
+      background: linear-gradient(90deg, $accent-blue 0%, $accent-light 100%);
+    }
+  }
+
+  &__timeline {
+    position: relative;
+    padding-left: 40px;
+
+    @include mq(sp) {
+      padding-left: 20px;
+    }
+
+    &::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: linear-gradient(180deg, $accent-blue 0%, $navy-light 100%);
+    }
+  }
+
+  &__item {
+    position: relative;
+    margin-bottom: 40px;
+    opacity: 0;
+    animation: slideInLeft 0.6s ease forwards;
+
+    @for $i from 1 through 10 {
+      &:nth-child(#{$i}) {
+        animation-delay: #{$i * 0.1}s;
+      }
+    }
+
+    &::before {
+      content: "";
+      position: absolute;
+      left: -46px;
+      top: 0;
+      width: 12px;
+      height: 12px;
+      background: $accent-blue;
+      border-radius: 50%;
+      box-shadow: 0 0 0 4px rgba($accent-blue, 0.2);
+      
+      @include mq(sp) {
+        left: -26px;
+      }
+    }
+  }
+
+  &__period {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.9rem;
+    color: $accent-light;
+    margin-bottom: 10px;
+  }
+
+  &__start,
+  &__end {
+    font-weight: 500;
+  }
+
+  &__separator {
+    color: rgba($white, 0.5);
+  }
+
+  &__content {
+    background: rgba($white, 0.02);
+    border-radius: 12px;
+    padding: 25px;
+    border: 1px solid rgba($accent-blue, 0.2);
+    backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+
+    &:hover {
+      transform: translateX(5px);
+      box-shadow: 0 5px 20px rgba($accent-blue, 0.2);
+      border-color: rgba($accent-blue, 0.4);
+    }
+  }
+
+  &__company {
+    font-size: 1.3rem;
+    color: $white;
+    font-weight: 600;
+    margin-bottom: 5px;
+  }
+
+  &__position {
+    font-size: 1.1rem;
+    color: $accent-light;
+    margin-bottom: 15px;
+  }
+
+  &__description {
+    color: rgba($white, 0.8);
+    line-height: 1.7;
+    margin-bottom: 15px;
+  }
+
+  &__technologies {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  &__technology {
+    padding: 6px 14px;
+    background: rgba($navy-light, 0.3);
+    border: 1px solid rgba($accent-blue, 0.3);
+    border-radius: 20px;
+    font-size: 0.8rem;
+    color: $accent-light;
+    transition: all 0.3s ease;
+
+    &:hover {
+      background: rgba($accent-blue, 0.2);
+      border-color: $accent-blue;
+      transform: translateY(-2px);
+    }
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}

@@ -9,7 +9,7 @@ export async function GET(req: Request, res: NextApiResponse) {
     const data = await mysql.Get('SELECT * FROM user;');
     return new Response(JSON.stringify(data));
   } catch (error) {
-    console.error('Error fetching user data:', error);
+    // エラーログを無効化
     return new Response(JSON.stringify({ error: 'Internal Server Error' }));
   }
 }
@@ -17,10 +17,10 @@ export async function GET(req: Request, res: NextApiResponse) {
 export async function POST(req: Request, res: NextApiResponse) {
   try {
     const body = await req.json();
-    console.log('POST request', body.name);
+    // ログ出力を無効化
     return new Response(JSON.stringify({ message: 'Hello' }));
   } catch (error) {
-    console.error('Error processing POST request:', error);
+    // エラーログを無効化
     return new Response(JSON.stringify({ error: 'Internal Server Error' }));
   }
 }

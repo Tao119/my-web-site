@@ -1,0 +1,362 @@
+@use "../../foundation/variable" as *;
+@use "../../foundation/mixin" as *;
+
+.c-admin-login {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, $navy-dark 0%, #0a1142 100%);
+  padding: 20px;
+  position: relative;
+
+  &__theme-toggle {
+    position: absolute;
+    top: 2rem;
+    right: 2rem;
+    z-index: 10;
+
+    @include mq(sp) {
+      top: 1rem;
+      right: 1rem;
+    }
+  }
+
+  &__container {
+    width: 100%;
+    max-width: 400px;
+    background: rgba($white, 0.02);
+    border-radius: 20px;
+    padding: 40px;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba($accent-blue, 0.2);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    animation: fadeInScale 0.5s ease;
+  }
+
+  &__title {
+    font-size: 1.8rem;
+    color: $white;
+    text-align: center;
+    margin-bottom: 30px;
+    font-weight: 700;
+  }
+
+  &__info {
+    margin-bottom: 30px;
+  }
+
+  &__credentials {
+    background: rgba($accent-blue, 0.1);
+    border: 1px solid rgba($accent-blue, 0.3);
+    border-radius: 10px;
+    padding: 20px;
+
+    h3 {
+      color: $accent-light;
+      font-size: 1rem;
+      margin-bottom: 12px;
+      font-weight: 600;
+    }
+
+    p {
+      color: $white;
+      font-size: 0.85rem;
+      margin-bottom: 8px;
+      line-height: 1.4;
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+
+      strong {
+        color: $accent-light;
+      }
+    }
+  }
+
+  &__note {
+    color: rgba($white, 0.7) !important;
+    font-size: 0.8rem !important;
+    font-style: italic;
+    margin-top: 10px !important;
+  }
+
+  &__form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  &__field {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  &__label {
+    color: $accent-light;
+    font-size: 0.9rem;
+    letter-spacing: 0.05em;
+  }
+
+  &__input {
+    padding: 12px 16px;
+    background: rgba($white, 0.05);
+    border: 1px solid rgba($accent-blue, 0.3);
+    border-radius: 8px;
+    color: $white;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+
+    &:focus {
+      outline: none;
+      border-color: $accent-blue;
+      box-shadow: 0 0 0 3px rgba($accent-blue, 0.2);
+    }
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+  }
+
+  &__error {
+    color: #ff6b6b;
+    font-size: 0.85rem;
+    text-align: center;
+    padding: 10px;
+    background: rgba(#ff6b6b, 0.1);
+    border-radius: 8px;
+    border: 1px solid rgba(#ff6b6b, 0.3);
+  }
+
+  &__submit {
+    padding: 14px 24px;
+    background: $white;
+    color: $navy-dark;
+    border: 4px solid $navy-dark;
+    border-radius: 0;
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 4px 4px 0px 0px $navy-dark;
+    text-transform: uppercase;
+
+    &:hover:not(:disabled) {
+      transform: translate(2px, 2px);
+      box-shadow: 2px 2px 0px 0px $navy-dark;
+    }
+
+    &:active:not(:disabled) {
+      transform: translate(4px, 4px);
+      box-shadow: 0px 0px 0px 0px $navy-dark;
+    }
+
+    &:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: 4px 4px 0px 0px rgba($navy-dark, 0.5);
+    }
+  }
+
+  &--loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    background: linear-gradient(135deg, $navy-dark 0%, #0a1142 100%);
+    color: $white;
+    font-size: 1.125rem;
+
+    &::after {
+      content: '';
+      width: 20px;
+      height: 20px;
+      margin-left: 10px;
+      border: 2px solid $accent-blue;
+      border-top: 2px solid transparent;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+  }
+}
+
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+// ============================================================================
+// Light Theme Styles for Admin Login
+// ============================================================================
+
+.light .c-admin-login,
+.admin-light-theme .c-admin-login {
+  background: $white !important;
+
+  &__container {
+    background: $white;
+    border: 4px solid $black;
+    box-shadow: 8px 8px 0px 0px $black;
+  }
+
+  &__title {
+    color: $black;
+  }
+
+  &__credentials {
+    background: $gray-50;
+    border-color: $black;
+
+    h3 {
+      color: $navy-blue;
+    }
+
+    p {
+      color: $black;
+
+      strong {
+        color: $navy-blue;
+      }
+    }
+  }
+
+  &__note {
+    color: $gray-600;
+  }
+
+  &__label {
+    color: $black;
+  }
+
+  &__input {
+    background: $white;
+    color: $black;
+    border-color: $black;
+
+    &:focus {
+      box-shadow: 4px 4px 0px 0px $black;
+    }
+
+    &::placeholder {
+      color: $gray-500;
+    }
+  }
+
+  &__submit {
+    background: $neon-yellow;
+    color: $black;
+    border-color: $black;
+    box-shadow: 4px 4px 0px 0px $black;
+
+    &:hover:not(:disabled) {
+      transform: translate(2px, 2px);
+      box-shadow: 2px 2px 0px 0px $black;
+    }
+
+    &:disabled {
+      background: $gray-300;
+      color: $gray-500;
+    }
+  }
+
+  &__error {
+    background: rgba($electric-pink, 0.1);
+    color: $electric-pink;
+    border-color: $electric-pink;
+  }
+}
+
+// ============================================================================
+// Dark Theme Styles for Admin Login (Enhanced)
+// ============================================================================
+
+.dark .c-admin-login,
+.admin-dark-theme .c-admin-login {
+  background: linear-gradient(135deg, #1a1a1a 0%, #0d0d0d 100%);
+
+  &__container {
+    background: #2d2d2d;
+    border: 4px solid $white;
+    box-shadow: 8px 8px 0px 0px $white;
+  }
+
+  &__title {
+    color: $white;
+  }
+
+  &__credentials {
+    background: rgba($navy-blue-light, 0.2);
+    border-color: $white;
+
+    h3 {
+      color: $neon-yellow;
+    }
+
+    p {
+      color: $white;
+
+      strong {
+        color: $neon-yellow;
+      }
+    }
+  }
+
+  &__note {
+    color: #b3b3b3;
+  }
+
+  &__label {
+    color: $white;
+  }
+
+  &__input {
+    background: #1a1a1a;
+    color: $white;
+    border-color: $white;
+
+    &:focus {
+      box-shadow: 4px 4px 0px 0px $white;
+    }
+
+    &::placeholder {
+      color: #666;
+    }
+  }
+
+  &__submit {
+    background: $neon-yellow;
+    color: $black;
+    border-color: $white;
+    box-shadow: 4px 4px 0px 0px $white;
+
+    &:hover:not(:disabled) {
+      transform: translate(2px, 2px);
+      box-shadow: 2px 2px 0px 0px $white;
+    }
+
+    &:disabled {
+      background: #666;
+      color: #999;
+    }
+  }
+
+  &__error {
+    background: rgba($electric-pink, 0.2);
+    color: $electric-pink;
+    border-color: $electric-pink;
+  }
+}

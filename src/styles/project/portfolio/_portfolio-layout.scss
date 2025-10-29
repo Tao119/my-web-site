@@ -1,0 +1,548 @@
+@use "../../foundation/variable" as *;
+@use "../../foundation/mixin" as *;
+
+// Neobrutalism Portfolio Layout
+.neo-portfolio {
+    min-height: 100vh; // Minimum height instead of fixed height
+    width: 100%;
+    background: #ffffff;
+    color: #000000;
+    font-family: "Inter", "Noto Sans JP", sans-serif;
+    transition: all 0.3s ease;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+
+    // Dark mode
+    &--dark {
+        background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+        color: #f1f5f9;
+    }
+
+    // Main content area
+    &__main {
+        flex: 1; // Take remaining space
+        box-sizing: border-box;
+        min-height: 100vh; // Ensure minimum height for proper display
+        margin-top: 70px; // Account for fixed header height (min-height from nav)
+
+        @include mq(sp) {
+            margin-top: 65px; // Smaller header on mobile
+        }
+
+        // Hero section should be first and full height
+        .hero-section:first-child {
+            margin-top: -70px; // Compensate for header height to start from top
+            padding-top: 70px; // Add padding back for content positioning
+
+            @include mq(sp) {
+                margin-top: -65px;
+                padding-top: 65px;
+            }
+        }
+
+        // Other sections get normal spacing when they are first
+        >section:not(.hero-section):first-child,
+        >*:not(.hero-section):first-child {
+            padding-top: 40px; // Reduced padding since we have margin-top
+
+            @include mq(sp) {
+                padding-top: 30px;
+            }
+        }
+    }
+
+    // Footer
+    &__footer {
+        background: #000000;
+        color: #ffffff;
+        border-top: 6px solid #fbbf24;
+        margin-top: auto; // Push footer to bottom
+        flex-shrink: 0; // Prevent footer from shrinking
+
+        .neo-portfolio--dark & {
+            background: #1e293b;
+            border-top-color: #fbbf24;
+        }
+    }
+
+    &__footer-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 60px 24px 20px;
+
+        @include mq(sp) {
+            padding: 40px 20px 16px;
+        }
+    }
+
+    &__footer-content {
+        display: grid;
+        grid-template-columns: 2fr 1fr 1fr;
+        gap: 40px;
+        margin-bottom: 40px;
+
+        @include mq(tb) {
+            grid-template-columns: 1fr;
+            gap: 30px;
+            text-align: center;
+        }
+
+        @include mq(sp) {
+            gap: 24px;
+        }
+    }
+
+    &__footer-section {
+        display: flex;
+        flex-direction: column;
+    }
+
+    &__footer-title {
+        font-size: 1.8rem;
+        font-weight: 900;
+        margin-bottom: 8px;
+        color: #fbbf24;
+        font-family: "Space Grotesk", sans-serif;
+
+        @include mq(sp) {
+            font-size: 1.5rem;
+        }
+    }
+
+    &__footer-description {
+        font-size: 1rem;
+        color: #d1d5db;
+        line-height: 1.6;
+    }
+
+    &__footer-subtitle {
+        font-size: 1.1rem;
+        font-weight: 700;
+        margin-bottom: 16px;
+        color: #ffffff;
+
+        @include mq(sp) {
+            font-size: 1rem;
+        }
+    }
+
+    &__footer-links {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+
+        @include mq(tb) {
+            flex-direction: row;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        @include mq(sp) {
+            flex-direction: column;
+            gap: 8px;
+        }
+    }
+
+    &__footer-link {
+        color: #d1d5db;
+        text-decoration: none;
+        font-weight: 500;
+        transition: color 0.15s ease;
+
+        &:hover {
+            color: #fbbf24;
+        }
+    }
+
+    &__footer-social {
+        display: flex;
+        gap: 12px;
+
+        @include mq(tb) {
+            justify-content: center;
+        }
+
+        @include mq(sp) {
+            flex-direction: column;
+            gap: 8px;
+        }
+    }
+
+    &__footer-social-link {
+        display: inline-block;
+        padding: 8px 16px;
+        background: #fbbf24;
+        color: #000000;
+        text-decoration: none;
+        font-weight: 700;
+        font-size: 0.9rem;
+        border: 3px solid #000000;
+        transition: all 0.15s ease;
+        box-shadow: 3px 3px 0px 0px rgba(0, 0, 0, 1);
+
+        &:hover {
+            background: #f59e0b;
+            transform: translate(-1px, -1px);
+            box-shadow: 4px 4px 0px 0px rgba(0, 0, 0, 1);
+        }
+
+        @include mq(sp) {
+            text-align: center;
+        }
+    }
+
+    &__footer-bottom {
+        border-top: 2px solid #374151;
+        padding-top: 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 0.9rem;
+        color: #9ca3af;
+
+        @include mq(tb) {
+            flex-direction: column;
+            gap: 8px;
+            text-align: center;
+        }
+    }
+
+    &__footer-copyright {
+        margin: 0;
+    }
+
+    &__footer-built {
+        margin: 0;
+        font-style: italic;
+    }
+}
+
+// Responsive Grid System
+.neo-grid {
+    display: grid;
+    gap: 24px;
+    width: 100%;
+
+    // Grid variations
+    &--1 {
+        grid-template-columns: 1fr;
+    }
+
+    &--2 {
+        grid-template-columns: repeat(2, 1fr);
+
+        @include mq(tb) {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    &--3 {
+        grid-template-columns: repeat(3, 1fr);
+
+        @include mq(tb) {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        @include mq(sp) {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    &--4 {
+        grid-template-columns: repeat(4, 1fr);
+
+        @include mq(pc) {
+            grid-template-columns: repeat(3, 1fr);
+        }
+
+        @include mq(tb) {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        @include mq(sp) {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    // Auto-fit grids
+    &--auto-fit {
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+
+        @include mq(sp) {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    &--auto-fit-small {
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+
+        @include mq(sp) {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    // Gap variations
+    &--gap-small {
+        gap: 16px;
+    }
+
+    &--gap-large {
+        gap: 32px;
+
+        @include mq(sp) {
+            gap: 20px;
+        }
+    }
+
+    &--gap-xl {
+        gap: 48px;
+
+        @include mq(tb) {
+            gap: 32px;
+        }
+
+        @include mq(sp) {
+            gap: 24px;
+        }
+    }
+}
+
+// Container System
+.neo-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 24px;
+
+    @include mq(sp) {
+        padding: 0 20px;
+    }
+
+    // Container variations
+    &--narrow {
+        max-width: 800px;
+    }
+
+    &--wide {
+        max-width: 1400px;
+    }
+
+    &--full {
+        max-width: none;
+        padding: 0;
+    }
+}
+
+// Section System
+.neo-section {
+    padding: 60px 0; // Reduced from 80px since we now have proper header margin
+
+    @include mq(tb) {
+        padding: 50px 0;
+    }
+
+    @include mq(sp) {
+        padding: 40px 0;
+    }
+
+    // Section variations
+    &--small {
+        padding: 30px 0; // Reduced proportionally
+
+        @include mq(sp) {
+            padding: 20px 0;
+        }
+    }
+
+    &--large {
+        padding: 100px 0; // Reduced from 120px
+
+        @include mq(tb) {
+            padding: 70px 0;
+        }
+
+        @include mq(sp) {
+            padding: 50px 0;
+        }
+    }
+
+    &--hero {
+        padding: 0;
+        min-height: calc(100vh - 70px); // Account for header height
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        @include mq(sp) {
+            min-height: calc(100vh - 65px); // Smaller header on mobile
+        }
+    }
+
+    // Last section should have bottom margin for footer spacing
+    &:last-child {
+        margin-bottom: 60px; // Reduced to match new section padding
+
+        @include mq(sp) {
+            margin-bottom: 30px;
+        }
+    }
+}
+
+// Neobrutalism Card System
+.neo-card {
+    background: #ffffff;
+    border: 4px solid #000000;
+    box-shadow: 8px 8px 0px 0px rgba(0, 0, 0, 1);
+    padding: 24px;
+    transition: all 0.15s ease-out;
+
+    .neo-portfolio--dark & {
+        background: #1e293b;
+        border-color: #fbbf24;
+        box-shadow: 8px 8px 0px 0px rgba(251, 191, 36, 1);
+        color: #f1f5f9;
+    }
+
+    &:hover {
+        transform: translate(-2px, -2px);
+        box-shadow: 10px 10px 0px 0px rgba(0, 0, 0, 1);
+
+        .neo-portfolio--dark & {
+            box-shadow: 10px 10px 0px 0px rgba(251, 191, 36, 1);
+        }
+    }
+
+    // Card variations
+    &--small {
+        padding: 16px;
+        border-width: 3px;
+        box-shadow: 6px 6px 0px 0px rgba(0, 0, 0, 1);
+
+        .neo-portfolio--dark & {
+            box-shadow: 6px 6px 0px 0px rgba(251, 191, 36, 1);
+        }
+
+        &:hover {
+            box-shadow: 8px 8px 0px 0px rgba(0, 0, 0, 1);
+
+            .neo-portfolio--dark & {
+                box-shadow: 8px 8px 0px 0px rgba(251, 191, 36, 1);
+            }
+        }
+    }
+
+    &--large {
+        padding: 32px;
+        border-width: 5px;
+        box-shadow: 12px 12px 0px 0px rgba(0, 0, 0, 1);
+
+        .neo-portfolio--dark & {
+            box-shadow: 12px 12px 0px 0px rgba(251, 191, 36, 1);
+        }
+
+        &:hover {
+            box-shadow: 14px 14px 0px 0px rgba(0, 0, 0, 1);
+
+            .neo-portfolio--dark & {
+                box-shadow: 14px 14px 0px 0px rgba(251, 191, 36, 1);
+            }
+        }
+    }
+
+    &--no-hover {
+        &:hover {
+            transform: none;
+            box-shadow: 8px 8px 0px 0px rgba(0, 0, 0, 1);
+
+            .neo-portfolio--dark & {
+                box-shadow: 8px 8px 0px 0px rgba(251, 191, 36, 1);
+            }
+        }
+    }
+}
+
+// Typography System
+.neo-heading {
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 900;
+    line-height: 1.2;
+    margin: 0 0 16px 0;
+
+    &--1 {
+        font-size: clamp(2.5rem, 5vw, 4rem);
+        margin-bottom: 24px;
+    }
+
+    &--2 {
+        font-size: clamp(2rem, 4vw, 3rem);
+        margin-bottom: 20px;
+    }
+
+    &--3 {
+        font-size: clamp(1.5rem, 3vw, 2.25rem);
+        margin-bottom: 16px;
+    }
+
+    &--4 {
+        font-size: clamp(1.25rem, 2.5vw, 1.75rem);
+        margin-bottom: 12px;
+    }
+
+    &--5 {
+        font-size: clamp(1.1rem, 2vw, 1.5rem);
+        margin-bottom: 8px;
+    }
+
+    &--6 {
+        font-size: clamp(1rem, 1.5vw, 1.25rem);
+        margin-bottom: 8px;
+    }
+}
+
+.neo-text {
+    line-height: 1.6;
+    margin: 0 0 16px 0;
+
+    &--large {
+        font-size: 1.125rem;
+    }
+
+    &--small {
+        font-size: 0.875rem;
+    }
+
+    &--center {
+        text-align: center;
+    }
+
+    &--muted {
+        color: #6b7280;
+
+        .neo-portfolio--dark & {
+            color: #9ca3af;
+        }
+    }
+}
+
+// Utility Classes
+.neo-sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+.neo-focus-visible {
+    &:focus-visible {
+        outline: 3px solid #fbbf24;
+        outline-offset: 2px;
+    }
+}

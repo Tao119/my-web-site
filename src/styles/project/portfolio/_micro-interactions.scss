@@ -1,0 +1,733 @@
+@use "../../foundation/variable" as *;
+@use "../../foundation/mixin" as *;
+
+// Interactive Button
+.interactive-button {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    overflow: hidden;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    user-select: none;
+
+    // Sizes
+    &--small {
+        padding: 0.5rem 1rem;
+        font-size: 0.875rem;
+        min-height: 2rem;
+    }
+
+    &--medium {
+        padding: 0.75rem 1.5rem;
+        font-size: 1rem;
+        min-height: 2.5rem;
+    }
+
+    &--large {
+        padding: 1rem 2rem;
+        font-size: 1.125rem;
+        min-height: 3rem;
+    }
+
+    // Variants
+    &--primary {
+        background: linear-gradient(135deg, $accent-blue 0%, $accent-blue-lighter 100%);
+        color: white;
+        box-shadow: 0 4px 12px rgba($accent-blue, 0.3);
+
+        &:hover {
+            background: linear-gradient(135deg, $accent-blue-lighter 0%, #90d4f8 100%);
+            box-shadow: 0 6px 20px rgba($accent-blue, 0.4);
+            transform: translateY(-2px);
+        }
+    }
+
+    &--secondary {
+        background: transparent;
+        color: $accent-blue;
+        border: 2px solid $accent-blue;
+
+        &:hover {
+            background: $accent-blue;
+            color: white;
+            transform: translateY(-2px);
+        }
+    }
+
+    &--accent {
+        background: linear-gradient(135deg, $accent-purple 0%, $accent-purple-lighter 100%);
+        color: white;
+        box-shadow: 0 4px 12px rgba($accent-purple, 0.3);
+
+        &:hover {
+            background: linear-gradient(135deg, $accent-purple-lighter 0%, #c966d4 100%);
+            box-shadow: 0 6px 20px rgba($accent-purple, 0.4);
+            transform: translateY(-2px);
+        }
+    }
+
+    // States
+    &--pressed {
+        transform: translateY(0) scale(0.98);
+    }
+
+    &--disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        pointer-events: none;
+    }
+
+    &--loading {
+        pointer-events: none;
+    }
+
+    // Content
+    &__content {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    &__loading {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    // Ripple effect
+    &__ripples {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        pointer-events: none;
+    }
+
+    &__ripple {
+        position: absolute;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background: rgba(white, 0.6);
+        transform: translate(-50%, -50%) scale(0);
+        animation: ripple-effect 0.6s ease-out;
+    }
+}
+
+@keyframes ripple-effect {
+    to {
+        transform: translate(-50%, -50%) scale(4);
+        opacity: 0;
+    }
+}
+
+// Animated Card
+.animated-card {
+    position: relative;
+    background: rgba($accent-blue, 0.05);
+    border: 1px solid rgba($accent-blue, 0.1);
+    border-radius: 12px;
+    padding: 1.5rem;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+    &--clickable {
+        cursor: pointer;
+        border: none;
+        background: rgba($accent-blue, 0.05);
+
+        &:focus {
+            outline: 2px solid $accent-blue;
+            outline-offset: 2px;
+        }
+    }
+
+    &--hovered {
+        border-color: rgba($accent-blue, 0.2);
+    }
+
+    &--pressed {
+        transform: scale(0.98);
+    }
+
+    // Hover effects are handled by micro-interaction classes
+}
+
+// Floating Label Input
+.floating-label-input {
+    position: relative;
+    margin-bottom: 1rem;
+
+    &__wrapper {
+        position: relative;
+    }
+
+    &__field {
+        width: 100%;
+        padding: 1rem;
+        border: 2px solid rgba($accent-blue, 0.2);
+        border-radius: 8px;
+        background: rgba($accent-blue, 0.05);
+        color: $accent-light;
+        font-size: 1rem;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+        &:focus {
+            outline: none;
+            border-color: $accent-blue;
+            background: rgba($accent-blue, 0.1);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba($accent-blue, 0.15);
+        }
+
+        &::placeholder {
+            color: rgba($accent-light, 0.5);
+        }
+    }
+
+    &__label {
+        position: absolute;
+        top: 50%;
+        left: 1rem;
+        transform: translateY(-50%);
+        color: rgba($accent-light, 0.6);
+        font-size: 1rem;
+        pointer-events: none;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        background: transparent;
+
+        &--active {
+            top: 0;
+            left: 0.75rem;
+            transform: translateY(-50%) scale(0.85);
+            color: $accent-blue;
+            background: $navy-dark;
+            padding: 0 0.5rem;
+        }
+    }
+
+    &__required {
+        color: #ef4444;
+        margin-left: 0.25rem;
+    }
+
+    &__error {
+        margin-top: 0.5rem;
+        color: #ef4444;
+        font-size: 0.875rem;
+    }
+
+    &--error &__field {
+        border-color: #ef4444;
+    }
+}
+
+// Toast Container
+.toast-container {
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+    z-index: 10000;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    max-width: 400px;
+
+    @include mq(sp) {
+        left: 1rem;
+        right: 1rem;
+        max-width: none;
+    }
+}
+
+// Toast
+.toast {
+    display: flex;
+    align-items: center;
+    padding: 1rem;
+    border-radius: 8px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    animation: toast-slide-in 0.3s ease-out;
+    backdrop-filter: blur(10px);
+
+    &--success {
+        background: rgba(#10b981, 0.9);
+        color: white;
+        border-left: 4px solid #10b981;
+    }
+
+    &--error {
+        background: rgba(#ef4444, 0.9);
+        color: white;
+        border-left: 4px solid #ef4444;
+    }
+
+    &--warning {
+        background: rgba(#f59e0b, 0.9);
+        color: white;
+        border-left: 4px solid #f59e0b;
+    }
+
+    &--info {
+        background: rgba($accent-blue, 0.9);
+        color: white;
+        border-left: 4px solid $accent-blue;
+    }
+
+    &__content {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        flex: 1;
+    }
+
+    &__icon {
+        font-size: 1.25rem;
+        flex-shrink: 0;
+    }
+
+    &__message {
+        font-weight: 500;
+    }
+
+    &__close {
+        background: none;
+        border: none;
+        color: inherit;
+        font-size: 1.5rem;
+        cursor: pointer;
+        padding: 0;
+        margin-left: 1rem;
+        opacity: 0.7;
+        transition: opacity 0.2s;
+
+        &:hover {
+            opacity: 1;
+        }
+    }
+}
+
+@keyframes toast-slide-in {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+// Pulse Indicator
+.pulse-indicator {
+    position: relative;
+    display: inline-block;
+
+    &--small {
+        width: 8px;
+        height: 8px;
+    }
+
+    &--medium {
+        width: 12px;
+        height: 12px;
+    }
+
+    &--large {
+        width: 16px;
+        height: 16px;
+    }
+
+    &__dot {
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        position: relative;
+        z-index: 1;
+    }
+
+    &__ring {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        opacity: 0;
+    }
+
+    &--active &__ring {
+        animation: pulse-ring 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+
+    // Colors
+    &--primary {
+        .pulse-indicator__dot {
+            background: $accent-blue;
+        }
+
+        .pulse-indicator__ring {
+            border: 2px solid $accent-blue;
+        }
+    }
+
+    &--accent {
+        .pulse-indicator__dot {
+            background: $accent-purple;
+        }
+
+        .pulse-indicator__ring {
+            border: 2px solid $accent-purple;
+        }
+    }
+
+    &--success {
+        .pulse-indicator__dot {
+            background: #10b981;
+        }
+
+        .pulse-indicator__ring {
+            border: 2px solid #10b981;
+        }
+    }
+
+    &--warning {
+        .pulse-indicator__dot {
+            background: #f59e0b;
+        }
+
+        .pulse-indicator__ring {
+            border: 2px solid #f59e0b;
+        }
+    }
+
+    &--error {
+        .pulse-indicator__dot {
+            background: #ef4444;
+        }
+
+        .pulse-indicator__ring {
+            border: 2px solid #ef4444;
+        }
+    }
+}
+
+@keyframes pulse-ring {
+    0% {
+        transform: scale(0.8);
+        opacity: 1;
+    }
+
+    100% {
+        transform: scale(2.4);
+        opacity: 0;
+    }
+}
+
+// Progress Ring
+.progress-ring {
+    position: relative;
+    display: inline-block;
+
+    &__svg {
+        transform: rotate(-90deg);
+    }
+
+    &__progress {
+        transition: stroke-dashoffset 0.5s ease-in-out;
+    }
+
+    &__text {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: $accent-light;
+    }
+}
+
+// Enhanced hover effects
+.micro-interaction--hover-lift:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+}
+
+.micro-interaction--hover-scale:hover {
+    transform: scale(1.05);
+}
+
+.micro-interaction--hover-glow:hover {
+    box-shadow: 0 0 20px rgba($accent-blue, 0.4);
+}
+
+// Click effects
+.micro-interaction--click-shrink:active {
+    transform: scale(0.95);
+}
+
+.micro-interaction--click-bounce:active {
+    animation: click-bounce 0.3s ease;
+}
+
+@keyframes click-bounce {
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(0.95);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+// Responsive adjustments
+@include mq(sp) {
+    .interactive-button {
+        &--small {
+            padding: 0.5rem 0.75rem;
+            font-size: 0.8rem;
+        }
+
+        &--medium {
+            padding: 0.75rem 1rem;
+            font-size: 0.9rem;
+        }
+
+        &--large {
+            padding: 1rem 1.5rem;
+            font-size: 1rem;
+        }
+    }
+
+    .animated-card {
+        padding: 1rem;
+    }
+
+    .floating-label-input__field {
+        padding: 0.875rem;
+    }
+}
+
+// Dark mode adjustments
+.admin-dark-theme {
+    .animated-card {
+        background: rgba(white, 0.05);
+        border-color: rgba(white, 0.1);
+
+        &--hovered {
+            border-color: rgba(white, 0.2);
+        }
+    }
+
+    .floating-label-input {
+        &__field {
+            background: rgba(white, 0.05);
+            border-color: rgba(white, 0.2);
+            color: white;
+
+            &:focus {
+                border-color: $accent-blue;
+                background: rgba(white, 0.1);
+            }
+        }
+
+        &__label {
+            color: rgba(white, 0.6);
+
+            &--active {
+                color: $accent-blue;
+                background: $navy-dark;
+            }
+        }
+    }
+}
+
+// リップル効果
+@keyframes ripple-animation {
+    0% {
+        width: 0;
+        height: 0;
+        opacity: 1;
+    }
+
+    100% {
+        width: 200px;
+        height: 200px;
+        opacity: 0;
+    }
+}
+
+.ripple-container {
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+}
+
+// ホバースケール効果
+.hover-scale {
+    transition: transform 0.2s ease;
+    cursor: pointer;
+}
+
+// フローティングアクションボタン
+.fab {
+    position: relative;
+    border-radius: 50%;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    transition: all 0.3s ease;
+
+    &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+    }
+}
+
+.fab-button {
+    width: 100%;
+    height: 100%;
+    border: none;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: inherit;
+    cursor: pointer;
+    transition: all 0.3s ease;
+
+    &:focus {
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+    }
+}
+
+.fab-tooltip {
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 8px 12px;
+    border-radius: 4px;
+    font-size: 12px;
+    white-space: nowrap;
+    margin-bottom: 8px;
+
+    &::after {
+        content: '';
+        position: absolute;
+        top: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+        border: 4px solid transparent;
+        border-top-color: rgba(0, 0, 0, 0.8);
+    }
+}
+
+// パルス効果
+@keyframes pulse-animation {
+    0% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 1;
+    }
+
+    100% {
+        transform: translate(-50%, -50%) scale(2);
+        opacity: 0;
+    }
+}
+
+.pulse-effect {
+    position: relative;
+    display: inline-block;
+}
+
+// スライドイン効果
+.slide-in {
+    transition: all 0.6s ease-out;
+}
+
+// カウントアップ
+.count-up {
+    font-weight: 600;
+    color: $accent-blue;
+}
+
+// アニメーション付きプログレスバー
+.animated-progress {
+    .progress-bar {
+        position: relative;
+        overflow: hidden;
+    }
+
+    .progress-fill {
+        position: relative;
+
+        &::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg,
+                    transparent,
+                    rgba(255, 255, 255, 0.3),
+                    transparent);
+            animation: progress-shine 2s ease-in-out infinite;
+        }
+    }
+
+    .progress-value {
+        text-align: right;
+        color: $gray-600;
+        font-size: 12px;
+        font-weight: 500;
+    }
+}
+
+@keyframes progress-shine {
+    0% {
+        transform: translateX(-100%);
+    }
+
+    100% {
+        transform: translateX(100%);
+    }
+}
+
+// Reduced motion対応の追加
+@media (prefers-reduced-motion: reduce) {
+
+    .hover-scale,
+    .fab,
+    .slide-in,
+    .animated-progress .progress-fill {
+        transition: none !important;
+        animation: none !important;
+        transform: none !important;
+    }
+
+    .ripple {
+        display: none;
+    }
+
+    .pulse-ring {
+        display: none;
+    }
+}

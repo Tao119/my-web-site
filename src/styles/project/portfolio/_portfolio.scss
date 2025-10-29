@@ -1,0 +1,25 @@
+@use "../../foundation/variable" as *;
+@use "../../foundation/mixin" as *;
+
+.p-portfolio {
+  background: linear-gradient(180deg, $navy-dark 0%, $navy-dark-darker 100%);
+  min-height: 100vh;
+
+  &__main {
+    // Header spacing is now handled by neo-portfolio__main in _portfolio-layout.scss
+  }
+
+  &__section {
+    padding: 80px 0;
+    max-width: 1200px;
+    margin: 0 auto;
+
+    @include mq(sp) {
+      padding: 60px 20px;
+    }
+
+    @include mq(tb) {
+      padding: 80px 40px;
+    }
+  }
+}

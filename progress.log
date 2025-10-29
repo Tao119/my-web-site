@@ -1,0 +1,170 @@
+# Progress Log
+
+## 2025-07-01
+
+### プロジェクト調査完了
+
+#### 使用技術スタック
+- **フレームワーク**: Next.js 14.0.3 (App Router)
+- **言語**: TypeScript 5.3.2
+- **スタイリング**: 
+  - SCSS (メイン)
+  - Tailwind CSS (補助的に使用)
+  - destyle.css (リセットCSS)
+- **データベース**: 
+  - Firebase
+  - MySQL (promise-mysql, serverless-mysql)
+- **主要ライブラリ**:
+  - React 18
+  - Framer Motion (アニメーション)
+  - Three.js (3D)
+  - Socket.io (リアルタイム通信)
+  - React Unity WebGL
+  - React Beautiful DnD (ドラッグ&ドロップ)
+
+#### プロジェクト構造
+- `/src/app/` - App Router構造
+- `/src/components/` - 再利用可能なコンポーネント
+- `/src/lib/` - ユーティリティ（Firebase, MySQL設定など）
+- `/src/styles/` - SCSS構造（BEM、FLOCSS風）
+  - foundation/ - 基礎設定
+  - component/ - コンポーネントスタイル
+  - project/ - プロジェクト固有スタイル
+  - utility/ - ユーティリティクラス
+
+#### 既存プロジェクト
+- karuta (かるた)
+- molkky (モルック)
+- ito
+- halloween
+- hattari (はったりさん)
+- Unity WebGLプロジェクト
+
+### 次のステップ
+ポートフォリオサイトの基本構造を作成開始
+
+### ポートフォリオサイト基本構造作成完了
+
+#### 作成したファイル
+
+**ページ構造:**
+- `/src/app/portfolio/page.tsx` - メインページ
+- `/src/app/portfolio/layout.tsx` - レイアウト定義
+
+**コンポーネント:**
+- `/src/components/portfolio/Navigation.tsx` - ナビゲーション
+- `/src/components/portfolio/Profile.tsx` - プロフィール表示
+- `/src/components/portfolio/Career.tsx` - 経歴タイムライン
+- `/src/components/portfolio/Skills.tsx` - スキル一覧（レベル表示付き）
+- `/src/components/portfolio/Works.tsx` - 作品・実績ギャラリー（フィルター機能付き）
+- `/src/components/portfolio/SocialLinks.tsx` - SNSリンク集
+- `/src/components/portfolio/BlogList.tsx` - ブログ記事一覧
+
+**スタイル（SCSS）:**
+- `/src/styles/project/portfolio/_index.scss` - インデックス
+- `/src/styles/project/portfolio/_portfolio.scss` - メインスタイル
+- `/src/styles/project/portfolio/_navigation.scss` - ナビゲーション
+- `/src/styles/project/portfolio/_profile.scss` - プロフィール
+- `/src/styles/project/portfolio/_career.scss` - 経歴
+- `/src/styles/project/portfolio/_skills.scss` - スキル
+- `/src/styles/project/portfolio/_works.scss` - 作品・実績
+- `/src/styles/project/portfolio/_social.scss` - SNS
+- `/src/styles/project/portfolio/_blog-list.scss` - ブログリスト
+
+#### 実装済み機能
+1. **データ取得**: FirestoreからのデータフェッチとLoading/Empty状態の管理
+2. **セクション切り替え**: NavigationコンポーネントによるSPA風のセクション表示
+3. **カテゴリフィルター**: 作品・実績のカテゴリ別フィルタリング
+4. **レスポンシブ対応準備**: SCSSのBEM記法による構造化
+
+#### Firestore構造
+- `portfolio/profile` - プロフィール情報
+- `portfolio/social` - SNSリンク情報
+- `careers` - 経歴コレクション
+- `skills` - スキルコレクション
+- `works` - 作品・実績コレクション
+- `blogPosts` - ブログ記事コレクション
+
+#### 今後必要な作業
+1. 管理画面（/portfolio/admin）の実装
+2. ブログ詳細ページの実装
+3. 認証機能の追加
+4. 画像アップロード機能
+5. Markdown対応（ブログ記事用）
+
+### 管理画面とデザイン実装完了
+
+#### 実装した機能
+
+**デザインシステム:**
+- テーマカラー: 紺色（Navy）グラデーション
+- アクセントカラー: ライトブルー
+- アニメーション: フェードイン、スライドイン、ホバーエフェクト
+- レスポンシブ対応
+
+**新規作成ファイル:**
+- `/src/components/portfolio/Header.tsx` - スティッキーヘッダー（スクロール対応）
+- `/src/app/portfolio/admin/page.tsx` - 管理画面ログイン
+- `/src/app/portfolio/admin/dashboard/page.tsx` - 管理画面ダッシュボード
+- `/src/app/portfolio/admin/profile/page.tsx` - プロフィール編集
+
+**新規スタイルファイル:**
+- `_header.scss` - ヘッダーデザイン（グラスモーフィズム）
+- `_admin-login.scss` - ログイン画面
+- `_admin-dashboard.scss` - ダッシュボード
+- `_admin-form.scss` - フォーム共通スタイル
+
+**実装済みアニメーション:**
+1. ヘッダー: スクロール時の背景変化、ホバーエフェクト
+2. ナビゲーション: ボタンのリップルエフェクト
+3. プロフィール: アバター回転、フロートアニメーション
+4. スキル: プログレスバーアニメーション、シマーエフェクト
+5. 全体: フェードイン、スライドインアニメーション
+
+#### 次の作業
+ブログ詳細ページの実装
+
+### 完成した機能
+
+#### ブログ機能
+- `/portfolio/blog` - ブログ一覧ページ（タグフィルター付き）
+- `/portfolio/blog/[id]` - ブログ詳細ページ（Markdown対応）
+
+#### デザイン完成
+- 紺色グラデーションをベースとした統一デザイン
+- グラスモーフィズム効果
+- 豊富なアニメーション：
+  - フェードイン/アウト
+  - スライドイン
+  - ホバーエフェクト
+  - リップルエフェクト
+  - プログレスバーアニメーション
+  - シマーエフェクト
+  - ローテーションアニメーション
+
+#### 残りの実装予定
+1. 管理画面の残りのページ（経歴、スキル、作品、ブログ、SNS編集）
+2. 画像アップロード機能（Firebase Storage）
+3. パフォーマンス最適化
+4. SEO対策
+5. OGP設定
+
+### レイアウト修正完了
+
+#### 修正内容
+1. **スクロール式レイアウト**
+   - セクション切り替えを廃止し、スムーズスクロール実装
+   - ヘッダーメニューからアンカーリンクでスクロール
+
+2. **レスポンシブ対応改善**
+   - @include mq() ミックスインを使用
+   - PCでの表示レイアウト最適化
+   - モバイルでのスライドメニュー実装
+
+3. **スタイルパス修正**
+   - foundationパスを正しく修正（../../foundation/）
+   - 各コンポーネントの幅を適切に制限
+
+4. **削除したファイル**
+   - Navigation.tsx（不要になったため）
+   - _navigation.scss（ヘッダーに統合）

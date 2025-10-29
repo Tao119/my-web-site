@@ -1,0 +1,107 @@
+// Dark Mode Global Styles
+:root {
+    // Light mode variables (default)
+    --neo-bg-primary: #ffffff;
+    --neo-bg-secondary: #f8fafc;
+    --neo-text-primary: #000000;
+    --neo-text-secondary: #374151;
+    --neo-text-muted: #6b7280;
+    --neo-border-primary: #000000;
+    --neo-border-secondary: #d1d5db;
+    --neo-accent: #1e3a8a;
+    --neo-accent-light: #3b82f6;
+    --neo-yellow: #fbbf24;
+    --neo-shadow: rgba(0, 0, 0, 1);
+}
+
+// Ensure full coverage
+html,
+body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+    transition: background 0.3s ease;
+}
+
+// Dark mode variables
+.dark-mode {
+    --neo-bg-primary: #0f172a;
+    --neo-bg-secondary: #1e293b;
+    --neo-text-primary: #f1f5f9;
+    --neo-text-secondary: #cbd5e1;
+    --neo-text-muted: #94a3b8;
+    --neo-border-primary: #fbbf24;
+    --neo-border-secondary: #475569;
+    --neo-accent: #3b82f6;
+    --neo-accent-light: #60a5fa;
+    --neo-yellow: #fbbf24;
+    --neo-shadow: rgba(251, 191, 36, 1);
+}
+
+// Apply dark mode styles
+html.dark-mode {
+    color-scheme: dark;
+
+    body {
+        background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    }
+}
+
+// Smooth transitions for theme switching
+* {
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+// Ensure proper contrast for form elements in dark mode
+.dark-mode {
+
+    input,
+    textarea,
+    select {
+        background: var(--neo-bg-secondary);
+        color: var(--neo-text-primary);
+        border-color: var(--neo-border-primary);
+
+        &::placeholder {
+            color: var(--neo-text-muted);
+        }
+    }
+
+    // Scrollbar styling for dark mode
+    ::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+        background: var(--neo-bg-secondary);
+    }
+
+    ::-webkit-scrollbar-thumb {
+        background: var(--neo-border-primary);
+        border-radius: 0;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+        background: var(--neo-yellow);
+    }
+}
+
+// Light mode scrollbar
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f5f9;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #000000;
+    border-radius: 0;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #374151;
+}

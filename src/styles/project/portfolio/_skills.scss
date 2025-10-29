@@ -1,0 +1,785 @@
+@use "../../foundation/variable" as *;
+@use "../../foundation/mixin" as *;
+
+// ============================================================================
+// Neobrutalism Skills Component
+// ============================================================================
+
+.neo-skills {
+  padding: 4rem 1rem;
+  background: #f9fafb;
+  position: relative;
+
+  @include mq(tb) {
+    padding: 3rem 1rem;
+  }
+
+  @include mq(sp) {
+    padding: 2rem 1rem;
+  }
+
+  // Dark mode support
+  .dark & {
+    background: #111827;
+  }
+
+  &__container {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  &__header {
+    text-align: center;
+    margin-bottom: 3rem;
+
+    @include mq(sp) {
+      margin-bottom: 2rem;
+    }
+  }
+
+  &__title {
+    font-size: clamp(2rem, 4vw, 3rem);
+    font-weight: 900;
+    color: $black;
+    margin-bottom: 1rem;
+    text-transform: uppercase;
+    letter-spacing: -0.02em;
+
+    .dark & {
+      color: $white;
+    }
+  }
+
+  &__subtitle {
+    font-size: 1.125rem;
+    color: #6b7280;
+    font-weight: 500;
+
+    .dark & {
+      color: #9ca3af;
+    }
+
+    @include mq(sp) {
+      font-size: 1rem;
+    }
+  }
+
+  // ============================================================================
+  // Tab System
+  // ============================================================================
+
+  &__tabs {
+    margin-bottom: 3rem;
+
+    @include mq(sp) {
+      margin-bottom: 2rem;
+    }
+  }
+
+  &__tab-list {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: center;
+    flex-wrap: wrap;
+    max-width: 100%;
+
+    @include mq(tb) {
+      gap: 0.5rem;
+    }
+
+    @include mq(sp) {
+      justify-content: center;
+      gap: 0.5rem;
+    }
+  }
+
+  &__tab {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    background: $white;
+    border: 3px solid $black;
+    box-shadow: 3px 3px 0px 0px $black;
+    font-weight: 700;
+    color: $black;
+    text-decoration: none;
+    transition: all 0.15s ease-out;
+    cursor: pointer;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    white-space: nowrap;
+    flex-shrink: 0;
+
+    @include mq(tb) {
+      padding: 0.625rem 0.875rem;
+      font-size: 0.75rem;
+    }
+
+    .dark & {
+      background: #1f2937;
+      color: $white;
+      border-color: $white;
+      box-shadow: 3px 3px 0px 0px $white;
+    }
+
+    &:hover {
+      transform: translate(-2px, -2px);
+      box-shadow: 5px 5px 0px 0px $black;
+
+      .dark & {
+        box-shadow: 5px 5px 0px 0px $white;
+      }
+    }
+
+    &:active {
+      transform: translate(0px, 0px);
+      box-shadow: 2px 2px 0px 0px $black;
+
+      .dark & {
+        box-shadow: 2px 2px 0px 0px $white;
+      }
+    }
+
+    &--active {
+      background: var(--tab-color, #fbbf24);
+      color: $black;
+      transform: translate(-2px, -2px);
+      box-shadow: 5px 5px 0px 0px $black;
+
+      .dark & {
+        box-shadow: 5px 5px 0px 0px $white;
+      }
+    }
+
+    @include mq(sp) {
+      padding: 0.5rem 1rem;
+      font-size: 0.75rem;
+    }
+  }
+
+  &__tab-icon {
+    font-size: 1.125rem;
+
+    @include mq(sp) {
+      font-size: 1rem;
+    }
+  }
+
+  &__tab-label {
+    font-weight: 800;
+  }
+
+  &__tab-count {
+    background: $black;
+    color: $white;
+    padding: 0.125rem 0.375rem;
+    border-radius: 50%;
+    font-size: 0.75rem;
+    font-weight: 900;
+    min-width: 1.25rem;
+    height: 1.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    .dark & {
+      background: $white;
+      color: $black;
+    }
+
+    @include mq(sp) {
+      font-size: 0.625rem;
+      min-width: 1rem;
+      height: 1rem;
+    }
+  }
+
+  // ============================================================================
+  // Skills Grid
+  // ============================================================================
+
+  &__content {
+    position: relative;
+  }
+
+  &__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+
+    @include mq(lg) {
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    }
+
+    @include mq(tb) {
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.25rem;
+    }
+
+    @include mq(sp) {
+      grid-template-columns: 1fr;
+      gap: 1rem;
+    }
+  }
+
+  &__card {
+    background: $white;
+    border: 4px solid $black;
+    box-shadow: 6px 6px 0px 0px $black;
+    padding: 1.5rem;
+    transition: all 0.15s ease-out;
+    opacity: 0;
+    animation: slideInUp 0.6s ease forwards;
+
+    .dark & {
+      background: #1f2937;
+      border-color: $white;
+      box-shadow: 6px 6px 0px 0px $white;
+    }
+
+    &:hover {
+      transform: translate(-3px, -3px);
+      box-shadow: 9px 9px 0px 0px $black;
+
+      .dark & {
+        box-shadow: 9px 9px 0px 0px $white;
+      }
+
+      .neo-skills__card-icon {
+        transform: scale(1.1) rotate(5deg);
+      }
+    }
+
+    @include mq(sp) {
+      padding: 1.25rem;
+    }
+  }
+
+  &__card-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+  }
+
+  &__card-icon {
+    width: 3rem;
+    height: 3rem;
+    background: #fbbf24;
+    border: 3px solid $black;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    transition: all 0.3s ease;
+    flex-shrink: 0;
+
+    .dark & {
+      border-color: $white;
+    }
+
+    @include mq(sp) {
+      width: 2.5rem;
+      height: 2.5rem;
+      font-size: 1.25rem;
+    }
+  }
+
+  &__card-info {
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__card-name {
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: $black;
+    margin-bottom: 0.25rem;
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+    word-break: break-word;
+
+    .dark & {
+      color: $white;
+    }
+
+    @include mq(sp) {
+      font-size: 1.125rem;
+    }
+  }
+
+  &__card-years {
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: #6b7280;
+    background: #e5e7eb;
+    padding: 0.25rem 0.5rem;
+    border: 2px solid $black;
+    display: inline-block;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+
+    .dark & {
+      color: #d1d5db;
+      background: #4b5563;
+      border-color: $white;
+    }
+
+    @include mq(sp) {
+      font-size: 0.75rem;
+    }
+  }
+
+  &__card-level {
+    margin-bottom: 1rem;
+  }
+
+  &__level-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+  }
+
+  &__level-label {
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: $black;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+
+    .dark & {
+      color: $white;
+    }
+
+    @include mq(sp) {
+      font-size: 0.75rem;
+    }
+  }
+
+  &__level-percentage {
+    font-size: 0.875rem;
+    font-weight: 900;
+    color: #6b7280;
+
+    .dark & {
+      color: #9ca3af;
+    }
+
+    @include mq(sp) {
+      font-size: 0.75rem;
+    }
+  }
+
+  &__progress-bar {
+    height: 0.75rem;
+    background: #e5e7eb;
+    border: 3px solid $black;
+    overflow: hidden;
+    position: relative;
+
+    .dark & {
+      background: #4b5563;
+      border-color: $white;
+    }
+
+    @include mq(sp) {
+      height: 0.625rem;
+      border-width: 2px;
+    }
+  }
+
+  &__progress-fill {
+    height: 100%;
+    background: #10b981;
+    transition: width 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+
+    &::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.3) 50%, transparent 100%);
+      animation: shimmer 2s ease infinite;
+    }
+  }
+
+  &__card-description {
+    font-size: 0.875rem;
+    line-height: 1.6;
+    color: #374151;
+    margin-bottom: 1rem;
+
+    .dark & {
+      color: #d1d5db;
+    }
+
+    @include mq(sp) {
+      font-size: 0.8rem;
+    }
+  }
+
+  &__card-category {
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  &__category-tag {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: $white;
+    background: #6b7280;
+    padding: 0.25rem 0.5rem;
+    border: 2px solid $black;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+
+    .dark & {
+      border-color: $white;
+    }
+
+    @include mq(sp) {
+      font-size: 0.625rem;
+    }
+  }
+
+  // ============================================================================
+  // Show More Button
+  // ============================================================================
+
+  &__show-more {
+    display: flex;
+    justify-content: center;
+    margin-top: 2rem;
+    margin-bottom: 1.5rem;
+  }
+
+  &__show-more-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem 2rem;
+    background: $white;
+    border: 4px solid $black;
+    box-shadow: 4px 4px 0px 0px $black;
+    font-weight: 800;
+    color: $black;
+    text-decoration: none;
+    transition: all 0.15s ease-out;
+    cursor: pointer;
+    font-size: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+
+    .dark & {
+      background: #1f2937;
+      color: $white;
+      border-color: $white;
+      box-shadow: 4px 4px 0px 0px $white;
+    }
+
+    &:hover:not(:disabled) {
+      transform: translate(-2px, -2px);
+      box-shadow: 6px 6px 0px 0px $black;
+
+      .dark & {
+        box-shadow: 6px 6px 0px 0px $white;
+      }
+    }
+
+    &:active:not(:disabled) {
+      transform: translate(0px, 0px);
+      box-shadow: 2px 2px 0px 0px $black;
+
+      .dark & {
+        box-shadow: 2px 2px 0px 0px $white;
+      }
+    }
+
+    &:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    &--loading {
+      .neo-skills__show-more-icon {
+        animation: spin 1s linear infinite;
+      }
+    }
+
+    @include mq(sp) {
+      padding: 0.875rem 1.5rem;
+      font-size: 0.875rem;
+    }
+  }
+
+  &__show-more-icon {
+    font-size: 1.25rem;
+    transition: transform 0.3s ease;
+
+    @include mq(sp) {
+      font-size: 1.125rem;
+    }
+  }
+
+  &__show-more-text {
+    font-weight: 800;
+  }
+
+  // ============================================================================
+  // Skills Summary
+  // ============================================================================
+
+  &__summary {
+    text-align: center;
+    margin-top: 1.5rem;
+    padding: 1rem;
+    background: rgba($black, 0.05);
+    border: 2px solid $black;
+
+    .dark & {
+      background: rgba($white, 0.05);
+      border-color: $white;
+    }
+
+    @include mq(sp) {
+      margin-top: 1rem;
+      padding: 0.75rem;
+    }
+  }
+
+  &__summary-text {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #374151;
+    margin: 0;
+
+    .dark & {
+      color: #d1d5db;
+    }
+
+    strong {
+      font-weight: 800;
+      color: $black;
+
+      .dark & {
+        color: $white;
+      }
+    }
+
+    @include mq(sp) {
+      font-size: 0.8rem;
+    }
+  }
+
+  // ============================================================================
+  // Empty State
+  // ============================================================================
+
+  &__empty {
+    text-align: center;
+    padding: 4rem 2rem;
+    color: #6b7280;
+
+    .dark & {
+      color: #9ca3af;
+    }
+  }
+
+  &__empty-icon {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+  }
+
+  &__empty-title {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: $black;
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+
+    .dark & {
+      color: $white;
+    }
+  }
+
+  &__empty-description {
+    font-size: 1rem;
+    color: #6b7280;
+
+    .dark & {
+      color: #9ca3af;
+    }
+  }
+
+  // ============================================================================
+  // Loading State
+  // ============================================================================
+
+  &--loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 400px;
+  }
+
+  &__skeleton {
+    width: 100%;
+    max-width: 1000px;
+  }
+
+  &__skeleton-header {
+    text-align: center;
+    margin-bottom: 3rem;
+  }
+
+  &__skeleton-title {
+    height: 3rem;
+    width: 300px;
+    background: linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%);
+    background-size: 200% 100%;
+    animation: shimmer 2s infinite;
+    border: 4px solid $black;
+    margin: 0 auto 2rem;
+
+    .dark & {
+      background: linear-gradient(90deg, #374151 25%, #4b5563 50%, #374151 75%);
+      border-color: $white;
+    }
+  }
+
+  &__skeleton-tabs {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  &__skeleton-tab {
+    height: 2.5rem;
+    width: 120px;
+    background: linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%);
+    background-size: 200% 100%;
+    animation: shimmer 2s infinite;
+    border: 3px solid $black;
+
+    .dark & {
+      background: linear-gradient(90deg, #374151 25%, #4b5563 50%, #374151 75%);
+      border-color: $white;
+    }
+  }
+
+  &__skeleton-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+
+    @include mq(sp) {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  &__skeleton-card {
+    height: 200px;
+    background: linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%);
+    background-size: 200% 100%;
+    animation: shimmer 2s infinite;
+    border: 4px solid $black;
+    box-shadow: 6px 6px 0px 0px $black;
+
+    .dark & {
+      background: linear-gradient(90deg, #374151 25%, #4b5563 50%, #374151 75%);
+      border-color: $white;
+      box-shadow: 6px 6px 0px 0px $white;
+    }
+  }
+}
+
+// ============================================================================
+// Animations
+// ============================================================================
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+// ============================================================================
+// Accessibility
+// ============================================================================
+
+@media (prefers-reduced-motion: reduce) {
+  .neo-skills__card {
+    animation: none;
+    opacity: 1;
+  }
+
+  .neo-skills__progress-fill {
+    transition: none;
+  }
+
+  .neo-skills__skeleton-title,
+  .neo-skills__skeleton-tab,
+  .neo-skills__skeleton-card {
+    animation: none;
+  }
+
+  .neo-skills__progress-fill::after {
+    animation: none;
+  }
+
+  .neo-skills__show-more-icon {
+    animation: none !important;
+  }
+}
+
+// ============================================================================
+// High Contrast Mode
+// ============================================================================
+
+@media (prefers-contrast: high) {
+  .neo-skills__card {
+    border-width: 6px;
+  }
+
+  .neo-skills__tab {
+    border-width: 4px;
+  }
+
+  .neo-skills__progress-bar {
+    border-width: 4px;
+  }
+}

@@ -1,0 +1,453 @@
+// ============================================================================
+// Blog List Styles
+// ============================================================================
+
+.blog-list {
+
+  // Grid Layout
+  &__grid {
+    display: grid;
+    gap: 1.5rem;
+    grid-template-columns: 1fr;
+
+    @media (min-width: 768px) {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 2rem;
+    }
+
+    @media (min-width: 1024px) {
+      grid-template-columns: repeat(3, 1fr);
+      gap: 2.5rem;
+    }
+  }
+
+  // Empty State
+  &__empty {
+    text-align: center;
+    padding: 3rem 1rem;
+
+    .neo-card {
+      max-width: 28rem;
+      margin: 0 auto;
+      background: #f9fafb;
+
+      .dark & {
+        background: #1f2937;
+      }
+    }
+
+    h3 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      color: #111827;
+
+      .dark & {
+        color: #f9fafb;
+      }
+    }
+
+    p {
+      color: #6b7280;
+
+      .dark & {
+        color: #9ca3af;
+      }
+    }
+  }
+
+  // View All Button
+  &__view-all {
+    text-align: center;
+    margin-top: 2rem;
+
+    .neo-button {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: #ffffff;
+      color: #000000;
+      transition: all 0.15s ease-out;
+
+      &:hover {
+        background: #f9fafb;
+      }
+
+      svg {
+        width: 1rem;
+        height: 1rem;
+        transition: transform 0.15s ease-out;
+      }
+
+      &:hover svg {
+        transform: translateX(2px);
+      }
+    }
+  }
+}
+
+// ============================================================================
+// Blog Card Styles
+// ============================================================================
+
+.blog-card {
+  display: block;
+  height: 100%;
+  transition: all 0.3s ease-out;
+
+  &:hover {
+    transform: translate(-4px, -4px);
+    box-shadow: 12px 12px 0px 0px rgba(0, 0, 0, 1);
+
+    .dark & {
+      box-shadow: 12px 12px 0px 0px rgba(255, 255, 255, 0.2);
+    }
+  }
+
+  // Card Container
+  &__container {
+    height: 100%;
+    overflow: hidden;
+    background: #ffffff;
+    border: 4px solid #000000;
+    box-shadow: 8px 8px 0px 0px rgba(0, 0, 0, 1);
+    transition: all 0.3s ease-out;
+
+    .dark & {
+      background: #1f2937;
+      border-color: #ffffff;
+      box-shadow: 8px 8px 0px 0px rgba(255, 255, 255, 0.1);
+    }
+  }
+
+  // Thumbnail
+  &__thumbnail {
+    position: relative;
+    height: 12rem;
+    overflow: hidden;
+
+    img {
+      object-fit: cover;
+      transition: transform 0.3s ease-out;
+    }
+
+    &:hover img {
+      transform: scale(1.05);
+    }
+  }
+
+  // Category Badge
+  &__category {
+    position: absolute;
+    top: 1rem;
+    left: 1rem;
+    background: #fbbf24;
+    color: #000000;
+    padding: 0.25rem 0.75rem;
+    font-size: 0.875rem;
+    font-weight: 700;
+    border: 2px solid #000000;
+    box-shadow: 2px 2px 0px 0px rgba(0, 0, 0, 1);
+    z-index: 10;
+  }
+
+  // Content
+  &__content {
+    padding: 1.5rem;
+  }
+
+  // Title
+  &__title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin-bottom: 0.75rem;
+    line-height: 1.4;
+    color: #111827;
+    transition: color 0.15s ease-out;
+
+    // Line clamp for 2 lines
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+
+    .dark & {
+      color: #f9fafb;
+    }
+
+    .blog-card:hover & {
+      color: #2563eb;
+
+      .dark & {
+        color: #60a5fa;
+      }
+    }
+  }
+
+  // Excerpt
+  &__excerpt {
+    color: #6b7280;
+    margin-bottom: 1rem;
+    font-size: 0.875rem;
+    line-height: 1.6;
+
+    // Line clamp for 3 lines
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+
+    .dark & {
+      color: #d1d5db;
+    }
+  }
+
+  // Meta Information
+  &__meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 0.875rem;
+    color: #6b7280;
+    margin-bottom: 1rem;
+
+    .dark & {
+      color: #9ca3af;
+    }
+
+    &-info {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    &-item {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+
+      svg {
+        width: 1rem;
+        height: 1rem;
+      }
+    }
+
+    &-arrow {
+      color: #2563eb;
+      transition: transform 0.15s ease-out;
+
+      .dark & {
+        color: #60a5fa;
+      }
+
+      .blog-card:hover & {
+        transform: translateX(4px);
+      }
+
+      svg {
+        width: 1rem;
+        height: 1rem;
+      }
+    }
+  }
+
+  // Tags
+  &__tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 1rem;
+
+    &-item {
+      background: #f3f4f6;
+      color: #374151;
+      padding: 0.25rem 0.5rem;
+      font-size: 0.75rem;
+      font-weight: 500;
+      border: 1px solid #d1d5db;
+
+      .dark & {
+        background: #374151;
+        color: #d1d5db;
+        border-color: #4b5563;
+      }
+    }
+
+    &-more {
+      color: #6b7280;
+      font-size: 0.75rem;
+
+      .dark & {
+        color: #9ca3af;
+      }
+    }
+  }
+}
+
+// ============================================================================
+// Responsive Adjustments
+// ============================================================================
+
+@media (max-width: 767px) {
+  .blog-card {
+    &__thumbnail {
+      height: 10rem;
+    }
+
+    &__content {
+      padding: 1rem;
+    }
+
+    &__title {
+      font-size: 1.125rem;
+    }
+
+    &__meta {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.5rem;
+
+      &-info {
+        gap: 0.75rem;
+      }
+    }
+  }
+}
+
+// ============================================================================
+// Animation Enhancements
+// ============================================================================
+
+.blog-card {
+
+  // Stagger animation for grid items
+  &:nth-child(1) {
+    animation-delay: 0ms;
+  }
+
+  &:nth-child(2) {
+    animation-delay: 100ms;
+  }
+
+  &:nth-child(3) {
+    animation-delay: 200ms;
+  }
+
+  &:nth-child(4) {
+    animation-delay: 300ms;
+  }
+
+  &:nth-child(5) {
+    animation-delay: 400ms;
+  }
+
+  &:nth-child(6) {
+    animation-delay: 500ms;
+  }
+
+  // Hover effects for interactive elements
+  &__category {
+    transition: all 0.15s ease-out;
+
+    &:hover {
+      transform: translate(-1px, -1px);
+      box-shadow: 3px 3px 0px 0px rgba(0, 0, 0, 1);
+    }
+  }
+
+  // Loading skeleton styles
+  &--loading {
+    .blog-card__thumbnail {
+      background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+      background-size: 200% 100%;
+      animation: loading 1.5s infinite;
+    }
+
+    .blog-card__title,
+    .blog-card__excerpt {
+      background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+      background-size: 200% 100%;
+      animation: loading 1.5s infinite;
+      border-radius: 4px;
+    }
+  }
+}
+
+@keyframes loading {
+  0% {
+    background-position: 200% 0;
+  }
+
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+// ============================================================================
+// Dark Mode Specific Adjustments
+// ============================================================================
+
+.dark {
+  .blog-card {
+    &__category {
+      background: #fbbf24;
+      color: #000000;
+      border-color: #000000;
+      box-shadow: 2px 2px 0px 0px rgba(0, 0, 0, 1);
+    }
+
+    &--loading {
+      .blog-card__thumbnail {
+        background: linear-gradient(90deg, #374151 25%, #4b5563 50%, #374151 75%);
+      }
+
+      .blog-card__title,
+      .blog-card__excerpt {
+        background: linear-gradient(90deg, #374151 25%, #4b5563 50%, #374151 75%);
+      }
+    }
+  }
+}
+
+// ============================================================================
+// Accessibility Enhancements
+// ============================================================================
+
+.blog-card {
+
+  // Focus styles
+  &:focus-visible {
+    outline: 2px solid #2563eb;
+    outline-offset: 2px;
+  }
+
+  // Reduced motion support
+  @media (prefers-reduced-motion: reduce) {
+
+    &,
+    &__thumbnail img,
+    &__title,
+    &__meta-arrow {
+      transition: none;
+    }
+
+    &:hover {
+      transform: none;
+    }
+
+    &__thumbnail:hover img {
+      transform: none;
+    }
+  }
+
+  // High contrast mode support
+  @media (prefers-contrast: high) {
+    &__container {
+      border-width: 3px;
+    }
+
+    &__category {
+      border-width: 3px;
+    }
+  }
+}

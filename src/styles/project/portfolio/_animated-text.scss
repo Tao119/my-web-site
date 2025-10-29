@@ -1,0 +1,213 @@
+// ============================================================================
+// Animated Text Styles
+// ============================================================================
+
+// Typewriter Text
+.typewriter-text {
+    position: relative;
+    display: inline-block;
+}
+
+.typewriter-cursor {
+    display: inline-block;
+    animation: blink 1s infinite;
+    color: currentColor;
+    margin-left: 2px;
+
+    &--hidden {
+        opacity: 0;
+        animation: none;
+    }
+}
+
+@keyframes blink {
+
+    0%,
+    50% {
+        opacity: 1;
+    }
+
+    51%,
+    100% {
+        opacity: 0;
+    }
+}
+
+// Animated Text Container
+.animated-text-container {
+    overflow: hidden;
+}
+
+// Base animated text styles
+.animated-text {
+    display: inline-block;
+    opacity: 0;
+    transform: translateY(30px);
+    transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+
+    &--visible {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    // Split text styles
+    &__word {
+        display: inline-block;
+        margin-right: 0.25em;
+    }
+
+    &__char {
+        display: inline-block;
+    }
+}
+
+// Animation variants
+.animated-text--fadeInUp {
+    opacity: 0;
+    transform: translateY(30px);
+
+    &.animated-text--visible {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animated-text--slideInLeft {
+    opacity: 0;
+    transform: translateX(-50px);
+
+    &.animated-text--visible {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.animated-text--slideInRight {
+    opacity: 0;
+    transform: translateX(50px);
+
+    &.animated-text--visible {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.animated-text--scaleIn {
+    opacity: 0;
+    transform: scale(0.8);
+
+    &.animated-text--visible {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.animated-text--rotateIn {
+    opacity: 0;
+    transform: rotate(-10deg) scale(0.9);
+
+    &.animated-text--visible {
+        opacity: 1;
+        transform: rotate(0deg) scale(1);
+    }
+}
+
+.animated-text--bounceIn {
+    opacity: 0;
+    transform: scale(0.3);
+    animation-timing-function: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+
+    &.animated-text--visible {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+// ============================================================================
+// Hero Section Text Animations
+// ============================================================================
+
+.hero-title-animated {
+    .animated-text__word {
+        display: inline-block;
+        margin-right: 0.2em;
+
+        &:last-child {
+            margin-right: 0;
+        }
+    }
+}
+
+.hero-subtitle-animated {
+    .animated-text__char {
+        display: inline-block;
+
+        &:nth-child(even) {
+            animation-delay: 0.1s;
+        }
+    }
+}
+
+// ============================================================================
+// Responsive Adjustments
+// ============================================================================
+
+@media (max-width: 639px) {
+    .animated-text {
+        &__word {
+            margin-right: 0.15em;
+        }
+    }
+
+    .typewriter-cursor {
+        margin-left: 1px;
+    }
+}
+
+// ============================================================================
+// Reduced Motion Support
+// ============================================================================
+
+@media (prefers-reduced-motion: reduce) {
+    .animated-text {
+        transition: none;
+        opacity: 1 !important;
+        transform: none !important;
+        animation: none !important;
+    }
+
+    .typewriter-cursor {
+        animation: none;
+        opacity: 1;
+    }
+
+    .animated-text--fadeInUp,
+    .animated-text--slideInLeft,
+    .animated-text--slideInRight,
+    .animated-text--scaleIn,
+    .animated-text--rotateIn,
+    .animated-text--bounceIn {
+        opacity: 1 !important;
+        transform: none !important;
+    }
+}
+
+// ============================================================================
+// High Contrast Mode
+// ============================================================================
+
+@media (prefers-contrast: high) {
+    .typewriter-cursor {
+        font-weight: bold;
+    }
+}
+
+// ============================================================================
+// Dark Mode Support
+// ============================================================================
+
+[data-theme="dark"] {
+    .typewriter-cursor {
+        color: inherit;
+    }
+}

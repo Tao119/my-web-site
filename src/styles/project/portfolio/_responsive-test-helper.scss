@@ -1,0 +1,507 @@
+@use "../../foundation/variable" as *;
+@use "../../foundation/mixin" as *;
+
+// レスポンシブテストヘルパーのスタイル
+.responsive-test-helper {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 9999;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+
+    &__overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(4px);
+    }
+
+    &__panel {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 90%;
+        max-width: 800px;
+        max-height: 90vh;
+        background: $white;
+        color: $text-dark;
+        border-radius: 12px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        overflow: hidden;
+        animation: panel-appear 0.3s ease;
+    }
+
+    &__header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 20px;
+        background: $accent-purple;
+        color: $white;
+    }
+
+    &__title {
+        margin: 0;
+        font-size: 18px;
+        font-weight: 600;
+    }
+
+    &__close {
+        background: none;
+        border: none;
+        color: $white;
+        font-size: 24px;
+        cursor: pointer;
+        padding: 8px;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        transition: background-color 0.2s ease;
+
+        &:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        &:focus {
+            outline: 2px solid $white;
+            outline-offset: 2px;
+        }
+    }
+
+    &__content {
+        padding: 20px;
+        max-height: calc(90vh - 80px);
+        overflow-y: auto;
+    }
+
+    &__current {
+        margin-bottom: 24px;
+        padding: 16px;
+        background: $gray-50;
+        border-radius: 8px;
+
+        h3 {
+            margin: 0 0 12px 0;
+            font-size: 16px;
+            color: $text-primary;
+        }
+    }
+
+    &__viewport-info {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        margin-bottom: 8px;
+    }
+
+    &__size {
+        font-size: 18px;
+        font-weight: 600;
+        color: $accent-blue;
+        font-family: monospace;
+    }
+
+    &__breakpoint {
+        font-size: 14px;
+        color: $text-secondary;
+        background: $gray-200;
+        padding: 4px 8px;
+        border-radius: 4px;
+    }
+
+    &__active-device {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-top: 8px;
+    }
+
+    &__device-icon {
+        font-size: 16px;
+    }
+
+    &__device-name {
+        font-size: 14px;
+        font-weight: 500;
+        color: $text-primary;
+    }
+
+    &__categories {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 24px;
+        flex-wrap: wrap;
+    }
+
+    &__category {
+        padding: 8px 16px;
+        background: $gray-200;
+        color: $text-secondary;
+        border: none;
+        border-radius: 20px;
+        font-size: 14px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+
+        &:hover {
+            background: $gray-300;
+            color: $text-primary;
+        }
+
+        &--active {
+            background: $accent-purple;
+            color: $white;
+        }
+
+        &:focus {
+            outline: 2px solid $accent-purple;
+            outline-offset: 2px;
+        }
+    }
+
+    &__devices {
+        margin-bottom: 24px;
+
+        h3 {
+            margin: 0 0 16px 0;
+            font-size: 16px;
+            color: $text-primary;
+        }
+    }
+
+    &__device-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 12px;
+    }
+
+    &__device {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px;
+        background: $white;
+        border: 2px solid $gray-200;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        text-align: left;
+
+        &:hover {
+            border-color: $accent-purple;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba($accent-purple, 0.2);
+        }
+
+        &--active {
+            border-color: $accent-purple;
+            background: rgba($accent-purple, 0.1);
+        }
+
+        &:focus {
+            outline: 2px solid $accent-purple;
+            outline-offset: 2px;
+        }
+    }
+
+    &__device-info {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+    }
+
+    &__device-size {
+        font-size: 12px;
+        color: $text-secondary;
+        font-family: monospace;
+    }
+
+    &__custom {
+        margin-bottom: 24px;
+
+        h3 {
+            margin: 0 0 16px 0;
+            font-size: 16px;
+            color: $text-primary;
+        }
+    }
+
+    &__custom-inputs {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+
+    &__input {
+        width: 100px;
+        padding: 8px 12px;
+        border: 2px solid $gray-200;
+        border-radius: 6px;
+        font-size: 14px;
+        transition: border-color 0.2s ease;
+
+        &:focus {
+            outline: none;
+            border-color: $accent-purple;
+        }
+    }
+
+    &__apply-btn {
+        padding: 8px 16px;
+        background: $accent-purple;
+        color: $white;
+        border: none;
+        border-radius: 6px;
+        font-size: 14px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+
+        &:hover:not(:disabled) {
+            background: $accent-purple-darker;
+        }
+
+        &:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        &:focus {
+            outline: 2px solid $accent-purple;
+            outline-offset: 2px;
+        }
+    }
+
+    &__tests {
+        margin-bottom: 24px;
+
+        h3 {
+            margin: 0 0 16px 0;
+            font-size: 16px;
+            color: $text-primary;
+        }
+    }
+
+    &__test-buttons {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+
+    &__test-btn {
+        padding: 10px 16px;
+        background: $success-color;
+        color: $white;
+        border: none;
+        border-radius: 6px;
+        font-size: 14px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+
+        &:hover {
+            background: $success-color-darker;
+            transform: translateY(-1px);
+        }
+
+        &:focus {
+            outline: 2px solid $success-color;
+            outline-offset: 2px;
+        }
+    }
+
+    &__breakpoints {
+        h3 {
+            margin: 0 0 16px 0;
+            font-size: 16px;
+            color: $text-primary;
+        }
+    }
+
+    &__breakpoint-list {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 8px;
+    }
+
+    &__breakpoint-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px 12px;
+        background: $gray-50;
+        border-radius: 6px;
+        font-size: 14px;
+    }
+
+    &__bp-name {
+        font-weight: 600;
+        color: $accent-blue;
+        font-family: monospace;
+    }
+
+    &__bp-range {
+        color: $text-secondary;
+        font-family: monospace;
+        font-size: 12px;
+    }
+}
+
+// タッチターゲットテスト用のスタイル
+.touch-target-small {
+    outline: 3px solid $error-color !important;
+    outline-offset: 2px !important;
+    animation: touch-target-pulse 1s ease-in-out infinite alternate;
+}
+
+@keyframes touch-target-pulse {
+    from {
+        outline-color: $error-color;
+    }
+
+    to {
+        outline-color: rgba($error-color, 0.5);
+    }
+}
+
+// グリッドオーバーレイ
+.responsive-grid-overlay {
+    position: relative;
+
+    &::before {
+        content: '';
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-image:
+            linear-gradient(to right, rgba($accent-blue, 0.1) 1px, transparent 1px),
+            linear-gradient(to bottom, rgba($accent-blue, 0.1) 1px, transparent 1px);
+        background-size: 20px 20px;
+        pointer-events: none;
+        z-index: 9998;
+    }
+}
+
+// アニメーション
+@keyframes panel-appear {
+    from {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.9);
+    }
+
+    to {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+    }
+}
+
+// ダークモード対応
+.admin-dark-theme {
+    .responsive-test-helper {
+        &__panel {
+            background: $dark-surface;
+            color: $white;
+        }
+
+        &__current,
+        &__breakpoint-item {
+            background: rgba($white, 0.05);
+        }
+
+        &__category {
+            background: rgba($white, 0.1);
+            color: rgba($white, 0.7);
+
+            &:hover {
+                background: rgba($white, 0.2);
+                color: $white;
+            }
+        }
+
+        &__device {
+            background: rgba($white, 0.05);
+            border-color: rgba($white, 0.2);
+
+            &:hover {
+                border-color: $accent-purple-lighter;
+            }
+
+            &--active {
+                background: rgba($accent-purple-lighter, 0.2);
+                border-color: $accent-purple-lighter;
+            }
+        }
+
+        &__input {
+            background: rgba($white, 0.05);
+            border-color: rgba($white, 0.2);
+            color: $white;
+
+            &:focus {
+                border-color: $accent-purple-lighter;
+            }
+        }
+
+        &__breakpoint {
+            background: rgba($white, 0.1);
+            color: rgba($white, 0.7);
+        }
+    }
+}
+
+// レスポンシブ対応
+@include mq(sp) {
+    .responsive-test-helper {
+        &__panel {
+            width: 95%;
+            max-height: 95vh;
+        }
+
+        &__header {
+            padding: 16px;
+        }
+
+        &__title {
+            font-size: 16px;
+        }
+
+        &__content {
+            padding: 16px;
+        }
+
+        &__device-grid {
+            grid-template-columns: 1fr;
+        }
+
+        &__custom-inputs {
+            flex-direction: column;
+            align-items: stretch;
+
+            span {
+                display: none;
+            }
+        }
+
+        &__input {
+            width: 100%;
+        }
+
+        &__test-buttons {
+            flex-direction: column;
+        }
+
+        &__breakpoint-list {
+            grid-template-columns: 1fr;
+        }
+    }
+}
