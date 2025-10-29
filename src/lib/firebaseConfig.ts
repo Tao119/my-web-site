@@ -16,12 +16,12 @@ const getEnvVar = (name: string): string => {
 export const getFirebaseConfig = (): FirebaseOptions => {
     // 直接環境変数を読み込み
     const config = {
-        apiKey: getEnvVar('NEXT_PUBLIC_FIREBASE_API_KEY') || 'AIzaSyDTkHdFqtY3CDygr6A7KmuNZ0uVMK9cr2U',
-        authDomain: getEnvVar('NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN') || 'ito-game.firebaseapp.com',
-        projectId: getEnvVar('NEXT_PUBLIC_FIREBASE_PROJECT_ID') || 'ito-game',
-        storageBucket: getEnvVar('NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET') || 'ito-game.appspot.com',
-        messagingSenderId: getEnvVar('NEXT_PUBLIC_FIREBASE_MESSAGE_SENDER_ID') || '771842800297',
-        appId: getEnvVar('NEXT_PUBLIC_FIREBASE_APP_ID') || '1:771842800297:web:4b9b032ce5a2a10c9e87b8',
+        apiKey: getEnvVar('NEXT_PUBLIC_FIREBASE_API_KEY'),
+        authDomain: getEnvVar('NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN'),
+        projectId: getEnvVar('NEXT_PUBLIC_FIREBASE_PROJECT_ID'),
+        storageBucket: getEnvVar('NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET'),
+        messagingSenderId: getEnvVar('NEXT_PUBLIC_FIREBASE_MESSAGE_SENDER_ID'),
+        appId: getEnvVar('NEXT_PUBLIC_FIREBASE_APP_ID'),
     };
 
     // ログ出力を無効化

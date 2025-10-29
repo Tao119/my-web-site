@@ -39,17 +39,5 @@ export const validateFirebaseEnvVars = () => {
 export const getFirebaseConfigWithFallback = () => {
     const envVars = getFirebaseEnvVars();
 
-    // 環境変数が設定されていない場合のフォールバック（ログ出力なし）
-    if (!envVars.apiKey && process.env.NODE_ENV === 'development') {
-        return {
-            apiKey: 'AIzaSyDTkHdFqtY3CDygr6A7KmuNZ0uVMK9cr2U',
-            authDomain: 'ito-game.firebaseapp.com',
-            projectId: 'ito-game',
-            storageBucket: 'ito-game.appspot.com',
-            messagingSenderId: '771842800297',
-            appId: '1:771842800297:web:4b9b032ce5a2a10c9e87b8',
-        };
-    }
-
     return envVars;
 };
