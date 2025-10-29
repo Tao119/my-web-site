@@ -7,6 +7,7 @@
 export interface Profile {
     id: string;
     name: string;
+    nameEn?: string;
     title: string;
     bio: string;
     email: string;
@@ -39,6 +40,7 @@ export interface Profile {
         description: string;
         subjects?: string[];
         order?: number;
+        field?: string;
     }[];
     createdAt: Date;
     updatedAt: Date;
@@ -68,14 +70,15 @@ export interface SocialLink {
 }
 
 export interface Education {
-    id: string;
+    id?: string;
     institution: string;
     degree: string;
-    field: string;
-    startDate: Date;
-    endDate?: Date;
+    field?: string;
+    startDate: string | Date;
+    endDate?: string | Date;
     description?: string;
-    order: number;
+    subjects?: string[];
+    order?: number;
 }
 
 export interface Experience {

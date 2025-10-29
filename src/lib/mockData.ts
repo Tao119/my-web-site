@@ -18,21 +18,21 @@ export const mockProfile: Profile = {
         {
             company: 'サンプル株式会社',
             position: 'シニアフロントエンド開発者',
-            period: '2022年4月 - 現在',
+            startDate: '2022年4月',
             description: 'React/Next.jsを使用したWebアプリケーションの設計・開発・運用を担当。チームリードとして5名のメンバーをマネジメント。'
         },
         {
             company: 'テック企業A',
             position: 'フロントエンド開発者',
-            period: '2020年4月 - 2022年3月',
+            startDate: '2022年4月',
             description: 'Vue.js/Nuxt.jsを使用したSPAの開発。UI/UXの改善とパフォーマンス最適化を実施。'
         }
     ],
     education: [
         {
-            school: 'サンプル大学',
+            institution: 'サンプル大学',
             degree: '情報工学科 学士',
-            period: '2016年4月 - 2020年3月',
+            startDate: '2016年4月',
             description: 'コンピュータサイエンスの基礎を学習。卒業研究では機械学習を用いた画像認識システムを開発。'
         }
     ],

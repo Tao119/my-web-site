@@ -147,7 +147,7 @@ const DetailedProfile = ({ className = "" }: DetailedProfileProps) => {
                                                     <div className="neo-timeline-details">
                                                         <p className="neo-timeline-degree">
                                                             <strong>{edu.degree}</strong>
-                                                            {edu.field && <span> - {edu.field}</span>}
+                                                            {(edu as any).field && <span> - {(edu as any).field}</span>}
                                                         </p>
                                                         {edu.description && (
                                                             <p className="neo-timeline-description">{edu.description}</p>
