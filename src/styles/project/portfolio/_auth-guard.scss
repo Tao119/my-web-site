@@ -1,0 +1,31 @@
+.c-auth-guard {
+    &__loading {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 50vh;
+        font-size: 1.125rem;
+        color: var(--color-text-secondary);
+
+        &::after {
+            content: '';
+            width: 20px;
+            height: 20px;
+            margin-left: 10px;
+            border: 2px solid var(--color-primary);
+            border-top: 2px solid transparent;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+    }
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}

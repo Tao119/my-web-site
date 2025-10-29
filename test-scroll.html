@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Scroll Test</title>
+    <style>
+      .header {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 70px;
+        background: rgba(255, 255, 255, 0.9);
+        border-bottom: 4px solid #000;
+        z-index: 1000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .header.scrolled {
+        height: 60px;
+      }
+
+      .section {
+        height: 100vh;
+        padding: 100px 20px 20px;
+        border-bottom: 2px solid #ccc;
+      }
+
+      .section:nth-child(odd) {
+        background: #f0f0f0;
+      }
+
+      .button {
+        padding: 10px 20px;
+        margin: 10px;
+        background: #1e3a8a;
+        color: white;
+        border: none;
+        cursor: pointer;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="header" id="header">
+      <button class="button" onclick="scrollToSection('works')">
+        View My Work
+      </button>
+      <button class="button" onclick="scrollToSection('contact')">
+        Get In Touch
+      </button>
+    </div>
+
+    <div class="section" id="hero">
+      <h1>Hero Section</h1>
+      <p>This is the hero section</p>
+    </div>
+
+    <div class="section" id="profile">
+      <h1>Profile Section</h1>
+      <p>This is the profile section</p>
+    </div>
+
+    <div class="section" id="skills">
+      <h1>Skills Section</h1>
+      <p>This is the skills section</p>
+    </div>
+
+    <div class="section" id="works">
+      <h1>Works Section</h1>
+      <p>This is the works section</p>
+    </div>
+
+    <div class="section" id="blog">
+      <h1>Blog Section</h1>
+      <p>This is the blog section</p>
+    </div>
+
+    <div class="section" id="contact">
+      <h1>Contact Section</h1>
+      <p>This is the contact section</p>
+    </div>
+
+    <script>
+      // Simulate header scroll behavior
+      window.addEventListener("scroll", () => {
+        const header = document.getElementById("header");
+        if (window.scrollY > 50) {
+          header.classList.add("scrolled");
+        } else {
+          header.classList.remove("scrolled");
+        }
+      });
+
+      function getHeaderHeight() {
+        const header = document.getElementById("header");
+        const isScrolled = header.classList.contains("scrolled");
+        return isScrolled ? 60 : 70;
+      }
+
+      function scrollToSection(targetId) {
+        const target = document.getElementById(targetId);
+        if (!target) {
+          console.warn(`Element with ID "${targetId}" not found`);
+          return;
+        }
+
+        const headerHeight = getHeaderHeight();
+        const additionalOffset = 20;
+        const totalOffset = headerHeight + additionalOffset;
+        const targetPosition = target.offsetTop - totalOffset;
+
+        window.scrollTo({
+          top: Math.max(0, targetPosition),
+          behavior: "smooth",
+        });
+
+        console.log(`Scrolling to ${targetId}:`, {
+          targetOffset: target.offsetTop,
+          headerHeight,
+          additionalOffset,
+          totalOffset,
+          targetPosition,
+        });
+      }
+    </script>
+  </body>
+</html>

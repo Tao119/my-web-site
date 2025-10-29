@@ -1,0 +1,50 @@
+@use "../../foundation/variable" as *;
+@use "../../foundation/mixin" as *;
+
+// ============================================================================
+// Admin Layout Styles
+// ============================================================================
+
+.admin-layout {
+    min-height: 100vh;
+    background: linear-gradient(135deg, $navy-dark 0%, $navy-dark-darker 100%);
+
+    &--light {
+        background: linear-gradient(135deg, $white 0%, $gray-100 100%);
+    }
+
+    &__main {
+        padding-top: 80px; // ヘッダーの高さ分のパディング
+
+        @include mq(sp) {
+            padding-top: 70px;
+        }
+    }
+
+    // ヘッダーナビゲーションが管理画面でも表示されるように調整
+    .neo-nav {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 1000;
+        background: rgba($navy-dark, 0.95);
+        backdrop-filter: blur(10px);
+
+        &--light {
+            background: rgba($white, 0.95);
+        }
+    }
+}
+
+// 管理画面特有のスタイル調整
+.admin-container {
+    .neo-nav {
+        // 管理画面では少し透明度を下げる
+        background: rgba($navy-dark, 0.98);
+
+        &--light {
+            background: rgba($white, 0.98);
+        }
+    }
+}

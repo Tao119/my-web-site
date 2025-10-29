@@ -1,0 +1,424 @@
+@use "../../foundation/variable" as *;
+@use "../../foundation/mixin" as *;
+
+// アクセシビリティテスターのスタイル
+.accessibility-tester {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 9999;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+
+    &__overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(4px);
+    }
+
+    &__panel {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 90%;
+        max-width: 600px;
+        max-height: 80vh;
+        background: $white;
+        color: $text-dark;
+        border-radius: 12px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        overflow: hidden;
+        animation: panel-appear 0.3s ease;
+    }
+
+    &__header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 20px;
+        background: $accent-blue;
+        color: $white;
+    }
+
+    &__title {
+        margin: 0;
+        font-size: 18px;
+        font-weight: 600;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+    }
+
+    &__close {
+        background: none;
+        border: none;
+        color: $white;
+        font-size: 24px;
+        cursor: pointer;
+        padding: 8px;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        transition: background-color 0.2s ease;
+
+        &:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        &:focus {
+            outline: 2px solid $white;
+            outline-offset: 2px;
+        }
+    }
+
+    &__tabs {
+        display: flex;
+        background: $gray-100;
+        border-bottom: 1px solid $gray-200;
+    }
+
+    &__tab {
+        flex: 1;
+        padding: 12px 16px;
+        background: none;
+        border: none;
+        color: $text-secondary;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        border-bottom: 3px solid transparent;
+
+        &:hover {
+            background: $gray-200;
+            color: $text-primary;
+        }
+
+        &--active {
+            background: $white;
+            color: $accent-blue;
+            border-bottom-color: $accent-blue;
+        }
+
+        &:focus {
+            outline: 2px solid $accent-blue;
+            outline-offset: -2px;
+        }
+    }
+
+    &__content {
+        padding: 20px;
+        max-height: 400px;
+        overflow-y: auto;
+    }
+
+    &__actions {
+        margin-bottom: 20px;
+    }
+
+    &__scan-button {
+        padding: 10px 20px;
+        background: $accent-blue;
+        color: $white;
+        border: none;
+        border-radius: 6px;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s ease;
+
+        &:hover:not(:disabled) {
+            background: $accent-blue-darker;
+            transform: translateY(-1px);
+        }
+
+        &:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        &:focus {
+            outline: 2px solid $accent-blue;
+            outline-offset: 2px;
+        }
+    }
+
+    &__no-issues {
+        text-align: center;
+        padding: 40px 20px;
+        color: $success-color;
+    }
+
+    &__success-icon {
+        font-size: 48px;
+        margin-bottom: 16px;
+    }
+
+    &__issues-list {
+        margin-bottom: 16px;
+    }
+
+    &__issue {
+        padding: 16px;
+        border-radius: 8px;
+        border-left: 4px solid;
+        background: $gray-50;
+        margin-bottom: 12px;
+
+        &:last-child {
+            margin-bottom: 0;
+        }
+    }
+
+    &__issue-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 8px;
+    }
+
+    &__issue-severity {
+        font-size: 16px;
+    }
+
+    &__issue-type {
+        font-size: 12px;
+        font-weight: 600;
+        padding: 4px 8px;
+        border-radius: 4px;
+        background: $accent-blue;
+        color: $white;
+    }
+
+    &__issue-element {
+        font-size: 12px;
+        color: $text-secondary;
+        font-family: monospace;
+        background: $gray-200;
+        padding: 2px 6px;
+        border-radius: 3px;
+    }
+
+    &__issue-message {
+        font-size: 14px;
+        margin-bottom: 8px;
+        line-height: 1.5;
+        color: $text-primary;
+    }
+
+    &__issue-suggestion {
+        font-size: 13px;
+        color: $text-secondary;
+        line-height: 1.4;
+        font-style: italic;
+    }
+
+    &__contrast {
+        h3 {
+            margin-bottom: 16px;
+            color: $text-primary;
+        }
+
+        ul {
+            list-style: none;
+            padding: 0;
+
+            li {
+                padding: 8px 0;
+                border-bottom: 1px solid $gray-200;
+
+                &:last-child {
+                    border-bottom: none;
+                }
+            }
+        }
+    }
+
+    &__contrast-info {
+        background: $gray-50;
+        padding: 16px;
+        border-radius: 8px;
+        margin-top: 16px;
+    }
+
+    &__keyboard {
+        h3 {
+            margin-bottom: 16px;
+            color: $text-primary;
+        }
+    }
+
+    &__keyboard-controls {
+        margin-bottom: 20px;
+    }
+
+    &__keyboard-button {
+        padding: 10px 20px;
+        background: $success-color;
+        color: $white;
+        border: none;
+        border-radius: 6px;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s ease;
+
+        &:hover {
+            background: $success-color-darker;
+            transform: translateY(-1px);
+        }
+
+        &:focus {
+            outline: 2px solid $success-color;
+            outline-offset: 2px;
+        }
+    }
+
+    &__keyboard-info {
+        background: $gray-50;
+        padding: 16px;
+        border-radius: 8px;
+
+        ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+
+            li {
+                padding: 6px 0;
+                display: flex;
+                justify-content: space-between;
+                border-bottom: 1px solid $gray-200;
+
+                &:last-child {
+                    border-bottom: none;
+                }
+
+                &::before {
+                    content: '⌨️';
+                    margin-right: 8px;
+                }
+            }
+        }
+    }
+}
+
+// キーボードナビゲーションテスト用のハイライト
+.a11y-highlight {
+    outline: 3px solid $accent-blue !important;
+    outline-offset: 2px !important;
+    box-shadow: 0 0 0 6px rgba($accent-blue, 0.3) !important;
+    animation: a11y-pulse 1s ease-in-out infinite alternate;
+}
+
+@keyframes a11y-pulse {
+    from {
+        box-shadow: 0 0 0 6px rgba($accent-blue, 0.3);
+    }
+
+    to {
+        box-shadow: 0 0 0 6px rgba($accent-blue, 0.6);
+    }
+}
+
+// アニメーション
+@keyframes panel-appear {
+    from {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.9);
+    }
+
+    to {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+    }
+}
+
+// ダークモード対応
+.admin-dark-theme {
+    .accessibility-tester {
+        &__panel {
+            background: $dark-surface;
+            color: $white;
+        }
+
+        &__tabs {
+            background: rgba($white, 0.1);
+            border-bottom-color: rgba($white, 0.2);
+        }
+
+        &__tab {
+            color: rgba($white, 0.7);
+
+            &:hover {
+                background: rgba($white, 0.1);
+                color: $white;
+            }
+
+            &--active {
+                background: rgba($white, 0.2);
+                color: $accent-blue-lighter;
+                border-bottom-color: $accent-blue-lighter;
+            }
+        }
+
+        &__issue {
+            background: rgba($white, 0.05);
+        }
+
+        &__contrast-info,
+        &__keyboard-info {
+            background: rgba($white, 0.05);
+        }
+
+        &__issue-element {
+            background: rgba($white, 0.1);
+            color: rgba($white, 0.7);
+        }
+    }
+}
+
+// レスポンシブ対応
+@include mq(sp) {
+    .accessibility-tester {
+        &__panel {
+            width: 95%;
+            max-height: 90vh;
+        }
+
+        &__header {
+            padding: 16px;
+        }
+
+        &__title {
+            font-size: 16px;
+        }
+
+        &__content {
+            padding: 16px;
+            max-height: 300px;
+        }
+
+        &__tabs {
+            flex-direction: column;
+        }
+
+        &__tab {
+            text-align: left;
+            border-bottom: 1px solid $gray-200;
+            border-right: none;
+
+            &--active {
+                border-bottom-color: $gray-200;
+                border-left: 3px solid $accent-blue;
+            }
+        }
+    }
+}

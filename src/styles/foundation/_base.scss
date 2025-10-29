@@ -2,27 +2,40 @@
 
 html {
     font-size: 62.5%;
+    scroll-behavior: smooth;
 }
 
 body {
     background-color: $white;
     color: $black;
-
     font-family: Avenir, Helvetica;
-    display: flex;
-    place-items: center;
     box-sizing: border-box;
-    text-align: center;
-    justify-content: center;
-    align-items: center;
-
     min-width: 400px;
     min-height: 100vh;
-    width: 100vw;
-    height: 100vh;
     cursor: default;
+    margin: 0;
+    padding: 0;
 
-    overflow: hidden;
+    // Portfolio specific styles
+    &.portfolio-page {
+        display: block;
+        text-align: initial;
+        width: 100%;
+        height: auto;
+        overflow: visible;
+    }
+
+    // Default styles for other pages
+    &:not(.portfolio-page) {
+        display: flex;
+        place-items: center;
+        text-align: center;
+        justify-content: center;
+        align-items: center;
+        width: 100vw;
+        height: 100vh;
+        overflow: hidden;
+    }
 }
 
 #root {

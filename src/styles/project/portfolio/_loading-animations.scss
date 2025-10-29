@@ -1,0 +1,591 @@
+@use "../../foundation/variable" as *;
+@use "../../foundation/mixin" as *;
+
+// Loading Spinner
+.loading-spinner {
+    display: inline-block;
+    position: relative;
+
+    &__circle {
+        border: 2px solid transparent;
+        border-top: 2px solid currentColor;
+        border-radius: 50%;
+        width: 100%;
+        height: 100%;
+        animation: spin 1s linear infinite;
+    }
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+// Loading Dots
+.loading-dots {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+
+    &__dot {
+        border-radius: 50%;
+        animation: pulse-dot 1.4s ease-in-out infinite both;
+
+        &:nth-child(1) {
+            animation-delay: -0.32s;
+        }
+
+        &:nth-child(2) {
+            animation-delay: -0.16s;
+        }
+
+        &:nth-child(3) {
+            animation-delay: 0s;
+        }
+    }
+
+    // Sizes
+    &--small &__dot {
+        width: 0.25rem;
+        height: 0.25rem;
+    }
+
+    &--medium &__dot {
+        width: 0.5rem;
+        height: 0.5rem;
+    }
+
+    &--large &__dot {
+        width: 0.75rem;
+        height: 0.75rem;
+    }
+
+    // Colors
+    &--primary &__dot {
+        background-color: $accent-blue;
+    }
+
+    &--accent &__dot {
+        background-color: $accent-purple;
+    }
+
+    &--white &__dot {
+        background-color: white;
+    }
+
+    &--dark &__dot {
+        background-color: $navy-dark;
+    }
+}
+
+@keyframes pulse-dot {
+
+    0%,
+    80%,
+    100% {
+        transform: scale(0);
+        opacity: 0.5;
+    }
+
+    40% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+// Loading Pulse
+.loading-pulse {
+    border-radius: 50%;
+    animation: pulse-scale 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse-scale {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.5;
+        transform: scale(1.05);
+    }
+}
+
+// Page Loading
+.page-loading {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, $navy-dark 0%, #0a1142 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+
+    &__content {
+        text-align: center;
+        color: $accent-light;
+    }
+
+    &__logo {
+        margin-bottom: 2rem;
+        animation: float 3s ease-in-out infinite;
+    }
+
+    &__logo-icon {
+        font-size: 4rem;
+        margin-bottom: 0.5rem;
+        animation: rotate-slow 8s linear infinite;
+    }
+
+    &__logo-text {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: $accent-blue;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+    }
+
+    &__message {
+        margin-top: 1.5rem;
+        font-size: 1.1rem;
+        opacity: 0.8;
+        animation: fade-in-out 2s ease-in-out infinite;
+    }
+}
+
+@keyframes float {
+
+    0%,
+    100% {
+        transform: translateY(0px);
+    }
+
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+@keyframes rotate-slow {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes fade-in-out {
+
+    0%,
+    100% {
+        opacity: 0.8;
+    }
+
+    50% {
+        opacity: 0.4;
+    }
+}
+
+// Skeleton Loading
+.skeleton {
+    background: linear-gradient(90deg,
+            rgba($accent-blue, 0.1) 25%,
+            rgba($accent-blue, 0.2) 50%,
+            rgba($accent-blue, 0.1) 75%);
+    background-size: 200% 100%;
+    animation: skeleton-loading 1.5s ease-in-out infinite;
+    border-radius: 4px;
+
+    &--text {
+        border-radius: 4px;
+    }
+
+    &--rectangular {
+        border-radius: 8px;
+    }
+
+    &--circular {
+        border-radius: 50%;
+    }
+}
+
+@keyframes skeleton-loading {
+    0% {
+        background-position: 200% 0;
+    }
+
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+// Skeleton Card
+.skeleton-card {
+    display: flex;
+    gap: 1rem;
+    padding: 1rem;
+    background: rgba($accent-blue, 0.05);
+    border-radius: 12px;
+    border: 1px solid rgba($accent-blue, 0.1);
+
+    &__avatar {
+        flex-shrink: 0;
+    }
+
+    &__content {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    &__title {
+        width: 70%;
+    }
+
+    &__line {
+        &:not(:last-child) {
+            margin-bottom: 0.5rem;
+        }
+    }
+}
+
+// Loading Overlay
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 9998;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    &__backdrop {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba($navy-dark, 0.8);
+        backdrop-filter: blur(4px);
+    }
+
+    &__content {
+        position: relative;
+        text-align: center;
+        color: white;
+        z-index: 1;
+    }
+
+    &__message {
+        margin-top: 1rem;
+        font-size: 1.1rem;
+        opacity: 0.9;
+    }
+}
+
+// Micro-interactions
+.micro-interaction {
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+
+    // Hover effects
+    &--hover-lift {
+        &:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+    }
+
+    &--hover-scale {
+        &:hover {
+            transform: scale(1.05);
+        }
+    }
+
+    &--hover-glow {
+        &:hover {
+            box-shadow: 0 0 20px rgba($accent-blue, 0.3);
+        }
+    }
+
+    // Click effects
+    &--click-shrink {
+        &:active {
+            transform: scale(0.95);
+        }
+    }
+
+    &--click-bounce {
+        &:active {
+            animation: click-bounce 0.3s ease;
+        }
+    }
+}
+
+@keyframes click-bounce {
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(0.95);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+// Button loading states
+.button-loading {
+    position: relative;
+    transition: all 0.2s ease;
+
+    &--active {
+        pointer-events: none;
+        opacity: 0.8;
+    }
+
+    &__spinner {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 2;
+    }
+
+    &__text {
+        transition: opacity 0.2s ease;
+
+        &--hidden {
+            opacity: 0;
+        }
+    }
+}
+
+// セクションローディング
+.section-loading {
+    padding: 2rem;
+    min-height: 300px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+// プログレスローディング
+.progress-loading {
+    width: 100%;
+
+    &__message {
+        margin-bottom: 1rem;
+        text-align: center;
+        color: $accent-light;
+        font-size: 1rem;
+    }
+
+    &__bar {
+        width: 100%;
+        height: 8px;
+        background: rgba($accent-blue, 0.2);
+        border-radius: 4px;
+        overflow: hidden;
+        position: relative;
+    }
+
+    &__fill {
+        height: 100%;
+        background: linear-gradient(90deg, $accent-blue, #7bc5f7);
+        border-radius: 4px;
+        transition: width 0.3s ease;
+        position: relative;
+
+        &::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg,
+                    transparent,
+                    rgba(255, 255, 255, 0.3),
+                    transparent);
+            animation: progress-shine 2s ease-in-out infinite;
+        }
+    }
+
+    &__percentage {
+        margin-top: 0.5rem;
+        text-align: center;
+        color: $accent-blue;
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+}
+
+// カードローディング
+.card-loading {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+
+    @include mq(sp) {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    &__item {
+        background: rgba($accent-blue, 0.05);
+        border-radius: 12px;
+        overflow: hidden;
+        border: 1px solid rgba($accent-blue, 0.1);
+    }
+
+    &__simple {
+        display: flex;
+        flex-direction: column;
+    }
+
+    &__content {
+        padding: 1rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+}
+
+// 遅延読み込みコンテナ
+.lazy-loading-container {
+    min-height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+// Form field focus effects
+.form-field-enhanced {
+    position: relative;
+
+    &__input {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+        &:focus {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba($accent-blue, 0.15);
+        }
+    }
+
+    &__label {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+        &--floating {
+            position: absolute;
+            top: 50%;
+            left: 1rem;
+            transform: translateY(-50%);
+            pointer-events: none;
+            color: rgba($accent-light, 0.6);
+
+            &.active {
+                top: 0;
+                left: 0.75rem;
+                transform: translateY(-50%) scale(0.85);
+                color: $accent-blue;
+                background: $navy-dark;
+                padding: 0 0.5rem;
+            }
+        }
+    }
+}
+
+// Progress indicators
+.progress-indicator {
+    &--linear {
+        width: 100%;
+        height: 4px;
+        background: rgba($accent-blue, 0.2);
+        border-radius: 2px;
+        overflow: hidden;
+
+        &::after {
+            content: '';
+            display: block;
+            width: 30%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, $accent-blue, transparent);
+            animation: progress-slide 1.5s ease-in-out infinite;
+        }
+    }
+
+    &--circular {
+        width: 40px;
+        height: 40px;
+        border: 3px solid rgba($accent-blue, 0.2);
+        border-top: 3px solid $accent-blue;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+}
+
+@keyframes progress-slide {
+    0% {
+        transform: translateX(-100%);
+    }
+
+    100% {
+        transform: translateX(400%);
+    }
+}
+
+// Responsive adjustments
+@include mq(sp) {
+    .page-loading {
+        &__logo-icon {
+            font-size: 3rem;
+        }
+
+        &__logo-text {
+            font-size: 1.25rem;
+        }
+
+        &__message {
+            font-size: 1rem;
+        }
+    }
+
+    .skeleton-card {
+        flex-direction: column;
+        text-align: center;
+
+        &__avatar {
+            align-self: center;
+        }
+    }
+}
+
+// Dark mode adjustments
+.admin-dark-theme {
+    .skeleton {
+        background: linear-gradient(90deg,
+                rgba(white, 0.05) 25%,
+                rgba(white, 0.1) 50%,
+                rgba(white, 0.05) 75%);
+    }
+
+    .skeleton-card {
+        background: rgba(white, 0.05);
+        border-color: rgba(white, 0.1);
+    }
+}

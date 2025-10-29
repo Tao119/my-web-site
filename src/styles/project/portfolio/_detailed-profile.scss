@@ -1,0 +1,606 @@
+@use "../../foundation/variable" as *;
+@use "../../foundation/mixin" as *;
+
+// ============================================================================
+// Neobrutalism Detailed Profile Component
+// ============================================================================
+
+.neo-detailed-profile {
+    padding: 4rem 1rem;
+    background: #f9fafb;
+    position: relative;
+
+    @include mq(tb) {
+        padding: 3rem 1rem;
+    }
+
+    @include mq(sp) {
+        padding: 2rem 1rem;
+    }
+
+    // Dark mode support
+    .dark & {
+        background: #111827;
+    }
+
+    &__container {
+        max-width: 1000px;
+        margin: 0 auto;
+    }
+
+    &__header {
+        text-align: center;
+        margin-bottom: 3rem;
+
+        @include mq(sp) {
+            margin-bottom: 2rem;
+        }
+    }
+
+    &__title {
+        font-size: clamp(2rem, 4vw, 3rem);
+        font-weight: 900;
+        color: $black;
+        margin-bottom: 1rem;
+        text-transform: uppercase;
+        letter-spacing: -0.02em;
+
+        .dark & {
+            color: $white;
+        }
+    }
+
+    &__subtitle {
+        font-size: 1.125rem;
+        color: #6b7280;
+        font-weight: 500;
+
+        .dark & {
+            color: #9ca3af;
+        }
+
+        @include mq(sp) {
+            font-size: 1rem;
+        }
+    }
+
+    &__content {
+        max-width: 800px;
+        margin: 0 auto;
+    }
+
+    // ============================================================================
+    // Loading and Empty States
+    // ============================================================================
+
+    &--loading {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 400px;
+    }
+
+    &__skeleton {
+        width: 100%;
+        max-width: 600px;
+    }
+
+    &--empty {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 400px;
+    }
+
+    .neo-card--error {
+        background: #fef2f2;
+        border: 4px solid #dc2626;
+        box-shadow: 6px 6px 0px 0px #dc2626;
+        padding: 2rem;
+        text-align: center;
+        max-width: 400px;
+
+        .dark & {
+            background: #7f1d1d;
+            color: $white;
+        }
+
+        h3 {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: #dc2626;
+            margin-bottom: 1rem;
+            text-transform: uppercase;
+
+            .dark & {
+                color: #fca5a5;
+            }
+        }
+
+        p {
+            color: #991b1b;
+            font-weight: 600;
+
+            .dark & {
+                color: #fca5a5;
+            }
+        }
+    }
+}
+
+// ============================================================================
+// Accordion Component
+// ============================================================================
+
+.neo-accordion {
+    display: flex;
+    flex-direction: column;
+    gap: 2.5rem;
+    margin-top: 2rem;
+}
+
+.neo-accordion-item {
+    background: $white;
+    border: 4px solid $black;
+    box-shadow: 6px 6px 0px 0px $black;
+    transition: all 0.15s ease-out;
+
+    .dark & {
+        background: #1f2937;
+        border-color: $white;
+        box-shadow: 6px 6px 0px 0px $white;
+    }
+
+    &:hover {
+        transform: translate(-2px, -2px);
+        box-shadow: 8px 8px 0px 0px $black;
+
+        .dark & {
+            box-shadow: 8px 8px 0px 0px $white;
+        }
+    }
+
+    &--open {
+        .neo-accordion-header {
+            background: #fbbf24;
+            color: $black;
+
+            .dark & {
+                background: #f59e0b;
+                color: $black;
+            }
+        }
+    }
+}
+
+.neo-accordion-header {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.5rem 2rem;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.15s ease-out;
+    text-align: left;
+
+    @include mq(sp) {
+        padding: 1rem 1.5rem;
+    }
+
+    &:focus {
+        outline: 3px solid #3b82f6;
+        outline-offset: 2px;
+    }
+
+    &__content {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    &__icon {
+        font-size: 1.5rem;
+        flex-shrink: 0;
+
+        @include mq(sp) {
+            font-size: 1.25rem;
+        }
+    }
+
+    &__title {
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: $black;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+
+        .dark & {
+            color: $white;
+        }
+
+        @include mq(sp) {
+            font-size: 1.25rem;
+        }
+    }
+
+    &__toggle {
+        flex-shrink: 0;
+    }
+}
+
+.neo-accordion-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    background: $black;
+    color: $white;
+    border: 3px solid $black;
+    font-size: 1.5rem;
+    font-weight: 900;
+    transition: all 0.15s ease-out;
+    line-height: 1;
+
+    .dark & {
+        background: $white;
+        color: $black;
+        border-color: $white;
+    }
+
+    @include mq(sp) {
+        width: 2rem;
+        height: 2rem;
+        font-size: 1.25rem;
+    }
+
+    &--open {
+        transform: rotate(180deg);
+    }
+}
+
+.neo-accordion-content {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease-out;
+
+    &--open {
+        max-height: 2000px;
+        transition: max-height 0.5s ease-out;
+    }
+
+    &__inner {
+        padding: 0 2rem 2rem 2rem;
+        border-top: 3px solid $black;
+
+        .dark & {
+            border-color: $white;
+        }
+
+        @include mq(sp) {
+            padding: 0 1.5rem 1.5rem 1.5rem;
+        }
+    }
+}
+
+// ============================================================================
+// Timeline Component
+// ============================================================================
+
+.neo-timeline {
+    position: relative;
+    padding-left: 2rem;
+
+    @include mq(sp) {
+        padding-left: 1.5rem;
+    }
+
+    // Timeline line
+    &::before {
+        content: "";
+        position: absolute;
+        left: 0.75rem;
+        top: 0;
+        bottom: 0;
+        width: 4px;
+        background: $black;
+
+        .dark & {
+            background: $white;
+        }
+
+        @include mq(sp) {
+            left: 0.5rem;
+            width: 3px;
+        }
+    }
+}
+
+.neo-timeline-item {
+    position: relative;
+    margin-bottom: 2rem;
+
+    &:last-child {
+        margin-bottom: 0;
+    }
+}
+
+.neo-timeline-marker {
+    position: absolute;
+    left: -2rem;
+    top: 0.5rem;
+
+    @include mq(sp) {
+        left: -1.5rem;
+    }
+}
+
+.neo-timeline-dot {
+    width: 1.5rem;
+    height: 1.5rem;
+    background: #fbbf24;
+    border: 4px solid $black;
+    border-radius: 50%;
+    box-shadow: 3px 3px 0px 0px $black;
+
+    .dark & {
+        border-color: $white;
+        box-shadow: 3px 3px 0px 0px $white;
+    }
+
+    @include mq(sp) {
+        width: 1rem;
+        height: 1rem;
+        border-width: 3px;
+        box-shadow: 2px 2px 0px 0px $black;
+
+        .dark & {
+            box-shadow: 2px 2px 0px 0px $white;
+        }
+    }
+}
+
+.neo-timeline-content {
+    background: #f9fafb;
+    border: 3px solid $black;
+    box-shadow: 4px 4px 0px 0px $black;
+    padding: 1.5rem;
+    transition: all 0.15s ease-out;
+
+    .dark & {
+        background: #374151;
+        border-color: $white;
+        box-shadow: 4px 4px 0px 0px $white;
+    }
+
+    &:hover {
+        transform: translate(-2px, -2px);
+        box-shadow: 6px 6px 0px 0px $black;
+
+        .dark & {
+            box-shadow: 6px 6px 0px 0px $white;
+        }
+    }
+
+    @include mq(sp) {
+        padding: 1rem;
+    }
+}
+
+.neo-timeline-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+    gap: 1rem;
+
+    @include mq(sp) {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+}
+
+.neo-timeline-title {
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: $black;
+    margin: 0;
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+
+    .dark & {
+        color: $white;
+    }
+
+    @include mq(sp) {
+        font-size: 1.125rem;
+    }
+}
+
+.neo-timeline-period {
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: #6b7280;
+    background: #e5e7eb;
+    padding: 0.25rem 0.75rem;
+    border: 2px solid $black;
+    white-space: nowrap;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+
+    .dark & {
+        color: #d1d5db;
+        background: #4b5563;
+        border-color: $white;
+    }
+
+    @include mq(sp) {
+        font-size: 0.75rem;
+        padding: 0.25rem 0.5rem;
+    }
+}
+
+.neo-timeline-details {
+    color: #374151;
+
+    .dark & {
+        color: #d1d5db;
+    }
+}
+
+.neo-timeline-degree,
+.neo-timeline-position {
+    font-size: 1rem;
+    margin-bottom: 0.75rem;
+    font-weight: 600;
+
+    strong {
+        color: $black;
+        font-weight: 800;
+
+        .dark & {
+            color: $white;
+        }
+    }
+
+    @include mq(sp) {
+        font-size: 0.9rem;
+    }
+}
+
+.neo-timeline-description {
+    font-size: 0.95rem;
+    line-height: 1.6;
+    margin-bottom: 1rem;
+
+    @include mq(sp) {
+        font-size: 0.875rem;
+    }
+}
+
+.neo-timeline-technologies {
+    margin-top: 1rem;
+}
+
+.neo-timeline-tech-label {
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: $black;
+    display: block;
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+
+    .dark & {
+        color: $white;
+    }
+}
+
+.neo-timeline-tech-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.neo-timeline-tech-tag {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: $black;
+    background: #84cc16;
+    padding: 0.25rem 0.5rem;
+    border: 2px solid $black;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    transition: all 0.15s ease-out;
+
+    .dark & {
+        border-color: $white;
+    }
+
+    &:hover {
+        transform: translate(-1px, -1px);
+        box-shadow: 2px 2px 0px 0px $black;
+
+        .dark & {
+            box-shadow: 2px 2px 0px 0px $white;
+        }
+    }
+}
+
+// ============================================================================
+// Skeleton Loading
+// ============================================================================
+
+.neo-accordion-skeleton {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+
+    &__header {
+        height: 4rem;
+        background: linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%);
+        background-size: 200% 100%;
+        animation: shimmer 2s infinite;
+        border: 4px solid $black;
+        box-shadow: 6px 6px 0px 0px $black;
+
+        .dark & {
+            background: linear-gradient(90deg, #374151 25%, #4b5563 50%, #374151 75%);
+            border-color: $white;
+            box-shadow: 6px 6px 0px 0px $white;
+        }
+    }
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: -200% 0;
+    }
+
+    100% {
+        background-position: 200% 0;
+    }
+}
+
+// ============================================================================
+// Accessibility
+// ============================================================================
+
+@media (prefers-reduced-motion: reduce) {
+    .neo-accordion-content {
+        transition: none;
+    }
+
+    .neo-accordion-toggle {
+        transition: none;
+    }
+
+    .neo-timeline-content {
+        transition: none;
+    }
+
+    .neo-accordion-skeleton__header {
+        animation: none;
+    }
+}
+
+// ============================================================================
+// High Contrast Mode
+// ============================================================================
+
+@media (prefers-contrast: high) {
+    .neo-accordion-item {
+        border-width: 6px;
+    }
+
+    .neo-timeline-dot {
+        border-width: 6px;
+    }
+
+    .neo-timeline-content {
+        border-width: 4px;
+    }
+}

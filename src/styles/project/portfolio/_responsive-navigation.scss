@@ -1,0 +1,634 @@
+@use "../../foundation/variable" as *;
+@use "../../foundation/mixin" as *;
+
+// Neobrutalism Navigation Styles
+.neo-nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    background: rgba(255, 255, 255, 0.98);
+    backdrop-filter: blur(15px);
+    border-bottom: 4px solid #000000;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1), 8px 8px 0px 0px rgba(0, 0, 0, 1);
+    transition: all 0.15s ease-out;
+    transform: translateY(0);
+    min-height: 70px; // Ensure consistent minimum height
+
+    // Scrolled state - shrink effect
+    &--scrolled {
+        background: rgba(255, 255, 255, 0.98);
+        backdrop-filter: blur(20px);
+        box-shadow: 0 4px 24px rgba(0, 0, 0, 0.15), 4px 4px 0px 0px rgba(0, 0, 0, 1);
+
+        .neo-nav__container {
+            padding: 14px 20px; // Slightly increased
+            min-height: 60px; // Smaller when scrolled
+
+            @include mq(sp) {
+                padding: 12px 16px;
+                min-height: 55px;
+            }
+        }
+
+        .neo-nav__logo-text {
+            font-size: 1.2rem;
+        }
+
+        .neo-nav__logo-subtitle {
+            font-size: 0.65rem;
+        }
+    }
+
+    // Dark mode
+    &--dark {
+        background: rgba(15, 23, 42, 0.98);
+        backdrop-filter: blur(15px);
+        border-bottom-color: #fbbf24;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), 8px 8px 0px 0px rgba(251, 191, 36, 1);
+
+        &.neo-nav--scrolled {
+            background: rgba(15, 23, 42, 0.98);
+            backdrop-filter: blur(20px);
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4), 4px 4px 0px 0px rgba(251, 191, 36, 1);
+        }
+
+        .neo-nav__logo-text {
+            color: #ffffff;
+        }
+
+        .neo-nav__logo-subtitle {
+            color: #fbbf24;
+        }
+
+        .neo-nav__link {
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(10px);
+            color: #f1f5f9;
+            border-color: #fbbf24;
+            box-shadow: 3px 3px 0px 0px rgba(251, 191, 36, 1);
+
+            &:hover {
+                background: #fbbf24;
+                color: #0f172a;
+                box-shadow: 4px 4px 0px 0px rgba(251, 191, 36, 1);
+            }
+
+            &--active {
+                background: #fbbf24;
+                color: #0f172a;
+                box-shadow: 3px 3px 0px 0px rgba(251, 191, 36, 1);
+            }
+        }
+
+        .neo-nav__dark-toggle {
+            background: #fbbf24;
+            color: #0f172a;
+            border-color: #0f172a;
+
+            &:hover {
+                background: #f59e0b;
+            }
+        }
+
+        .neo-nav__menu-line {
+            background: #ffffff;
+        }
+
+        .neo-nav__mobile {
+            background: #0f172a;
+            border-color: #fbbf24;
+        }
+
+        .neo-nav__mobile-link {
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(10px);
+            color: #f1f5f9;
+            border-color: #fbbf24;
+            box-shadow: 6px 6px 0px 0px rgba(251, 191, 36, 1);
+
+            &:hover {
+                background: #fbbf24;
+                color: #0f172a;
+                box-shadow: 8px 8px 0px 0px rgba(251, 191, 36, 1);
+            }
+
+            &--active {
+                background: #fbbf24;
+                color: #0f172a;
+                box-shadow: 6px 6px 0px 0px rgba(251, 191, 36, 1);
+            }
+        }
+    }
+
+    &__container {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 18px 24px; // Slightly increased for better spacing
+        transition: padding 0.15s ease-out;
+        min-height: 70px; // Ensure consistent height
+        box-sizing: border-box;
+
+        @include mq(sp) {
+            padding: 16px 20px;
+            min-height: 65px;
+        }
+    }
+
+    // Logo
+    &__logo {
+        display: flex;
+        flex-direction: column;
+        text-decoration: none;
+        transition: transform 0.15s ease-out;
+
+        &:hover {
+            transform: translateY(-2px);
+        }
+    }
+
+    &__logo-text {
+        font-size: 1.4rem;
+        font-weight: 900;
+        color: #000000;
+        letter-spacing: -0.02em;
+        transition: font-size 0.15s ease-out;
+        font-family: "Space Grotesk", sans-serif;
+    }
+
+    &__logo-subtitle {
+        font-size: 0.7rem;
+        color: #1e3a8a;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        font-weight: 700;
+        margin-top: 2px;
+        transition: font-size 0.15s ease-out;
+    }
+
+    // Desktop Navigation
+    &__desktop {
+        display: flex;
+
+        @include mq(tb) {
+            display: none;
+        }
+    }
+
+    &__list {
+        display: flex;
+        gap: 8px;
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
+
+    &__item {
+        // No specific styles needed
+    }
+
+    &__link {
+        display: block;
+        padding: 10px 18px;
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border: 3px solid #000000;
+        color: #000000;
+        text-decoration: none;
+        font-weight: 700;
+        font-size: 0.9rem;
+        letter-spacing: 0.02em;
+        transition: all 0.15s ease-out;
+        box-shadow: 3px 3px 0px 0px rgba(0, 0, 0, 1);
+        position: relative;
+        z-index: 1;
+
+        &:hover {
+            background: #000000;
+            color: #ffffff;
+            transform: translate(-1px, -1px);
+            box-shadow: 4px 4px 0px 0px rgba(0, 0, 0, 1);
+        }
+
+        &--active {
+            background: #1e3a8a;
+            color: #ffffff;
+            box-shadow: 3px 3px 0px 0px rgba(0, 0, 0, 1);
+        }
+    }
+
+    // Controls
+    &__controls {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    // Dark Mode Toggle
+    &__dark-toggle {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 40px;
+        height: 40px;
+        background: #fbbf24;
+        border: 3px solid #000000;
+        cursor: pointer;
+        transition: all 0.15s ease-out;
+        box-shadow: 3px 3px 0px 0px rgba(0, 0, 0, 1);
+
+        &:hover {
+            background: #f59e0b;
+            transform: translate(-1px, -1px);
+            box-shadow: 4px 4px 0px 0px rgba(0, 0, 0, 1);
+        }
+
+        &--active {
+            background: #0f172a;
+            color: #fbbf24;
+        }
+    }
+
+    &__dark-toggle-icon {
+        font-size: 1.2rem;
+        line-height: 1;
+    }
+
+    // Mobile Menu Button
+    &__menu-button {
+        display: none;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        width: 40px;
+        height: 40px;
+        background: #ffffff;
+        border: 3px solid #000000;
+        cursor: pointer;
+        transition: all 0.15s ease-out;
+        box-shadow: 3px 3px 0px 0px rgba(0, 0, 0, 1);
+        gap: 4px;
+
+        @include mq(tb) {
+            display: flex;
+        }
+
+        &:hover {
+            background: #f3f4f6;
+            transform: translate(-1px, -1px);
+            box-shadow: 4px 4px 0px 0px rgba(0, 0, 0, 1);
+        }
+
+        &--open {
+            background: #000000;
+
+            .neo-nav__menu-line {
+                background: #ffffff;
+
+                &:nth-child(1) {
+                    transform: translateY(7px) rotate(45deg);
+                }
+
+                &:nth-child(2) {
+                    opacity: 0;
+                }
+
+                &:nth-child(3) {
+                    transform: translateY(-7px) rotate(-45deg);
+                }
+            }
+        }
+    }
+
+    &__menu-line {
+        display: block;
+        width: 20px;
+        height: 3px;
+        background: #000000;
+        transition: all 0.15s ease-out;
+        transform-origin: center;
+    }
+
+    // Mobile Navigation
+    &__mobile {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: #ffffff;
+        border-bottom: 4px solid #000000;
+        transform: translateX(100%);
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        z-index: 999;
+
+        @include mq(pc) {
+            display: none;
+        }
+
+        &--open {
+            transform: translateX(0);
+        }
+    }
+
+    &__mobile-content {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        height: 100%;
+        padding: 80px 40px 40px;
+    }
+
+    &__mobile-list {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        max-width: 300px;
+    }
+
+    &__mobile-item {
+        opacity: 0;
+        transform: translateY(20px);
+        animation: none;
+
+        .neo-nav__mobile--open & {
+            animation: slideInUp 0.4s ease forwards;
+        }
+    }
+
+    &__mobile-link {
+        display: block;
+        padding: 16px 24px;
+        background: #ffffff;
+        border: 4px solid #000000;
+        color: #000000;
+        text-decoration: none;
+        font-weight: 900;
+        font-size: 1.1rem;
+        letter-spacing: 0.02em;
+        text-align: center;
+        transition: all 0.15s ease-out;
+        box-shadow: 6px 6px 0px 0px rgba(0, 0, 0, 1);
+
+        &:hover {
+            background: #000000;
+            color: #ffffff;
+            transform: translate(-2px, -2px);
+            box-shadow: 8px 8px 0px 0px rgba(0, 0, 0, 1);
+        }
+
+        &--active {
+            background: #1e3a8a;
+            color: #ffffff;
+        }
+    }
+
+    // Overlay
+    &__overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 998;
+        opacity: 0;
+        animation: fadeIn 0.3s ease forwards;
+    }
+}
+
+// Animations
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+// Responsive adjustments
+@include mq(sp) {
+    .neo-nav {
+        &__container {
+            padding: 12px 16px;
+        }
+
+        &__logo-text {
+            font-size: 1.2rem;
+        }
+
+        &__logo-subtitle {
+            font-size: 0.6rem;
+        }
+
+        &__dark-toggle {
+            width: 36px;
+            height: 36px;
+        }
+
+        &__menu-button {
+            width: 36px;
+            height: 36px;
+        }
+
+        &__menu-line {
+            width: 18px;
+            height: 2px;
+        }
+
+        &__mobile-content {
+            padding: 60px 20px 20px;
+        }
+
+        &__mobile-link {
+            padding: 14px 20px;
+            font-size: 1rem;
+        }
+    }
+}
+
+// ============================================================================
+// Admin Area Styles
+// ============================================================================
+
+.neo-nav--admin {
+    // 管理画面では通常のポートフォリオサイトと同じスタイルを維持
+    // ライトモードでも基本的なデザインは変更しない
+
+    &.neo-nav--dark {
+        // ダークモード時は通常通り
+        background: rgba(15, 23, 42, 0.98);
+        border-bottom-color: #fbbf24;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), 8px 8px 0px 0px rgba(251, 191, 36, 1);
+    }
+
+    // ライトモード時も通常のポートフォリオサイトと同じスタイル
+    &:not(.neo-nav--dark) {
+        background: rgba(255, 255, 255, 0.98);
+        border-bottom-color: #000000;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1), 8px 8px 0px 0px rgba(0, 0, 0, 1);
+
+        // ライトモード時の文字色を明示的に設定
+        .neo-nav__logo-text {
+            color: #000000 !important;
+        }
+
+        .neo-nav__logo-subtitle {
+            color: #1e3a8a !important;
+        }
+
+        .neo-nav__link {
+            color: #000000 !important;
+            background: rgba(255, 255, 255, 0.95);
+
+            &:hover {
+                background: #000000;
+                color: #ffffff !important;
+            }
+
+            &--active {
+                background: #1e3a8a;
+                color: #ffffff !important;
+            }
+        }
+
+        .neo-nav__dark-toggle {
+            background: #fbbf24;
+            color: #000000;
+            border-color: #000000;
+        }
+
+        .neo-nav__menu-line {
+            background: #000000;
+        }
+
+        .neo-nav__mobile-link {
+            color: #000000 !important;
+            background: #ffffff;
+
+            &:hover {
+                background: #000000;
+                color: #ffffff !important;
+            }
+
+            &--active {
+                background: #1e3a8a;
+                color: #ffffff !important;
+            }
+        }
+    }
+}
+
+// 管理画面でのライトモード時の追加スタイル（bodyクラスとの組み合わせ）
+.admin-light-theme .neo-nav,
+.light .neo-nav {
+    background: rgba(255, 255, 255, 0.98) !important;
+    border-bottom: 4px solid #000000 !important;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1), 8px 8px 0px 0px rgba(0, 0, 0, 1) !important;
+
+    &.neo-nav--scrolled {
+        background: rgba(255, 255, 255, 0.98) !important;
+        box-shadow: 0 4px 24px rgba(0, 0, 0, 0.15), 4px 4px 0px 0px rgba(0, 0, 0, 1) !important;
+    }
+
+    .neo-nav__logo-text {
+        color: #000000 !important;
+    }
+
+    .neo-nav__logo-subtitle {
+        color: #1e3a8a !important;
+    }
+
+    .neo-nav__link {
+        color: #000000 !important;
+        background: rgba(255, 255, 255, 0.95) !important;
+        border: 3px solid #000000 !important;
+        box-shadow: 3px 3px 0px 0px rgba(0, 0, 0, 1) !important;
+
+        &:hover {
+            background: #000000 !important;
+            color: #ffffff !important;
+            box-shadow: 4px 4px 0px 0px rgba(0, 0, 0, 1) !important;
+        }
+
+        &--active {
+            background: #1e3a8a !important;
+            color: #ffffff !important;
+            box-shadow: 3px 3px 0px 0px rgba(0, 0, 0, 1) !important;
+        }
+    }
+
+    .neo-nav__dark-toggle {
+        background: #fbbf24 !important;
+        color: #000000 !important;
+        border: 3px solid #000000 !important;
+        box-shadow: 3px 3px 0px 0px rgba(0, 0, 0, 1) !important;
+
+        &:hover {
+            background: #f59e0b !important;
+            box-shadow: 4px 4px 0px 0px rgba(0, 0, 0, 1) !important;
+        }
+    }
+
+    .neo-nav__menu-button {
+        background: #ffffff !important;
+        border: 3px solid #000000 !important;
+        box-shadow: 3px 3px 0px 0px rgba(0, 0, 0, 1) !important;
+
+        &:hover {
+            background: #f3f4f6 !important;
+            box-shadow: 4px 4px 0px 0px rgba(0, 0, 0, 1) !important;
+        }
+    }
+
+    .neo-nav__menu-line {
+        background: #000000 !important;
+    }
+
+    .neo-nav__mobile {
+        background: #ffffff !important;
+        border-bottom: 4px solid #000000 !important;
+    }
+
+    .neo-nav__mobile-link {
+        color: #000000 !important;
+        background: #ffffff !important;
+        border: 4px solid #000000 !important;
+        box-shadow: 6px 6px 0px 0px rgba(0, 0, 0, 1) !important;
+
+        &:hover {
+            background: #000000 !important;
+            color: #ffffff !important;
+            box-shadow: 8px 8px 0px 0px rgba(0, 0, 0, 1) !important;
+        }
+
+        &--active {
+            background: #1e3a8a !important;
+            color: #ffffff !important;
+            box-shadow: 6px 6px 0px 0px rgba(0, 0, 0, 1) !important;
+        }
+    }
+}

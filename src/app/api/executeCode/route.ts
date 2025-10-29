@@ -11,7 +11,7 @@ export async function POST(request: Request) {
 
     // return NextResponse.json({ output });
   } catch (error) {
-    console.error('Error executing code:', error);
+    // エラーログを無効化
     // return NextResponse.json({ error: body }, { status: 50 });
   }
 }

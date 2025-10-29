@@ -1,0 +1,347 @@
+@use "../../foundation/variable" as *;
+@use "../../foundation/mixin" as *;
+
+// Performance Monitor
+.performance-monitor {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    z-index: 9999;
+    font-family: 'Courier New', monospace;
+    opacity: 0.7;
+    transition: opacity 0.3s ease;
+
+    &:hover {
+        opacity: 1;
+    }
+
+    &__toggle {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        border: none;
+        background: rgba($accent-blue, 0.7);
+        color: white;
+        font-size: 12px;
+        cursor: pointer;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+        backdrop-filter: blur(10px);
+
+        &:hover {
+            background: rgba($accent-blue, 0.9);
+            transform: scale(1.05);
+        }
+
+        &:focus {
+            outline: 2px solid $accent-blue;
+            outline-offset: 2px;
+        }
+    }
+
+    &__panel {
+        position: absolute;
+        top: 50px;
+        left: 0;
+        min-width: 280px;
+        background: rgba(white, 0.95);
+        border: 2px solid $accent-blue;
+        border-radius: 8px;
+        padding: 16px;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        backdrop-filter: blur(10px);
+        animation: slideIn 0.3s ease-out;
+    }
+
+    &__title {
+        margin: 0 0 12px 0;
+        font-size: 14px;
+        font-weight: 600;
+        color: $accent-blue;
+        text-align: center;
+    }
+
+    &__metrics {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    &__metric {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 6px 8px;
+        border-radius: 4px;
+        font-size: 12px;
+        transition: background-color 0.2s ease;
+
+        &--good {
+            background: rgba(#10b981, 0.1);
+            border-left: 3px solid #10b981;
+        }
+
+        &--needs-improvement {
+            background: rgba(#f59e0b, 0.1);
+            border-left: 3px solid #f59e0b;
+        }
+
+        &--poor {
+            background: rgba(#ef4444, 0.1);
+            border-left: 3px solid #ef4444;
+        }
+
+        &--unknown {
+            background: rgba($gray-500, 0.1);
+            border-left: 3px solid $gray-500;
+        }
+    }
+
+    &__metric-name {
+        font-weight: 600;
+        color: $gray-700;
+    }
+
+    &__metric-value {
+        font-weight: 500;
+        color: $gray-900;
+    }
+
+    // Dark mode
+    .admin-dark-theme & {
+        &__panel {
+            background: rgba($navy-dark, 0.95);
+            border-color: $accent-blue;
+        }
+
+        &__title {
+            color: $accent-blue;
+        }
+
+        &__metric-name {
+            color: $gray-300;
+        }
+
+        &__metric-value {
+            color: white;
+        }
+    }
+
+    // Mobile adjustments
+    @include mq(sp) {
+        top: 10px;
+        left: 10px;
+
+        &__toggle {
+            width: 36px;
+            height: 36px;
+            font-size: 14px;
+        }
+
+        &__panel {
+            min-width: 240px;
+            padding: 12px;
+        }
+
+        &__title {
+            font-size: 13px;
+        }
+
+        &__metric {
+            font-size: 11px;
+            padding: 5px 6px;
+        }
+    }
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+// Performance Hints
+.performance-hints {
+    margin-top: 16px;
+    padding: 12px;
+    border-radius: 6px;
+    font-size: 12px;
+
+    &--good {
+        background: rgba(#10b981, 0.1);
+        border: 1px solid #10b981;
+        color: #065f46;
+
+        h4 {
+            margin: 0;
+            color: #10b981;
+        }
+    }
+
+    &--needs-improvement {
+        background: rgba(#f59e0b, 0.1);
+        border: 1px solid #f59e0b;
+        color: #92400e;
+
+        h4 {
+            margin: 0 0 8px 0;
+            color: #f59e0b;
+        }
+
+        ul {
+            margin: 0;
+            padding-left: 16px;
+
+            li {
+                margin-bottom: 4px;
+                line-height: 1.4;
+            }
+        }
+    }
+
+    // Dark mode
+    .admin-dark-theme & {
+        &--good {
+            background: rgba(#10b981, 0.2);
+            color: #6ee7b7;
+
+            h4 {
+                color: #10b981;
+            }
+        }
+
+        &--needs-improvement {
+            background: rgba(#f59e0b, 0.2);
+            color: #fbbf24;
+
+            h4 {
+                color: #f59e0b;
+            }
+        }
+    }
+}
+
+// Resource Monitor (追加機能)
+.resource-monitor {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 9998;
+    font-family: 'Courier New', monospace;
+
+    &__panel {
+        background: rgba(white, 0.95);
+        border: 2px solid $accent-purple;
+        border-radius: 8px;
+        padding: 12px;
+        min-width: 200px;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        backdrop-filter: blur(10px);
+    }
+
+    &__title {
+        margin: 0 0 8px 0;
+        font-size: 12px;
+        font-weight: 600;
+        color: $accent-purple;
+        text-align: center;
+    }
+
+    &__item {
+        display: flex;
+        justify-content: space-between;
+        font-size: 10px;
+        margin-bottom: 4px;
+        color: $gray-700;
+
+        &:last-child {
+            margin-bottom: 0;
+        }
+    }
+
+    &__label {
+        font-weight: 500;
+    }
+
+    &__value {
+        font-weight: 600;
+        color: $accent-purple;
+    }
+
+    // Dark mode
+    .admin-dark-theme & {
+        &__panel {
+            background: rgba($navy-dark, 0.95);
+        }
+
+        &__item {
+            color: $gray-300;
+        }
+
+        &__value {
+            color: $accent-purple-lighter;
+        }
+    }
+
+    // Mobile - hide on small screens
+    @include mq(sp) {
+        display: none;
+    }
+}
+
+// Performance Badge (for development)
+.performance-badge {
+    position: fixed;
+    top: 50%;
+    right: 0;
+    transform: translateY(-50%);
+    z-index: 9997;
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+
+    &__content {
+        background: rgba($accent-blue, 0.9);
+        color: white;
+        padding: 8px 4px;
+        font-size: 10px;
+        font-weight: 600;
+        border-radius: 4px 0 0 4px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+
+        &:hover {
+            background: rgba($accent-blue, 1);
+            padding-right: 8px;
+        }
+    }
+
+    &--hidden {
+        transform: translateY(-50%) translateX(100%);
+    }
+
+    // Mobile
+    @include mq(sp) {
+        display: none;
+    }
+}
+
+// Reduced motion support
+@media (prefers-reduced-motion: reduce) {
+    .performance-monitor__panel {
+        animation: none;
+    }
+
+    .performance-monitor__toggle:hover {
+        transform: none;
+    }
+
+    .performance-badge__content {
+        transition: none;
+    }
+}

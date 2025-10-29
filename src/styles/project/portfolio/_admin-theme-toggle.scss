@@ -1,0 +1,408 @@
+// ============================================================================
+// Admin Theme Toggle Styles
+// ============================================================================
+
+.c-admin-theme-toggle {
+  &__container {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  &__label {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--black);
+    white-space: nowrap;
+  }
+
+  &__switch {
+    position: relative;
+    width: 60px;
+    height: 32px;
+    background: var(--gray-200);
+    border: 3px solid var(--black);
+    cursor: pointer;
+    transition: all 0.2s ease-out;
+    overflow: hidden;
+
+    &:hover {
+      transform: translate(1px, 1px);
+      box-shadow: 2px 2px 0px 0px var(--black);
+    }
+
+    &:active {
+      transform: translate(2px, 2px);
+      box-shadow: none;
+    }
+
+    &--dark {
+      background: var(--navy-blue);
+    }
+  }
+
+  &__slider {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 24px;
+    height: 24px;
+    background: var(--white);
+    border: 2px solid var(--black);
+    transition: all 0.2s ease-out;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    .c-admin-theme-toggle__switch--dark & {
+      transform: translateX(26px);
+      background: var(--neon-yellow);
+    }
+  }
+
+  &__icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--black);
+    
+    svg {
+      width: 14px;
+      height: 14px;
+    }
+  }
+
+  &__tooltip {
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--black);
+    color: var(--white);
+    padding: 0.5rem 0.75rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease-out;
+    margin-bottom: 0.5rem;
+    border: 2px solid var(--black);
+
+    &::after {
+      content: "";
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      border: 4px solid transparent;
+      border-top-color: var(--black);
+    }
+  }
+
+  &__container:hover &__tooltip {
+    opacity: 1;
+  }
+
+  &__placeholder {
+    opacity: 0.5;
+  }
+
+  // Responsive Design
+  @media (max-width: 768px) {
+    &__label {
+      font-size: 0.75rem;
+    }
+
+    &__switch {
+      width: 50px;
+      height: 28px;
+    }
+
+    &__slider {
+      width: 20px;
+      height: 20px;
+
+      .c-admin-theme-toggle__switch--dark & {
+        transform: translateX(20px);
+      }
+    }
+
+    &__icon svg {
+      width: 12px;
+      height: 12px;
+    }
+  }
+}
+
+// ============================================================================
+// Admin Theme Styles
+// ============================================================================
+
+// Light Theme (Default)
+.admin-light-theme {
+  --admin-bg: var(--white);
+  --admin-surface: var(--gray-50);
+  --admin-text: var(--black);
+  --admin-text-secondary: var(--gray-600);
+  --admin-border: var(--black);
+  --admin-shadow: var(--black);
+  --admin-input-bg: var(--white);
+  --admin-card-bg: var(--white);
+}
+
+// Dark Theme
+.admin-dark-theme {
+  --admin-bg: #1a1a1a;
+  --admin-surface: #2d2d2d;
+  --admin-text: #ffffff;
+  --admin-text-secondary: #b3b3b3;
+  --admin-border: #ffffff;
+  --admin-shadow: #ffffff;
+  --admin-input-bg: #2d2d2d;
+  --admin-card-bg: #2d2d2d;
+
+  // Override component backgrounds and colors
+  .c-admin-dashboard,
+  .c-blog-manager,
+  .c-blog-editor,
+  .c-markdown-editor {
+    background: var(--admin-bg);
+    color: var(--admin-text);
+
+    &__title,
+    &__label,
+    &__item-title {
+      color: var(--admin-text) !important;
+    }
+
+    &__input,
+    &__select,
+    &__textarea,
+    &__search-input,
+    &__filter-select {
+      background: var(--admin-input-bg) !important;
+      color: var(--admin-text) !important;
+      border-color: var(--admin-border) !important;
+
+      &:focus {
+        box-shadow: 4px 4px 0px 0px var(--admin-shadow) !important;
+      }
+
+      &::placeholder {
+        color: var(--admin-text-secondary) !important;
+      }
+    }
+
+    &__item,
+    &__card,
+    &__form,
+    &__content {
+      background: var(--admin-card-bg) !important;
+      border-color: var(--admin-border) !important;
+      box-shadow: 4px 4px 0px 0px var(--admin-shadow) !important;
+
+      &:hover {
+        box-shadow: 2px 2px 0px 0px var(--admin-shadow) !important;
+      }
+    }
+
+    &__item-excerpt,
+    &__item-meta,
+    &__date {
+      color: var(--admin-text-secondary) !important;
+    }
+
+    &__empty,
+    &__loading {
+      background: var(--admin-surface) !important;
+      color: var(--admin-text-secondary) !important;
+      border-color: var(--admin-border) !important;
+    }
+
+    &__tag {
+      background: var(--admin-surface) !important;
+      color: var(--admin-text) !important;
+      border-color: var(--admin-border) !important;
+    }
+
+    // Markdown Editor specific
+    &__preview {
+      background: var(--admin-card-bg) !important;
+      color: var(--admin-text) !important;
+
+      h1, h2, h3, h4, h5, h6 {
+        color: var(--admin-text) !important;
+      }
+
+      code {
+        background: var(--admin-surface) !important;
+        color: var(--admin-text) !important;
+        border-color: var(--admin-border) !important;
+      }
+
+      pre {
+        background: #000000 !important;
+        border-color: var(--admin-border) !important;
+      }
+
+      blockquote {
+        background: var(--admin-surface) !important;
+        color: var(--admin-text-secondary) !important;
+      }
+    }
+
+    &__tabs {
+      border-color: var(--admin-border) !important;
+    }
+
+    &__tab {
+      background: var(--admin-surface) !important;
+      color: var(--admin-text) !important;
+      border-color: var(--admin-border) !important;
+
+      &:hover {
+        background: var(--admin-card-bg) !important;
+      }
+
+      &--active {
+        background: var(--admin-card-bg) !important;
+        color: var(--neon-yellow) !important;
+      }
+    }
+
+    &__toolbar {
+      background: var(--admin-card-bg) !important;
+    }
+
+    &__toolbar-btn {
+      background: var(--admin-surface) !important;
+      color: var(--admin-text) !important;
+      border-color: var(--admin-border) !important;
+
+      &:hover {
+        background: var(--admin-card-bg) !important;
+      }
+    }
+
+    &__help {
+      background: var(--admin-surface) !important;
+      border-color: var(--admin-border) !important;
+    }
+
+    &__help-summary {
+      background: var(--admin-surface) !important;
+      color: var(--admin-text) !important;
+
+      &:hover {
+        background: var(--admin-card-bg) !important;
+      }
+    }
+
+    &__help-content {
+      background: var(--admin-card-bg) !important;
+    }
+
+    &__help-section {
+      h4 {
+        color: var(--neon-yellow) !important;
+      }
+
+      code {
+        background: var(--admin-surface) !important;
+        color: var(--admin-text) !important;
+        border-color: var(--admin-border) !important;
+      }
+    }
+  }
+
+  // Theme toggle specific styles
+  .c-admin-theme-toggle {
+    &__label {
+      color: var(--admin-text) !important;
+    }
+
+    &__tooltip {
+      background: var(--admin-text) !important;
+      color: var(--admin-bg) !important;
+      border-color: var(--admin-border) !important;
+
+      &::after {
+        border-top-color: var(--admin-text) !important;
+      }
+    }
+  }
+}
+
+// Admin Settings specific dark theme styles
+.admin-dark-theme .c-admin-settings {
+  background: var(--admin-bg);
+  color: var(--admin-text);
+
+  &__title,
+  &__section-title,
+  &__label,
+  &__info-label,
+  &__theme-label {
+    color: var(--admin-text) !important;
+  }
+
+  &__input {
+    background: var(--admin-input-bg) !important;
+    color: var(--admin-text) !important;
+    border-color: var(--admin-border) !important;
+
+    &:focus {
+      box-shadow: 4px 4px 0px 0px var(--admin-shadow) !important;
+    }
+
+    &::placeholder {
+      color: var(--admin-text-secondary) !important;
+    }
+  }
+
+  &__info-card,
+  &__theme-card,
+  &__form {
+    background: var(--admin-card-bg) !important;
+    border-color: var(--admin-border) !important;
+  }
+
+  &__info-value,
+  &__theme-description {
+    color: var(--admin-text) !important;
+  }
+
+  &__info-note {
+    color: var(--admin-text-secondary) !important;
+  }
+
+  &__status {
+    border-color: var(--admin-border) !important;
+
+    &--success {
+      background: var(--lime-green) !important;
+      color: var(--black) !important;
+    }
+
+    &--error {
+      background: var(--electric-pink) !important;
+      color: var(--white) !important;
+    }
+  }
+
+  &__security-info {
+    background: var(--admin-surface) !important;
+    border-color: var(--admin-border) !important;
+  }
+
+  &__security-item {
+    h4 {
+      color: var(--admin-text) !important;
+    }
+
+    p {
+      color: var(--admin-text-secondary) !important;
+    }
+  }
+}

@@ -1,0 +1,360 @@
+@use "../../foundation/variable" as *;
+@use "../../foundation/mixin" as *;
+
+// スクリーンリーダー専用テキスト
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+// スキップリンク
+.skip-link {
+    position: absolute;
+    top: -40px;
+    left: 6px;
+    background: $navy-dark;
+    color: $white;
+    padding: 8px;
+    text-decoration: none;
+    border-radius: 4px;
+    z-index: 10000;
+    font-weight: 600;
+    transition: top 0.3s ease;
+
+    &:focus,
+    &--visible {
+        top: 6px;
+    }
+
+    &:hover {
+        background: $accent-blue;
+    }
+}
+
+// アクセシブルボタン
+.accessible-button {
+    position: relative;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: none;
+    background: transparent;
+
+    &:focus {
+        outline: 2px solid $accent-blue;
+        outline-offset: 2px;
+    }
+
+    &:focus:not(:focus-visible) {
+        outline: none;
+    }
+
+    &:focus-visible {
+        outline: 2px solid $accent-blue;
+        outline-offset: 2px;
+    }
+
+    &:disabled {
+        cursor: not-allowed;
+        opacity: 0.6;
+    }
+
+    // ホバー時のフィードバック
+    &:hover:not(:disabled) {
+        transform: translateY(-1px);
+    }
+
+    &:active:not(:disabled) {
+        transform: translateY(0);
+    }
+}
+
+// アクセシブルリンク
+.accessible-link {
+    color: $accent-blue;
+    text-decoration: underline;
+    transition: all 0.2s ease;
+
+    &:focus {
+        outline: 2px solid $accent-blue;
+        outline-offset: 2px;
+        border-radius: 2px;
+    }
+
+    &:focus:not(:focus-visible) {
+        outline: none;
+    }
+
+    &:focus-visible {
+        outline: 2px solid $accent-blue;
+        outline-offset: 2px;
+        border-radius: 2px;
+    }
+
+    &:hover {
+        color: $accent-blue-lighter;
+        text-decoration: none;
+    }
+
+    &:visited {
+        color: $accent-purple;
+    }
+}
+
+// ライブリージョン
+.live-region {
+    position: absolute;
+    left: -10000px;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+
+    &--visible {
+        position: static;
+        width: auto;
+        height: auto;
+        overflow: visible;
+    }
+}
+
+// アクセシブルプログレスバー
+.accessible-progress {
+    margin-bottom: 1rem;
+
+    &__label {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.5rem;
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: $text-primary;
+    }
+
+    &__value {
+        color: $accent-blue;
+    }
+
+    &__bar {
+        width: 100%;
+        height: 8px;
+        background: rgba($accent-blue, 0.2);
+        border-radius: 4px;
+        overflow: hidden;
+        position: relative;
+    }
+
+    &__fill {
+        height: 100%;
+        background: linear-gradient(90deg, $accent-blue, $accent-blue-lighter);
+        border-radius: 4px;
+        transition: width 0.3s ease;
+        position: relative;
+
+        &::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg,
+                    transparent,
+                    rgba(255, 255, 255, 0.3),
+                    transparent);
+            animation: progress-shine 2s ease-in-out infinite;
+        }
+    }
+}
+
+// アクセシブルモーダル
+.accessible-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    padding: 1rem;
+}
+
+.accessible-modal {
+    background: $white;
+    border-radius: 12px;
+    max-width: 600px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    animation: modal-appear 0.3s ease;
+
+    &:focus {
+        outline: 2px solid $accent-blue;
+        outline-offset: -2px;
+    }
+
+    &__header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1.5rem;
+        border-bottom: 1px solid $gray-200;
+    }
+
+    &__title {
+        margin: 0;
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: $text-dark;
+    }
+
+    &__close {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: $gray-100;
+        color: $gray-600;
+        font-size: 1.25rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        &:hover {
+            background: $gray-200;
+            color: $gray-800;
+        }
+    }
+
+    &__content {
+        padding: 1.5rem;
+    }
+}
+
+// フォーカス管理
+.focus-trap {
+    &:focus {
+        outline: 2px solid $accent-blue;
+        outline-offset: 2px;
+    }
+}
+
+// 高コントラストモード対応
+@media (prefers-contrast: high) {
+
+    .accessible-button:focus,
+    .accessible-link:focus {
+        outline: 3px solid;
+        outline-offset: 2px;
+    }
+
+    .accessible-progress__bar {
+        border: 1px solid;
+    }
+
+    .accessible-modal {
+        border: 2px solid;
+    }
+}
+
+// 動きを減らす設定への対応
+@media (prefers-reduced-motion: reduce) {
+
+    .accessible-button,
+    .accessible-link,
+    .accessible-progress__fill,
+    .accessible-modal {
+        transition: none !important;
+        animation: none !important;
+    }
+
+    .skip-link {
+        transition: none;
+    }
+}
+
+// ダークモード対応
+.admin-dark-theme {
+    .accessible-modal {
+        background: $dark-surface;
+        color: $white;
+
+        &__title {
+            color: $white;
+        }
+
+        &__close {
+            background: rgba($white, 0.1);
+            color: $white;
+
+            &:hover {
+                background: rgba($white, 0.2);
+            }
+        }
+
+        &__header {
+            border-bottom-color: rgba($white, 0.2);
+        }
+    }
+
+    .accessible-progress {
+        &__label {
+            color: $white;
+        }
+    }
+}
+
+// アニメーション
+@keyframes modal-appear {
+    from {
+        opacity: 0;
+        transform: scale(0.9) translateY(-20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+@keyframes progress-shine {
+    0% {
+        transform: translateX(-100%);
+    }
+
+    100% {
+        transform: translateX(400%);
+    }
+}
+
+// レスポンシブ対応
+@include mq(sp) {
+    .accessible-modal {
+        margin: 1rem;
+        max-height: calc(100vh - 2rem);
+
+        &__header,
+        &__content {
+            padding: 1rem;
+        }
+    }
+
+    .skip-link {
+        left: 4px;
+        top: -35px;
+
+        &:focus,
+        &--visible {
+            top: 4px;
+        }
+    }
+}
