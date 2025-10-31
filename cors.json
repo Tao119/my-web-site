@@ -3,7 +3,9 @@
     "origin": [
       "http://localhost:3000",
       "http://localhost:3001",
-      "http://localhost:3002"
+      "http://localhost:3002",
+      "https://www.tao-matsumr.com",
+      "https://tao-matsumr.com"
     ],
     "method": ["GET", "POST", "PUT", "DELETE"],
     "maxAgeSeconds": 3600
