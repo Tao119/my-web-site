@@ -5,6 +5,11 @@ import { v4 as uuidv4 } from 'uuid'
 
 // 環境判定
 const isLocalEnvironment = () => {
+    // 本番環境では常にFirebase Storageを使用
+    if (process.env.NODE_ENV === 'production') {
+        return false
+    }
+    // 開発環境でも明示的にローカルストレージを有効にした場合のみローカルを使用
     return process.env.NODE_ENV === 'development' && process.env.NEXT_PUBLIC_USE_LOCAL_STORAGE === 'true'
 }
 
@@ -345,9 +350,22 @@ export const getDownloadUrlFromPath = async (storagePath: string): Promise<strin
 // 既存のFirebase Storage URLを有効なダウンロードURLに変換
 export const convertToValidUrl = async (url: string): Promise<string> => {
     try {
-        // 既に有効なURLの場合はそのまま返す
-        if (url.startsWith('http') && !url.includes('firebasestorage.googleapis.com/v0/b/')) {
+        // 既に有効なHTTPSのURLの場合はそのまま返す
+        if (url.startsWith('https://') && !url.startsWith('/uploads/')) {
             return url
+        }
+
+        // ローカルパス（/uploads/で始まる）の場合
+        if (url.startsWith('/uploads/')) {
+            if (isLocalEnvironment()) {
+                // ローカル環境ではそのまま返す
+                return url
+            } else {
+                // 本番環境では対応するFirebase Storage URLを取得
+                // /uploads/profiles/filename.jpg -> profiles/filename.jpg
+                const storagePath = url.replace('/uploads/', '')
+                return await getDownloadUrlFromPath(storagePath)
+            }
         }
 
         // Firebase Storage URLからパスを抽出

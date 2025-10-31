@@ -18,6 +18,7 @@ import {
     shouldUseMockData
 } from './mockData'
 import { Profile, Project, BlogPost, Skill } from '@/types/portfolio'
+import { convertToValidUrl } from './imageUpload'
 
 // プロフィールデータの取得
 export const getProfile = async (forceRefresh = false): Promise<Profile> => {
@@ -37,7 +38,7 @@ export const getProfile = async (forceRefresh = false): Promise<Profile> => {
             const data = docSnap.data()
 
             // データ構造を正規化（デフォルト値は空文字や空配列）
-            const profileData = {
+            let profileData = {
                 id: docSnap.id,
                 name: data.name || data.profile?.name || '',
                 nameEn: data.nameEn || data.profile?.nameEn || '',
@@ -51,6 +52,16 @@ export const getProfile = async (forceRefresh = false): Promise<Profile> => {
                 education: data.education || data.profile?.education || [],
                 createdAt: data.createdAt || new Date(),
                 updatedAt: data.updatedAt || new Date()
+            }
+
+            // 画像URLを適切に変換
+            if (profileData.avatar && profileData.avatar.startsWith('/uploads/')) {
+                try {
+                    profileData.avatar = await convertToValidUrl(profileData.avatar)
+                } catch (error) {
+                    console.warn('Failed to convert avatar URL:', error)
+                    // 変換に失敗した場合は元のURLを保持
+                }
             }
 
             console.log('Loaded profile from Firestore:', profileData)
@@ -300,10 +311,37 @@ export const getProjects = async (featuredOnly = false): Promise<Project[]> => {
         }
 
         const querySnapshot = await getDocs(q)
-        const projects = querySnapshot.docs.map(doc => ({
+        let projects = querySnapshot.docs.map(doc => ({
             id: doc.id,
             ...doc.data()
         })) as Project[]
+
+        // 画像URLを適切に変換
+        projects = await Promise.all(projects.map(async (project) => {
+            if (project.thumbnail && project.thumbnail.startsWith('/uploads/')) {
+                try {
+                    project.thumbnail = await convertToValidUrl(project.thumbnail)
+                } catch (error) {
+                    console.warn('Failed to convert project thumbnail URL:', error)
+                }
+            }
+
+            if (project.images) {
+                project.images = await Promise.all(project.images.map(async (imageUrl) => {
+                    if (imageUrl.startsWith('/uploads/')) {
+                        try {
+                            return await convertToValidUrl(imageUrl)
+                        } catch (error) {
+                            console.warn('Failed to convert project image URL:', error)
+                            return imageUrl
+                        }
+                    }
+                    return imageUrl
+                }))
+            }
+
+            return project
+        }))
 
         console.log(`Loaded ${projects.length} projects from Firestore${featuredOnly ? ' (featured only)' : ''}`)
         return projects
