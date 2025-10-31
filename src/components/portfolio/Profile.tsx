@@ -138,7 +138,7 @@ const Profile = ({ showDetailedInfo = false }: ProfileProps) => {
             </div>
 
             <div className="neo-profile__bio">
-              <p>{profileData?.bio || ''}</p>
+              <p style={{ whiteSpace: 'pre-line' }}>{profileData?.bio || ''}</p>
             </div>
 
             <div className="neo-profile__info">

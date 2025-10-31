@@ -5,7 +5,7 @@ export const mockProfile: Profile = {
     id: 'mock-profile',
     name: 'サンプル太郎',
     title: 'フルスタック開発者',
-    bio: 'モダンなWebアプリケーション開発を専門とするフルスタック開発者です。React、Next.js、Node.jsを中心とした技術スタックで、ユーザー体験を重視したアプリケーションを開発しています。',
+    bio: 'モダンなWebアプリケーション開発を専門とするフルスタック開発者です。\n\nReact、Next.js、Node.jsを中心とした技術スタックで、ユーザー体験を重視したアプリケーションを開発しています。\n\n常に新しい技術にチャレンジし、効率的で保守性の高いコードを心がけています。',
     email: 'sample@example.com',
     location: '東京, 日本',
     avatar: '/images/avatar-placeholder.jpg',

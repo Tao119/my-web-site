@@ -325,3 +325,42 @@ export const extractPathFromUrl = (url: string): string | null => {
         return null
     }
 }
+
+// Firebase Storage パスからダウンロードURLを取得
+export const getDownloadUrlFromPath = async (storagePath: string): Promise<string> => {
+    try {
+        if (isLocalEnvironment()) {
+            // ローカル環境では直接パスを返す
+            return `/uploads/${storagePath}`
+        }
+
+        const storage = getStorageInstance()
+        const storageRef = ref(storage, storagePath)
+        return await getDownloadURL(storageRef)
+    } catch (error) {
+        throw new Error(`ダウンロードURLの取得に失敗しました: ${error}`)
+    }
+}
+
+// 既存のFirebase Storage URLを有効なダウンロードURLに変換
+export const convertToValidUrl = async (url: string): Promise<string> => {
+    try {
+        // 既に有効なURLの場合はそのまま返す
+        if (url.startsWith('http') && !url.includes('firebasestorage.googleapis.com/v0/b/')) {
+            return url
+        }
+
+        // Firebase Storage URLからパスを抽出
+        const path = extractPathFromUrl(url)
+        if (!path) {
+            throw new Error('無効なFirebase Storage URLです')
+        }
+
+        // 新しいダウンロードURLを取得
+        return await getDownloadUrlFromPath(path)
+    } catch (error) {
+        console.error('URL変換エラー:', error)
+        // フォールバック: 元のURLを返す
+        return url
+    }
+}
