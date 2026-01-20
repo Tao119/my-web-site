@@ -217,13 +217,33 @@ export const getSkills = async (): Promise<Skill[]> => {
 
         const db = getFirestoreInstance()
         const skillsRef = collection(db, 'skills')
-        const q = query(skillsRef, orderBy('level', 'desc'))
-        const querySnapshot = await getDocs(q)
 
-        const skills = querySnapshot.docs.map(doc => ({
+        // まずorderフィールドでソートを試行
+        let q = query(skillsRef, orderBy('order', 'asc'))
+        let querySnapshot
+
+        try {
+            querySnapshot = await getDocs(q)
+        } catch (error) {
+            // orderフィールドが存在しない場合はlevelでソート
+            console.warn('Order field not found, falling back to level sorting')
+            q = query(skillsRef, orderBy('level', 'desc'))
+            querySnapshot = await getDocs(q)
+        }
+
+        let skills = querySnapshot.docs.map(doc => ({
             id: doc.id,
             ...doc.data()
         })) as Skill[]
+
+        // orderフィールドが存在する場合はそれでソート、存在しない場合はlevelでソート
+        skills.sort((a, b) => {
+            if (a.order !== undefined && b.order !== undefined) {
+                return a.order - b.order
+            }
+            // orderが設定されていない場合はlevelの降順
+            return (b.level || 0) - (a.level || 0)
+        })
 
         console.log(`Loaded ${skills.length} skills from Firestore`)
         return skills

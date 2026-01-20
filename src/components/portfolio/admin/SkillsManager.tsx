@@ -49,7 +49,14 @@ export const SkillsManager = () => {
             const response = await fetch('/api/admin/skills');
             if (response.ok) {
                 const data = await response.json();
-                setSkills(data.skills || []);
+                const sortedSkills = (data.skills || []).sort((a: Skill, b: Skill) => {
+                    if (a.order !== undefined && b.order !== undefined) {
+                        return a.order - b.order;
+                    }
+                    // orderが設定されていない場合はlevelの降順
+                    return (b.level || 0) - (a.level || 0);
+                });
+                setSkills(sortedSkills);
             }
         } catch (error) {
             console.error('Failed to load skills:', error);
@@ -149,9 +156,12 @@ export const SkillsManager = () => {
     };
 
     const handleAddNew = () => {
+        // 新しいスキルのorderは現在のスキル数+1
+        const newOrder = skills.length + 1;
         setEditingSkill({
             ...newSkillTemplate,
-            id: `skill_${Date.now()}`
+            id: `skill_${Date.now()}`,
+            order: newOrder
         });
         setIsAddingNew(true);
     };
