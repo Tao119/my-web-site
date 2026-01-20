@@ -17,17 +17,17 @@ export default function CVLayout({ children }: { children: ReactNode }) {
       <Script id="cats-conversion-cv" strategy="afterInteractive">
         {`
   // CATS互換設定
-  var trackingId = "dfb2f6c6a158";
-  var baseUrl = "https://016fbaa2dfbb.ngrok-free.app";
+  var trackingId = "a093b0c19351";
+  var baseUrl = "https://bb9d904d102e.ngrok-free.app";
   var advertiserId = "";
   var adGroupId = "grp_77703814-79ea-40ac-b65";
   var adId = "";
   var tagType = "group";
-  var uqid = "dfb2f6c6a158";
+  var uqid = "a093b0c19351";
   
   // CATS互換パラメータ
-  var cid = adGroupId; // CATSではCIDはグループID
-  var gid = adGroupId;
+  var cid = adId || ""; // 個別広告IDがある場合のみ設定
+  var gid = adGroupId; // 広告グループID
   var sid = "";
   var uid1 = "";
   var uid2 = "";
@@ -67,10 +67,14 @@ export default function CVLayout({ children }: { children: ReactNode }) {
     a.onload = function() {
       // 少し遅延させて確実に実行
       setTimeout(function() {
-        if (typeof CATS_Action === 'function') {
-          CATS_Action(cid, sid, uid1, uid2, uqid, uid3, uid4, uid5, uid6, uid7, uid8, catsPoint, amount, trackingUserId, firstCookie, catsOptions);
-        } else if (typeof CATS_GroupAction === 'function') {
+        // グループタグの場合はCATS_GroupActionを使用
+        if (tagType === 'group' && typeof CATS_GroupAction === 'function') {
           CATS_GroupAction(gid, sid, uid1, uid2, uqid, uid3, uid4, uid5, uid6, uid7, uid8, catsPoint, amount, trackingUserId, firstCookie, catsOptions);
+        } else if (tagType === 'ad' && typeof CATS_Action === 'function') {
+          // 個別広告タグの場合はCATS_Actionを使用
+          CATS_Action(cid, sid, uid1, uid2, uqid, uid3, uid4, uid5, uid6, uid7, uid8, catsPoint, amount, trackingUserId, firstCookie, catsOptions);
+        } else {
+          console.error('[Ads Tracker] CATS function not found or invalid tag type');
         }
       }, 500);
     };

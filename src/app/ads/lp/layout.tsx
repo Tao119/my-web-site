@@ -18,17 +18,17 @@ export default function LPLayout({ children }: { children: ReactNode }) {
       <Script id="cats-tracking-lp" strategy="afterInteractive">
         {`
   // CATS互換設定
-  var trackingId = "dfb2f6c6a158";
-  var baseUrl = "https://016fbaa2dfbb.ngrok-free.app";
+  var trackingId = "a093b0c19351";
+  var baseUrl = "https://bb9d904d102e.ngrok-free.app";
   var advertiserId = "";
   var adGroupId = "grp_77703814-79ea-40ac-b65";
   var adId = "";
   var tagType = "group";
-  var uqid = "dfb2f6c6a158";
+  var uqid = "a093b0c19351";
   
   // CATS互換パラメータ
-  var cid = adGroupId; // CATSではCIDはグループID
-  var gid = adGroupId;
+  var cid = adId || ""; // 個別広告IDがある場合のみ設定
+  var gid = adGroupId; // 広告グループID
   var can_organic_search = "off";
   var can_chatbot = "off";
   var cats_options = {
@@ -52,10 +52,14 @@ export default function LPLayout({ children }: { children: ReactNode }) {
     // cookie.js読み込み完了後に計測実行
     a.onload = function() {
       setTimeout(function() {
-        if (typeof CATS_Create === 'function' && tagType !== 'group') {
-          CATS_Create(cid, uqid, can_organic_search, can_chatbot, cats_options);
-        } else if (typeof CATS_GroupCreate === 'function') {
+        // グループタグの場合はCATS_GroupCreateを使用
+        if (tagType === 'group' && typeof CATS_GroupCreate === 'function') {
           CATS_GroupCreate(gid, uqid, cid, can_organic_search, can_chatbot, cats_options);
+        } else if (tagType === 'ad' && typeof CATS_Create === 'function') {
+          // 個別広告タグの場合はCATS_Createを使用
+          CATS_Create(cid, uqid, can_organic_search, can_chatbot, cats_options);
+        } else {
+          console.error('[Ads Tracker] CATS function not found or invalid tag type');
         }
       }, 100);
     };
