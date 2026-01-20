@@ -17,48 +17,49 @@ export default function LPLayout({ children }: { children: ReactNode }) {
     <>
       <Script id="cats-tracking-lp" strategy="afterInteractive">
         {`
-          // 互換設定
-          var trackingId = "e71e17fa6495";
-          var baseUrl = "http://localhost:8080";
-          var advertiserId = "";
-          var adGroupId = "grp_77703814-79ea-40ac-b65";
-          var adId = "";
-          var tagType = "group";
-          var uqid = "e71e17fa6495";
-          
-          // 互換パラメータ
-          var cid = adGroupId;
-          var gid = adGroupId;
-          var can_organic_search = "off";
-          var can_chatbot = "off";
-          var cats_options = {
-            fpc_id: "",
-            api_parameter_inheritance: "on"
-          };
-          
-          // 動的スクリプト読み込み
-          (function() {
-            var a = document.createElement('script');
-            a.type = 'text/javascript';
-            a.async = true;
-            a.defer = true;
-            a.charset = 'UTF-8';
-            a.id = 'ck_' + uqid;
-            a.src = baseUrl + '/ck/' + uqid + '/cookie.js';
-            var s = document.getElementsByTagName('script')[0];
-            s.parentNode.insertBefore(a, s);
-            
-            // cookie.js読み込み完了後に計測実行
-            a.onload = function() {
-              setTimeout(function() {
-                if (typeof CATS_Create === 'function' && tagType !== 'group') {
-                  CATS_Create(cid, uqid, can_organic_search, can_chatbot, cats_options);
-                } else if (typeof CATS_GroupCreate === 'function') {
-                  CATS_GroupCreate(gid, uqid, cid, can_organic_search, can_chatbot, cats_options);
-                }
-              }, 100);
-            };
-          })();
+  // CATS互換設定
+  var trackingId = "dfb2f6c6a158";
+  var baseUrl = "https://016fbaa2dfbb.ngrok-free.app";
+  var advertiserId = "";
+  var adGroupId = "grp_77703814-79ea-40ac-b65";
+  var adId = "";
+  var tagType = "group";
+  var uqid = "dfb2f6c6a158";
+  
+  // CATS互換パラメータ
+  var cid = adGroupId; // CATSではCIDはグループID
+  var gid = adGroupId;
+  var can_organic_search = "off";
+  var can_chatbot = "off";
+  var cats_options = {
+    fpc_id: "",
+    api_parameter_inheritance: "on"
+  };
+
+  // CATS風の動的スクリプト読み込み
+  (function() {
+    var a = document.createElement('script');
+    a.type = 'text/javascript';
+    a.async = true;
+    a.defer = true;
+    a.charset = 'UTF-8';
+    a.id = 'ck_' + uqid;
+    a.src = baseUrl + '/ck/' + uqid + '/cookie.js';
+    
+    var s = document.getElementsByTagName('script')[0];
+    s.parentNode.insertBefore(a, s);
+    
+    // cookie.js読み込み完了後に計測実行
+    a.onload = function() {
+      setTimeout(function() {
+        if (typeof CATS_Create === 'function' && tagType !== 'group') {
+          CATS_Create(cid, uqid, can_organic_search, can_chatbot, cats_options);
+        } else if (typeof CATS_GroupCreate === 'function') {
+          CATS_GroupCreate(gid, uqid, cid, can_organic_search, can_chatbot, cats_options);
+        }
+      }, 100);
+    };
+  })();
         `}
       </Script>
 
