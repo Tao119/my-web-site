@@ -17,13 +17,13 @@ export default function CVLayout({ children }: { children: ReactNode }) {
       <Script id="cats-conversion-cv" strategy="afterInteractive">
         {`
   // 設定
-  var trackingId = "aede2caef05e";
+  var trackingId = "47d3fb033ed8";
   var baseUrl = "https://ads-tracker-api.onrender.com";
   var advertiserId = "";
   var adGroupId = "grp_ff66893e-b51d-41bd-98d";
   var adId = "";
   var tagType = "group";
-  var uqid = "aede2caef05e";
+  var uqid = "47d3fb033ed8";
   
   // 互換パラメータ
   var cid = adId || ""; // 個別広告IDがある場合のみ設定
