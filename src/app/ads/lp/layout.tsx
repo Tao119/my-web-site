@@ -17,26 +17,26 @@ export default function LPLayout({ children }: { children: ReactNode }) {
     <>
       <Script id="cats-tracking-lp" strategy="afterInteractive">
         {`
-  // CATS互換設定
-  var trackingId = "a093b0c19351";
-  var baseUrl = "https://bb9d904d102e.ngrok-free.app";
+  // 互換設定
+  var trackingId = "5ddea53206cc";
+  var baseUrl = "https://ads-tracker-api.onrender.com/";
   var advertiserId = "";
-  var adGroupId = "grp_77703814-79ea-40ac-b65";
+  var adGroupId = "grp_ff66893e-b51d-41bd-98d";
   var adId = "";
   var tagType = "group";
-  var uqid = "a093b0c19351";
+  var uqid = "5ddea53206cc";
   
-  // CATS互換パラメータ
+  // 互換パラメータ
   var cid = adId || ""; // 個別広告IDがある場合のみ設定
   var gid = adGroupId; // 広告グループID
   var can_organic_search = "off";
   var can_chatbot = "off";
-  var cats_options = {
+  var options = {
     fpc_id: "",
     api_parameter_inheritance: "on"
   };
 
-  // CATS風の動的スクリプト読み込み
+  // 動的スクリプト読み込み
   (function() {
     var a = document.createElement('script');
     a.type = 'text/javascript';
@@ -52,14 +52,14 @@ export default function LPLayout({ children }: { children: ReactNode }) {
     // cookie.js読み込み完了後に計測実行
     a.onload = function() {
       setTimeout(function() {
-        // グループタグの場合はCATS_GroupCreateを使用
-        if (tagType === 'group' && typeof CATS_GroupCreate === 'function') {
-          CATS_GroupCreate(gid, uqid, cid, can_organic_search, can_chatbot, cats_options);
-        } else if (tagType === 'ad' && typeof CATS_Create === 'function') {
-          // 個別広告タグの場合はCATS_Createを使用
-          CATS_Create(cid, uqid, can_organic_search, can_chatbot, cats_options);
+        // グループタグの場合はGroupCreateを使用
+        if (tagType === 'group' && typeof AdsTracker_GroupCreate === 'function') {
+          AdsTracker_GroupCreate(gid, uqid, cid, can_organic_search, can_chatbot, options);
+        } else if (tagType === 'ad' && typeof AdsTracker_Create === 'function') {
+          // 個別広告タグの場合はCreateを使用
+          AdsTracker_Create(cid, uqid, can_organic_search, can_chatbot, options);
         } else {
-          console.error('[Ads Tracker] CATS function not found or invalid tag type');
+          console.error('[Ads Tracker] Function not found or invalid tag type');
         }
       }, 100);
     };
