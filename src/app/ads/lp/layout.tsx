@@ -18,13 +18,13 @@ export default function LPLayout({ children }: { children: ReactNode }) {
       <Script id="cats-tracking-lp" strategy="afterInteractive">
         {`
   // 互換設定
-  var trackingId = "5ddea53206cc";
-  var baseUrl = "https://ads-tracker-api.onrender.com/";
+  var trackingId = "aede2caef05e";
+  var baseUrl = "https://ads-tracker-api.onrender.com";
   var advertiserId = "";
   var adGroupId = "grp_ff66893e-b51d-41bd-98d";
   var adId = "";
   var tagType = "group";
-  var uqid = "5ddea53206cc";
+  var uqid = "aede2caef05e";
   
   // 互換パラメータ
   var cid = adId || ""; // 個別広告IDがある場合のみ設定
