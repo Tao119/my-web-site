@@ -25,7 +25,7 @@
     "framer-motion": "^11.11.10",
     "lil-gui": "^0.19.2",
     "marked": "^11.0.0",
-    "next": "14.0.3",
+    "next": "14.2.35",
     "promise-mysql": "^5.2.0",
     "react": "^18",
     "react-beautiful-dnd": "^13.1.1",
