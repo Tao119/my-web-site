@@ -39,3 +39,6 @@ next-env.d.ts
 /public/uploads/
 
 .env
+
+# Firebase service account key
+*-firebase-adminsdk-*.json

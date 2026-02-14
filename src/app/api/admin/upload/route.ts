@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getStorageInstance } from '@/lib/firebase'
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage'
+import { getAdminBucket } from '@/lib/firebaseAdmin'
 
 // 許可される画像形式
 const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif']
@@ -40,18 +39,24 @@ export async function POST(request: NextRequest) {
         const extension = file.name.split('.').pop()?.toLowerCase() || 'jpg'
         const fileName = `${type}/${timestamp}_${randomId}.${extension}`
 
-        // File → Uint8Array に変換（サーバーサイドで動作させるため）
+        // File → Buffer に変換
         const arrayBuffer = await file.arrayBuffer()
-        const uint8Array = new Uint8Array(arrayBuffer)
+        const buffer = Buffer.from(arrayBuffer)
 
-        // uploadBytes を使用（uploadBytesResumable はブラウザXHRが必要で動作しない）
-        const storage = getStorageInstance()
-        const storageRef = ref(storage, fileName)
-        await uploadBytes(storageRef, uint8Array, {
-            contentType: file.type,
+        // Firebase Admin SDK でアップロード
+        const bucket = getAdminBucket()
+        const fileRef = bucket.file(fileName)
+
+        await fileRef.save(buffer, {
+            metadata: {
+                contentType: file.type,
+            },
         })
 
-        const url = await getDownloadURL(storageRef)
+        // 公開URLを取得（署名付きURLではなくFirebase Storage公開URL形式）
+        await fileRef.makePublic()
+        const bucketName = bucket.name
+        const url = `https://storage.googleapis.com/${bucketName}/${fileName}`
 
         return NextResponse.json({
             success: true,
@@ -62,12 +67,13 @@ export async function POST(request: NextRequest) {
             message: 'ファイルが正常にアップロードされました'
         })
 
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error('File upload error:', error)
+        const message = error instanceof Error ? error.message : 'ファイルのアップロードに失敗しました'
         return NextResponse.json(
             {
                 success: false,
-                error: error.message || 'ファイルのアップロードに失敗しました'
+                error: message
             },
             { status: 500 }
         )

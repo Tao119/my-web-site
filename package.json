@@ -22,6 +22,7 @@
     "dnd-kit": "^0.0.2",
     "dotenv": "^16.3.1",
     "firebase": "^10.10.0",
+    "firebase-admin": "^13.6.1",
     "framer-motion": "^11.11.10",
     "lil-gui": "^0.19.2",
     "marked": "^11.0.0",
