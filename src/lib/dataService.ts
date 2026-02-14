@@ -363,6 +363,18 @@ export const getProjects = async (featuredOnly = false): Promise<Project[]> => {
             return project
         }))
 
+        // orderフィールド優先でクライアントサイドソート（composite index回避）
+        projects.sort((a, b) => {
+            if (a.order !== undefined && b.order !== undefined) {
+                return a.order - b.order
+            }
+            if (a.order !== undefined) return -1
+            if (b.order !== undefined) return 1
+            const dateA = new Date(a.createdAt).getTime()
+            const dateB = new Date(b.createdAt).getTime()
+            return dateB - dateA
+        })
+
         console.log(`Loaded ${projects.length} projects from Firestore${featuredOnly ? ' (featured only)' : ''}`)
         return projects
     } catch (error: any) {
