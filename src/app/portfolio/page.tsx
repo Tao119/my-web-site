@@ -11,7 +11,6 @@ import ContactSection from "@/components/portfolio/ContactSection";
 import { OfflineIndicator } from "@/components/portfolio/OfflineIndicator";
 import { SlideIn, FloatingActionButton } from "@/components/portfolio/MicroInteractions";
 import { BlogPost } from "@/types/portfolio";
-import { getBlogPosts } from "@/lib/dataService";
 import { useState, useEffect } from "react";
 
 const PortfolioPage = () => {
@@ -29,10 +28,13 @@ const PortfolioPage = () => {
   useEffect(() => {
     const loadPosts = async () => {
       try {
-        const posts = await getBlogPosts(true);
-        setBlogPosts(posts);
+        const response = await fetch('/api/portfolio/blog');
+        if (response.ok) {
+          const data = await response.json();
+          setBlogPosts(data.posts || []);
+        }
       } catch {
-        // Firestore未接続時は空配列のまま
+        // API接続エラー時は空配列のまま
       }
     };
     loadPosts();

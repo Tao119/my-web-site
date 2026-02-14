@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { getSkills } from "@/lib/dataService";
 import { Skill, SkillCategory } from "@/types/portfolio";
 import { ScrollAnimation } from "./ScrollAnimation";
 
@@ -36,10 +35,13 @@ const Skills = () => {
 
   const fetchSkills = async () => {
     try {
-      const skillsList = await getSkills();
-      setSkills(skillsList);
+      const response = await fetch('/api/portfolio/skills');
+      if (response.ok) {
+        const data = await response.json();
+        setSkills(data.skills || []);
+      }
     } catch {
-      // Firestore未接続時は空配列のまま
+      // API接続エラー時は空配列のまま
     } finally {
       setLoading(false);
     }

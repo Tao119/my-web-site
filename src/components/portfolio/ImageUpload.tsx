@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useRef, useCallback } from 'react';
-import { uploadImage, deleteImage, UploadProgress } from '@/lib/imageUpload';
 import Image from 'next/image';
 
 interface ImageUploadProps {
@@ -38,26 +37,35 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
         setProgress(0);
 
         try {
-            // プレビュー表示
             if (showPreview) {
                 const preview = URL.createObjectURL(file);
                 setPreviewUrl(preview);
             }
 
-            // 統合アップロード機能を使用（ローカル/Firebase自動判定）
-            const result = await uploadImage(
-                file,
-                folder,
-                (progress: UploadProgress) => {
-                    setProgress(progress.progress);
-                }
-            );
+            setProgress(30);
+
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('type', folder);
+
+            const response = await fetch('/api/admin/upload', {
+                method: 'POST',
+                body: formData,
+            });
+
+            setProgress(80);
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'アップロードに失敗しました');
+            }
+
+            const result = await response.json();
+            setProgress(100);
 
             onUploadComplete(result.url);
             setPreviewUrl(result.url);
-
         } catch (error) {
-            console.error('Upload error:', error);
             onUploadError?.(error instanceof Error ? error.message : 'アップロードに失敗しました');
             setPreviewUrl(currentImage || null);
         } finally {
@@ -100,18 +108,9 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
     }, [disabled, uploading]);
 
     const handleRemove = useCallback(async () => {
-        if (previewUrl && previewUrl.startsWith('/uploads/')) {
-            try {
-                // ローカルアップロードされた画像の場合
-                const path = previewUrl.replace('/uploads/', 'uploads/');
-                await deleteImage(path);
-            } catch (error) {
-                console.warn('Failed to delete image:', error);
-            }
-        }
         setPreviewUrl(null);
         onUploadComplete('');
-    }, [previewUrl, onUploadComplete]);
+    }, [onUploadComplete]);
 
     return (
         <div className={`c-image-upload ${className}`}>

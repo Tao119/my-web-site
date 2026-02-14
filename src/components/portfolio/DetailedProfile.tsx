@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { getProfile } from "@/lib/dataService";
 import { Profile, Education, Experience } from "@/types/portfolio";
 
 interface DetailedProfileProps {
@@ -68,11 +67,15 @@ const DetailedProfile = ({ className = "" }: DetailedProfileProps) => {
 
     const fetchDetailedProfile = async () => {
         try {
-            const profile = await getProfile();
-            setProfileData(profile);
-            setError(false);
-        } catch (error) {
-            console.error('Failed to fetch detailed profile:', error);
+            const response = await fetch('/api/portfolio/profile');
+            if (response.ok) {
+                const profile = await response.json();
+                setProfileData(profile);
+                setError(false);
+            } else {
+                throw new Error('API error');
+            }
+        } catch {
             setError(true);
         } finally {
             setLoading(false);

@@ -1,8 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { getFirebaseApp } from "@/lib/firebase";
-import { getFirestore, doc, getDoc } from "firebase/firestore";
 
 interface SocialLink {
   platform: string;
@@ -23,77 +21,56 @@ const SocialLinks = () => {
     fetchSocialData();
   }, []);
 
+  const defaultLinks: SocialLink[] = [
+    {
+      platform: "X",
+      url: "https://x.com/tao_matsumr",
+      username: "@tao_matsumr",
+      icon: "https://cdn.jsdelivr.net/npm/simple-icons@v9/icons/x.svg"
+    },
+    {
+      platform: "Instagram",
+      url: "https://instagram.com/tao_matsumr",
+      username: "@tao_matsumr",
+      icon: "https://cdn.jsdelivr.net/npm/simple-icons@v9/icons/instagram.svg"
+    },
+    {
+      platform: "Facebook",
+      url: "https://facebook.com/profile.php?id=100027431360651",
+      username: "Tao Matsumura",
+      icon: "https://cdn.jsdelivr.net/npm/simple-icons@v9/icons/facebook.svg"
+    },
+    {
+      platform: "LinkedIn",
+      url: "https://www.linkedin.com/in/%E5%A4%A7%E5%A4%AE-%E6%9D%BE%E6%9D%91-474a15277/",
+      username: "大央 松村",
+      icon: "https://cdn.jsdelivr.net/npm/simple-icons@v9/icons/linkedin.svg"
+    }
+  ];
+
   const fetchSocialData = async () => {
     try {
-      const app = getFirebaseApp();
-      const db = getFirestore(app);
-      const docRef = doc(db, "portfolio", "social");
-      const docSnap = await getDoc(docRef);
-
-      if (docSnap.exists()) {
-        setSocialData(docSnap.data() as SocialData);
+      const response = await fetch('/api/portfolio/profile');
+      if (response.ok) {
+        const profile = await response.json();
+        if (profile.socialLinks && Object.keys(profile.socialLinks).length > 0) {
+          const links: SocialLink[] = Object.entries(profile.socialLinks)
+            .filter(([_, url]) => url)
+            .map(([platform, url]) => ({
+              platform,
+              url: url as string,
+              username: platform,
+              icon: `https://cdn.jsdelivr.net/npm/simple-icons@v9/icons/${platform.toLowerCase()}.svg`
+            }));
+          setSocialData({ links: links.length > 0 ? links : defaultLinks });
+        } else {
+          setSocialData({ links: defaultLinks });
+        }
       } else {
-        // Use default social data if Firebase data is not available
-        setSocialData({
-          links: [
-            {
-              platform: "X",
-              url: "https://x.com/tao_matsumr",
-              username: "@tao_matsumr",
-              icon: "https://cdn.jsdelivr.net/npm/simple-icons@v9/icons/x.svg"
-            },
-            {
-              platform: "Instagram",
-              url: "https://instagram.com/tao_matsumr",
-              username: "@tao_matsumr",
-              icon: "https://cdn.jsdelivr.net/npm/simple-icons@v9/icons/instagram.svg"
-            },
-            {
-              platform: "Facebook",
-              url: "https://facebook.com/profile.php?id=100027431360651",
-              username: "Tao Matsumura",
-              icon: "https://cdn.jsdelivr.net/npm/simple-icons@v9/icons/facebook.svg"
-            },
-            {
-              platform: "LinkedIn",
-              url: "https://www.linkedin.com/in/%E5%A4%A7%E5%A4%AE-%E6%9D%BE%E6%9D%91-474a15277/",
-              username: "大央 松村",
-              icon: "https://cdn.jsdelivr.net/npm/simple-icons@v9/icons/linkedin.svg"
-            }
-          ]
-        });
+        setSocialData({ links: defaultLinks });
       }
-    } catch (error) {
-      // エラーログを無効化
-      // Use default social data on error
-      setSocialData({
-        links: [
-          {
-            platform: "X (Twitter)",
-            url: "https://x.com/tao_matsumr",
-            username: "@tao_matsumr",
-            icon: "https://cdn.jsdelivr.net/npm/simple-icons@v9/icons/x.svg"
-          },
-          {
-            platform: "Instagram",
-            url: "https://instagram.com/tao_matsumr",
-            username: "@tao_matsumr",
-            icon: "https://cdn.jsdelivr.net/npm/simple-icons@v9/icons/instagram.svg"
-          },
-          {
-            platform: "Facebook",
-            url: "https://facebook.com/profile.php?id=100027431360651",
-            username: "Tao Matsumura",
-            icon: "https://cdn.jsdelivr.net/npm/simple-icons@v9/icons/facebook.svg"
-          },
-          {
-            platform: "LinkedIn",
-            url: "https://www.linkedin.com/in/%E5%A4%A7%E5%A4%AE-%E6%9D%BE%E6%9D%91-474a15277/",
-            username: "大央 松村",
-            icon: "https://cdn.jsdelivr.net/npm/simple-icons@v9/icons/linkedin.svg"
-          }
-        ]
-      });
+    } catch {
+      setSocialData({ links: defaultLinks });
     } finally {
       setLoading(false);
     }

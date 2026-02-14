@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { getProfile } from "@/lib/dataService";
 import { Profile as ProfileType } from "@/types/portfolio";
 import Image from "next/image";
 // import { TypewriterText } from "./TypewriterText";
@@ -35,16 +34,18 @@ const Profile = ({ showDetailedInfo = false }: ProfileProps) => {
     };
   }, []);
 
-  const fetchProfileData = async (forceRefresh = false) => {
+  const fetchProfileData = async (_forceRefresh = false) => {
     try {
       setLoading(true);
-      const profile = await getProfile(forceRefresh);
-      setProfileData(profile);
-      setIsOffline(false);
-      console.log('Profile data loaded:', profile);
-    } catch (error) {
-      console.error('Failed to fetch profile data:', error);
-      // エラーが発生した場合はmockDataを直接使用
+      const response = await fetch('/api/portfolio/profile');
+      if (response.ok) {
+        const profile = await response.json();
+        setProfileData(profile);
+        setIsOffline(false);
+      } else {
+        throw new Error('API error');
+      }
+    } catch {
       const { mockProfile } = await import('@/lib/mockData');
       setProfileData(mockProfile);
       setIsOffline(true);

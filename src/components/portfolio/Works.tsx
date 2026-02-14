@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import { Project, ProjectCategory } from "@/types/portfolio";
-import { getProjects } from "@/lib/dataService";
 import ProjectModal from "./ProjectModal";
 import { ScrollAnimation, StaggerAnimation, CardAnimation } from "./ScrollAnimation";
 import { ThumbnailImage } from "./OptimizedImage";
@@ -59,11 +58,14 @@ const Works = () => {
 
   const fetchProjects = async () => {
     try {
-      const projectsList = await getProjects();
-      setProjects(projectsList);
-    } catch (error) {
-      // エラーログを無効化
-      // Fallback to mock data for development
+      const response = await fetch('/api/portfolio/projects');
+      if (response.ok) {
+        const data = await response.json();
+        setProjects(data.projects || []);
+      } else {
+        setProjects(getMockProjects());
+      }
+    } catch {
       setProjects(getMockProjects());
     } finally {
       setLoading(false);
@@ -72,7 +74,7 @@ const Works = () => {
 
   useEffect(() => {
     fetchProjects();
-  }, [fetchProjects]);
+  }, []);
 
   // Mock data for development
   const getMockProjects = (): Project[] => [
