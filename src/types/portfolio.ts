@@ -142,6 +142,7 @@ export interface Project {
     images: string[];
     technologies: string[];
     category?: ProjectCategory;
+    projectUrl?: string;
     githubUrl?: string;
     demoUrl?: string;
     featured: boolean;
@@ -170,6 +171,7 @@ export interface BlogPost {
     readTime: number;
     published: boolean;
     featured?: boolean;
+    externalUrl?: string;
     publishedAt: Date;
     createdAt: Date;
     updatedAt: Date;

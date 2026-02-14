@@ -11,6 +11,7 @@ interface Project {
     images: string[];
     technologies: string[];
     category: string;
+    projectUrl?: string;
     githubUrl?: string;
     demoUrl?: string;
     featured: boolean;
@@ -65,6 +66,7 @@ export const ProjectsManager = () => {
         images: [],
         technologies: [],
         category: "web",
+        projectUrl: "",
         githubUrl: "",
         demoUrl: "",
         featured: false,
@@ -331,6 +333,17 @@ export const ProjectsManager = () => {
                                 </div>
 
                                 <div className="c-projects-manager__field">
+                                    <label className="c-projects-manager__label">サイトURL</label>
+                                    <input
+                                        type="url"
+                                        value={editingProject.projectUrl || ""}
+                                        onChange={(e) => updateEditingProject("projectUrl", e.target.value)}
+                                        className="c-projects-manager__input"
+                                        placeholder="https://example.com"
+                                    />
+                                </div>
+
+                                <div className="c-projects-manager__field">
                                     <label className="c-projects-manager__label">GitHubリンク</label>
                                     <input
                                         type="url"
@@ -434,6 +447,9 @@ export const ProjectsManager = () => {
                                             </div>
                                         )}
                                         <div className="c-projects-manager__preview-links">
+                                            {editingProject.projectUrl && (
+                                                <span className="c-projects-manager__preview-link">Site</span>
+                                            )}
                                             {editingProject.githubUrl && (
                                                 <span className="c-projects-manager__preview-link">GitHub</span>
                                             )}

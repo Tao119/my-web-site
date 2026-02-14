@@ -3,7 +3,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { getBlogPosts } from "@/lib/dataService";
 import Link from "next/link";
-import Image from "next/image";
 import { BlogPost } from "@/types/portfolio";
 import { formatDate, debounce } from "@/lib/utils";
 // Simple SVG icon components
@@ -45,93 +44,11 @@ const BlogPage = () => {
     try {
       const postsList = await getBlogPosts(true); // published only
       setPosts(postsList);
-    } catch (error) {
-      console.error("Error fetching blog posts:", error);
-      // Fallback to sample data for demo
+    } catch {
+      // Firestore未接続時は空配列のまま
     } finally {
       setLoading(false);
     }
-  };
-
-  const setSamplePosts = () => {
-    const samplePosts: BlogPost[] = [
-      {
-        id: "1",
-        title: "Next.js 14とApp Routerで作るモダンなポートフォリオサイト",
-        slug: "nextjs-14-portfolio-site",
-        excerpt: "Next.js 14の新機能App Routerを使用して、パフォーマンスとSEOに優れたポートフォリオサイトを構築する方法を詳しく解説します。",
-        content: "# Next.js 14とApp Routerで作るモダンなポートフォリオサイト\n\nNext.js 14の新機能について詳しく解説します...",
-        thumbnail: "/placeholder-blog.svg",
-        category: "Web Development",
-        tags: ["Next.js", "React", "TypeScript", "Portfolio"],
-        readTime: 8,
-        published: true,
-        publishedAt: new Date("2024-01-15"),
-        createdAt: new Date("2024-01-15"),
-        updatedAt: new Date("2024-01-15"),
-      },
-      {
-        id: "2",
-        title: "Tailwind CSSとNeobrutalism UIで作る印象的なデザイン",
-        slug: "tailwind-neobrutalism-design",
-        excerpt: "Neobrutalism UIデザインの特徴である太いボーダー、鮮やかな色彩、大胆なタイポグラフィをTailwind CSSで実装する方法を紹介します。",
-        content: "# Tailwind CSSとNeobrutalism UIで作る印象的なデザイン\n\nNeobrutalism UIについて詳しく解説します...",
-        thumbnail: "/placeholder-blog.svg",
-        category: "Design",
-        tags: ["Tailwind CSS", "UI Design", "Neobrutalism", "CSS"],
-        readTime: 6,
-        published: true,
-        publishedAt: new Date("2024-01-10"),
-        createdAt: new Date("2024-01-10"),
-        updatedAt: new Date("2024-01-10"),
-      },
-      {
-        id: "3",
-        title: "UnityとWebGLで作るブラウザゲーム開発入門",
-        slug: "unity-webgl-browser-game",
-        excerpt: "Unityを使ってブラウザで動作するWebGLゲームを開発する際のベストプラクティスと最適化テクニックを解説します。",
-        content: "# UnityとWebGLで作るブラウザゲーム開発入門\n\nUnity WebGL開発について詳しく解説します...",
-        thumbnail: "/placeholder-blog.svg",
-        category: "Game Development",
-        tags: ["Unity", "WebGL", "Game Development", "JavaScript"],
-        readTime: 12,
-        published: true,
-        publishedAt: new Date("2024-01-05"),
-        createdAt: new Date("2024-01-05"),
-        updatedAt: new Date("2024-01-05"),
-      },
-      {
-        id: "4",
-        title: "React Hooksを使った状態管理のベストプラクティス",
-        slug: "react-hooks-state-management",
-        excerpt: "React Hooksを効果的に使用した状態管理の方法と、パフォーマンス最適化のテクニックを紹介します。",
-        content: "# React Hooksを使った状態管理のベストプラクティス\n\nReact Hooksについて詳しく解説します...",
-        thumbnail: "/placeholder-blog.svg",
-        category: "Web Development",
-        tags: ["React", "Hooks", "State Management", "Performance"],
-        readTime: 10,
-        published: true,
-        publishedAt: new Date("2024-01-01"),
-        createdAt: new Date("2024-01-01"),
-        updatedAt: new Date("2024-01-01"),
-      },
-      {
-        id: "5",
-        title: "TypeScriptで型安全なAPIクライアントを作る",
-        slug: "typescript-type-safe-api-client",
-        excerpt: "TypeScriptの型システムを活用して、型安全で保守性の高いAPIクライアントを構築する方法を解説します。",
-        content: "# TypeScriptで型安全なAPIクライアントを作る\n\nTypeScript APIクライアントについて詳しく解説します...",
-        thumbnail: "/placeholder-blog.svg",
-        category: "Web Development",
-        tags: ["TypeScript", "API", "Type Safety", "Frontend"],
-        readTime: 7,
-        published: true,
-        publishedAt: new Date("2023-12-28"),
-        createdAt: new Date("2023-12-28"),
-        updatedAt: new Date("2023-12-28"),
-      },
-    ];
-    setPosts(samplePosts);
   };
 
   // Debounced search function
@@ -420,87 +337,82 @@ interface BlogPostCardProps {
 }
 
 const BlogPostCard: React.FC<BlogPostCardProps> = ({ post }) => {
-  return (
-    <Link href={`/portfolio/blog/${post.slug}`} className="block group">
-      <article className="neo-card bg-white dark:bg-gray-800 overflow-hidden h-full hover:shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] dark:hover:shadow-[12px_12px_0px_0px_rgba(255,255,255,0.2)] transition-all duration-300 group-hover:-translate-x-1 group-hover:-translate-y-1">
-        {/* Thumbnail */}
-        <div className="relative h-48 overflow-hidden">
-          <Image
-            src={post.thumbnail || '/placeholder-blog.svg'}
-            alt={post.title}
-            fill
-            className="object-cover transition-transform duration-300 group-hover:scale-105"
-            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-          />
+  const href = post.externalUrl || `/portfolio/blog/${post.slug}`;
+  const isExternal = !!post.externalUrl;
 
-          {/* Category Badge */}
-          <div className="absolute top-4 left-4">
-            <span className="bg-yellow-400 text-black px-3 py-1 text-sm font-bold border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
+  const cardContent = (
+    <article className="neo-card bg-white dark:bg-gray-800 overflow-hidden h-full hover:shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] dark:hover:shadow-[12px_12px_0px_0px_rgba(255,255,255,0.2)] transition-all duration-300 group-hover:-translate-x-1 group-hover:-translate-y-1">
+      {/* Content */}
+      <div className="p-6">
+        {/* Category + External badge */}
+        <div className="flex items-center gap-2 mb-3">
+          {post.category && (
+            <span className="bg-yellow-400 text-black px-2 py-0.5 text-xs font-bold border border-black">
               {post.category}
             </span>
-          </div>
+          )}
+          {isExternal && (
+            <span className="bg-blue-100 text-blue-800 px-2 py-0.5 text-xs font-bold border border-blue-300">
+              外部記事
+            </span>
+          )}
         </div>
 
-        {/* Content */}
-        <div className="p-6">
-          {/* Title */}
-          <h3 className="text-xl font-bold mb-3 line-clamp-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
-            {post.title}
-          </h3>
+        {/* Title */}
+        <h3 className="text-lg font-bold mb-3 line-clamp-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+          {post.title}
+        </h3>
 
-          {/* Excerpt */}
-          <p className="text-gray-600 dark:text-gray-300 mb-4 line-clamp-3 text-sm leading-relaxed">
-            {post.excerpt}
-          </p>
+        {/* Meta Information */}
+        <div className="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400 mb-3">
+          <div className="flex items-center gap-1">
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+            <span>{formatDate(post.publishedAt)}</span>
+          </div>
 
-          {/* Meta Information */}
-          <div className="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400 mb-4">
-            <div className="flex items-center gap-4">
-              {/* Published Date */}
-              <div className="flex items-center gap-1">
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                </svg>
-                <span>{formatDate(post.publishedAt)}</span>
-              </div>
-
-              {/* Read Time */}
-              <div className="flex items-center gap-1">
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                <span>{post.readTime}分</span>
-              </div>
-            </div>
-
-            {/* Read More Arrow */}
+          {isExternal ? (
+            <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+            </svg>
+          ) : (
             <div className="text-blue-600 dark:text-blue-400 group-hover:translate-x-1 transition-transform">
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
               </svg>
             </div>
-          </div>
-
-          {/* Tags */}
-          {post.tags && post.tags.length > 0 && (
-            <div className="flex flex-wrap gap-2">
-              {post.tags.slice(0, 3).map((tag) => (
-                <span
-                  key={tag}
-                  className="bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 px-2 py-1 text-xs font-medium border border-gray-300 dark:border-gray-600"
-                >
-                  #{tag}
-                </span>
-              ))}
-              {post.tags.length > 3 && (
-                <span className="text-gray-500 dark:text-gray-400 text-xs">
-                  +{post.tags.length - 3}
-                </span>
-              )}
-            </div>
           )}
         </div>
-      </article>
+
+        {/* Tags */}
+        {post.tags && post.tags.length > 0 && (
+          <div className="flex flex-wrap gap-2">
+            {post.tags.slice(0, 4).map((tag) => (
+              <span
+                key={tag}
+                className="text-xs text-gray-500 dark:text-gray-400"
+              >
+                #{tag}
+              </span>
+            ))}
+          </div>
+        )}
+      </div>
+    </article>
+  );
+
+  if (isExternal) {
+    return (
+      <a href={href} target="_blank" rel="noopener noreferrer" className="block group">
+        {cardContent}
+      </a>
+    );
+  }
+
+  return (
+    <Link href={href} className="block group">
+      {cardContent}
     </Link>
   );
 };

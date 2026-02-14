@@ -11,77 +11,36 @@ import ContactSection from "@/components/portfolio/ContactSection";
 import { OfflineIndicator } from "@/components/portfolio/OfflineIndicator";
 import { SlideIn, FloatingActionButton } from "@/components/portfolio/MicroInteractions";
 import { BlogPost } from "@/types/portfolio";
+import { getBlogPosts } from "@/lib/dataService";
 import { useState, useEffect } from "react";
 
 const PortfolioPage = () => {
   const [showScrollTop, setShowScrollTop] = useState(false);
+  const [blogPosts, setBlogPosts] = useState<BlogPost[]>([]);
 
-  // スクロール位置を監視してトップに戻るボタンの表示を制御
   useEffect(() => {
     const handleScroll = () => {
       setShowScrollTop(window.scrollY > 300);
     };
-
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // トップに戻る関数
-  const scrollToTop = () => {
-    window.scrollTo({
-      top: 0,
-      behavior: 'smooth'
-    });
-  };
+  useEffect(() => {
+    const loadPosts = async () => {
+      try {
+        const posts = await getBlogPosts(true);
+        setBlogPosts(posts);
+      } catch {
+        // Firestore未接続時は空配列のまま
+      }
+    };
+    loadPosts();
+  }, []);
 
-  // Sample blog posts data
-  const sampleBlogPosts: BlogPost[] = [
-    {
-      id: "1",
-      title: "Next.js 14とApp Routerで作るモダンなポートフォリオサイト",
-      slug: "nextjs-14-portfolio-site",
-      excerpt: "Next.js 14の新機能App Routerを使用して、パフォーマンスとSEOに優れたポートフォリオサイトを構築する方法を詳しく解説します。",
-      content: "",
-      thumbnail: "/placeholder-blog.jpg",
-      category: "Web Development",
-      tags: ["Next.js", "React", "TypeScript", "Portfolio"],
-      readTime: 8,
-      published: true,
-      publishedAt: new Date("2024-01-15"),
-      createdAt: new Date("2024-01-15"),
-      updatedAt: new Date("2024-01-15"),
-    },
-    {
-      id: "2",
-      title: "Tailwind CSSとNeobrutalism UIで作る印象的なデザイン",
-      slug: "tailwind-neobrutalism-design",
-      excerpt: "Neobrutalism UIデザインの特徴である太いボーダー、鮮やかな色彩、大胆なタイポグラフィをTailwind CSSで実装する方法を紹介します。",
-      content: "",
-      thumbnail: "/placeholder-blog.jpg",
-      category: "Design",
-      tags: ["Tailwind CSS", "UI Design", "Neobrutalism", "CSS"],
-      readTime: 6,
-      published: true,
-      publishedAt: new Date("2024-01-10"),
-      createdAt: new Date("2024-01-10"),
-      updatedAt: new Date("2024-01-10"),
-    },
-    {
-      id: "3",
-      title: "UnityとWebGLで作るブラウザゲーム開発入門",
-      slug: "unity-webgl-browser-game",
-      excerpt: "Unityを使ってブラウザで動作するWebGLゲームを開発する際のベストプラクティスと最適化テクニックを解説します。",
-      content: "",
-      thumbnail: "/placeholder-blog.jpg",
-      category: "Game Development",
-      tags: ["Unity", "WebGL", "Game Development", "JavaScript"],
-      readTime: 12,
-      published: true,
-      publishedAt: new Date("2024-01-05"),
-      createdAt: new Date("2024-01-05"),
-      updatedAt: new Date("2024-01-05"),
-    },
-  ];
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   return (
     <>
@@ -119,9 +78,9 @@ const PortfolioPage = () => {
         <section id="blog" className="neo-section">
           <div className="neo-container">
             <h2 className="neo-heading neo-heading--2" style={{ textAlign: 'center', marginBottom: '40px' }}>
-              Blog
+              記事
             </h2>
-            <BlogList posts={[]} showCount={3} showViewAll={true} />
+            <BlogList posts={blogPosts} showCount={6} />
           </div>
         </section>
       </SlideIn>

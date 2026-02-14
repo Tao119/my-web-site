@@ -84,6 +84,7 @@ const Works = () => {
       images: ["/api/placeholder/800/600"],
       technologies: ["Next.js", "TypeScript", "Tailwind", "Firebase"],
       category: ProjectCategory.WEB,
+      projectUrl: "https://portfolio.example.com",
       githubUrl: "https://github.com/example/portfolio",
       demoUrl: "https://portfolio.example.com",
       featured: true,
@@ -297,12 +298,25 @@ const Works = () => {
 
                     {/* Action Links */}
                     <div className="c-works__links">
-                      {project.demoUrl && (
+                      {project.projectUrl && (
+                        <a
+                          href={project.projectUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="c-works__link c-works__link--demo"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <span>🌐</span>
+                          サイトを見る
+                        </a>
+                      )}
+                      {project.demoUrl && !project.projectUrl && (
                         <a
                           href={project.demoUrl}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="c-works__link c-works__link--demo"
+                          onClick={(e) => e.stopPropagation()}
                         >
                           <span>🚀</span>
                           デモを見る
@@ -314,6 +328,7 @@ const Works = () => {
                           target="_blank"
                           rel="noopener noreferrer"
                           className="c-works__link c-works__link--github"
+                          onClick={(e) => e.stopPropagation()}
                         >
                           <span>📂</span>
                           GitHub

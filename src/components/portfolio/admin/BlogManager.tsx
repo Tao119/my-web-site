@@ -1,9 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { BlogPost, BlogCategory } from "@/types/portfolio";
-import { MarkdownEditor } from "./MarkdownEditor";
-import { ImageUpload } from "../ImageUpload";
+import { BlogPost } from "@/types/portfolio";
 
 interface BlogManagerProps {
     className?: string;
@@ -11,19 +9,14 @@ interface BlogManagerProps {
 
 export const BlogManager: React.FC<BlogManagerProps> = ({ className = "" }) => {
     const [posts, setPosts] = useState<BlogPost[]>([]);
-    const [categories, setCategories] = useState<BlogCategory[]>([]);
-    const [selectedPost, setSelectedPost] = useState<BlogPost | null>(null);
-    const [isEditing, setIsEditing] = useState(false);
+    const [editingPost, setEditingPost] = useState<Partial<BlogPost> | null>(null);
     const [isCreating, setIsCreating] = useState(false);
     const [loading, setLoading] = useState(false);
-    const [searchQuery, setSearchQuery] = useState("");
-    const [filterCategory, setFilterCategory] = useState<string>("all");
-    const [filterStatus, setFilterStatus] = useState<string>("all");
+    const [saving, setSaving] = useState(false);
+    const [saveStatus, setSaveStatus] = useState<"idle" | "success" | "error">("idle");
 
-    // Load posts and categories on component mount
     useEffect(() => {
         loadPosts();
-        loadCategories();
     }, []);
 
     const loadPosts = async () => {
@@ -34,49 +27,30 @@ export const BlogManager: React.FC<BlogManagerProps> = ({ className = "" }) => {
                 const data = await response.json();
                 setPosts(data.posts || []);
             }
-        } catch (error) {
-            // エラーログを無効化
+        } catch {
+            // Firestore未接続時は空配列
         } finally {
             setLoading(false);
         }
     };
 
-    const loadCategories = async () => {
-        try {
-            const response = await fetch("/api/admin/blog/categories");
-            if (response.ok) {
-                const data = await response.json();
-                setCategories(data.categories || []);
-            }
-        } catch (error) {
-            // エラーログを無効化
-        }
-    };
-
-    const handleCreatePost = () => {
-        const newPost: Partial<BlogPost> = {
+    const handleCreate = () => {
+        setEditingPost({
             title: "",
-            slug: "",
-            excerpt: "",
-            content: "",
-            thumbnail: "",
+            externalUrl: "",
             category: "",
             tags: [],
-            readTime: 0,
             published: false,
-        };
-        setSelectedPost(newPost as BlogPost);
+        });
         setIsCreating(true);
-        setIsEditing(true);
     };
 
-    const handleEditPost = (post: BlogPost) => {
-        setSelectedPost(post);
+    const handleEdit = (post: BlogPost) => {
+        setEditingPost({ ...post });
         setIsCreating(false);
-        setIsEditing(true);
     };
 
-    const handleDeletePost = async (postId: string) => {
+    const handleDelete = async (postId: string) => {
         if (!confirm("この記事を削除してもよろしいですか？")) return;
 
         try {
@@ -85,173 +59,277 @@ export const BlogManager: React.FC<BlogManagerProps> = ({ className = "" }) => {
             });
 
             if (response.ok) {
-                setPosts(posts.filter(post => post.id !== postId));
+                setPosts(prev => prev.filter(post => post.id !== postId));
+                setSaveStatus("success");
+                setTimeout(() => setSaveStatus("idle"), 3000);
             } else {
-                alert("記事の削除に失敗しました");
+                setSaveStatus("error");
+                setTimeout(() => setSaveStatus("idle"), 3000);
             }
-        } catch (error) {
-            // エラーログを無効化
-            alert("記事の削除に失敗しました");
+        } catch {
+            setSaveStatus("error");
+            setTimeout(() => setSaveStatus("idle"), 3000);
         }
     };
 
-    const handleTogglePublish = async (post: BlogPost) => {
+    const handleSave = async () => {
+        if (!editingPost || !editingPost.title?.trim()) return;
+
+        setSaving(true);
         try {
-            const response = await fetch(`/api/admin/blog/posts/${post.id}`, {
-                method: "PATCH",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    published: !post.published,
-                    publishedAt: !post.published ? new Date().toISOString() : post.publishedAt,
-                }),
+            const postData = {
+                ...editingPost,
+                slug: editingPost.externalUrl
+                    ? `external-${Date.now()}`
+                    : editingPost.title?.toLowerCase().replace(/[^\w\s-]/g, "").replace(/\s+/g, "-").trim() || `post-${Date.now()}`,
+                excerpt: editingPost.title || "",
+                content: "",
+                thumbnail: "",
+                readTime: 0,
+                publishedAt: editingPost.published
+                    ? ((editingPost as BlogPost).publishedAt || new Date().toISOString())
+                    : null,
+            };
+
+            const url = isCreating ? "/api/admin/blog/posts" : `/api/admin/blog/posts/${(editingPost as BlogPost).id}`;
+            const method = isCreating ? "POST" : "PUT";
+
+            const response = await fetch(url, {
+                method,
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(postData),
             });
 
             if (response.ok) {
-                const updatedPost = await response.json();
-                setPosts(posts.map(p => p.id === post.id ? updatedPost.post : p));
+                const result = await response.json();
+                if (isCreating) {
+                    setPosts(prev => [result.post, ...prev]);
+                } else {
+                    setPosts(prev => prev.map(p => p.id === result.post.id ? result.post : p));
+                }
+                setEditingPost(null);
+                setIsCreating(false);
+                setSaveStatus("success");
+                setTimeout(() => setSaveStatus("idle"), 3000);
             } else {
-                alert("公開状態の変更に失敗しました");
+                setSaveStatus("error");
+                setTimeout(() => setSaveStatus("idle"), 3000);
             }
-        } catch (error) {
-            // エラーログを無効化
-            alert("公開状態の変更に失敗しました");
+        } catch {
+            setSaveStatus("error");
+            setTimeout(() => setSaveStatus("idle"), 3000);
+        } finally {
+            setSaving(false);
         }
     };
 
-    const filteredPosts = posts.filter(post => {
-        const matchesSearch = post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            post.excerpt.toLowerCase().includes(searchQuery.toLowerCase());
-        const matchesCategory = filterCategory === "all" || post.category === filterCategory;
-        const matchesStatus = filterStatus === "all" ||
-            (filterStatus === "published" && post.published) ||
-            (filterStatus === "draft" && !post.published);
+    const handleCancel = () => {
+        setEditingPost(null);
+        setIsCreating(false);
+    };
 
-        return matchesSearch && matchesCategory && matchesStatus;
-    });
-
-    if (isEditing && selectedPost) {
-        return (
-            <BlogEditor
-                post={selectedPost}
-                isCreating={isCreating}
-                categories={categories}
-                onSave={(savedPost) => {
-                    if (isCreating) {
-                        setPosts([savedPost, ...posts]);
-                    } else {
-                        setPosts(posts.map(p => p.id === savedPost.id ? savedPost : p));
-                    }
-                    setIsEditing(false);
-                    setSelectedPost(null);
-                }}
-                onCancel={() => {
-                    setIsEditing(false);
-                    setSelectedPost(null);
-                }}
-            />
-        );
-    }
+    const updateField = (field: string, value: unknown) => {
+        setEditingPost(prev => prev ? { ...prev, [field]: value } : null);
+    };
 
     return (
         <div className={`c-blog-manager ${className}`}>
             <div className="c-blog-manager__header">
-                <h2 className="c-blog-manager__title">ブログ管理</h2>
+                <h2 className="c-blog-manager__title">記事管理</h2>
                 <button
-                    onClick={handleCreatePost}
+                    onClick={handleCreate}
                     className="c-blog-manager__create-btn"
+                    disabled={editingPost !== null}
                 >
-                    新しい記事を作成
+                    + 新しい記事を追加
                 </button>
             </div>
 
-            <div className="c-blog-manager__filters">
-                <div className="c-blog-manager__search">
-                    <input
-                        type="text"
-                        placeholder="記事を検索..."
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        className="c-blog-manager__search-input"
-                    />
+            {saveStatus === "success" && (
+                <div className="c-projects-manager__status c-projects-manager__status--success">
+                    記事を保存しました
                 </div>
+            )}
 
-                <div className="c-blog-manager__filter-group">
-                    <select
-                        value={filterCategory}
-                        onChange={(e) => setFilterCategory(e.target.value)}
-                        className="c-blog-manager__filter-select"
-                    >
-                        <option value="all">すべてのカテゴリ</option>
-                        {categories.map(category => (
-                            <option key={category.id} value={category.slug}>
-                                {category.name}
-                            </option>
-                        ))}
-                    </select>
-
-                    <select
-                        value={filterStatus}
-                        onChange={(e) => setFilterStatus(e.target.value)}
-                        className="c-blog-manager__filter-select"
-                    >
-                        <option value="all">すべての状態</option>
-                        <option value="published">公開済み</option>
-                        <option value="draft">下書き</option>
-                    </select>
+            {saveStatus === "error" && (
+                <div className="c-projects-manager__status c-projects-manager__status--error">
+                    保存に失敗しました
                 </div>
-            </div>
+            )}
 
-            {loading ? (
-                <div className="c-blog-manager__loading">
-                    記事を読み込み中...
-                </div>
-            ) : (
-                <div className="c-blog-manager__list">
-                    {filteredPosts.length === 0 ? (
-                        <div className="c-blog-manager__empty">
-                            記事が見つかりませんでした
+            {/* Editor */}
+            {editingPost && (
+                <div className="c-projects-manager__editor">
+                    <div className="c-projects-manager__editor-header">
+                        <h3>{isCreating ? "新しい記事を追加" : "記事を編集"}</h3>
+                        <div className="c-projects-manager__editor-actions">
+                            <button
+                                onClick={handleCancel}
+                                className="c-projects-manager__cancel-btn"
+                                disabled={saving}
+                            >
+                                キャンセル
+                            </button>
+                            <button
+                                onClick={handleSave}
+                                className="c-projects-manager__save-btn"
+                                disabled={saving || !editingPost.title?.trim()}
+                            >
+                                {saving ? "保存中..." : "保存"}
+                            </button>
                         </div>
-                    ) : (
-                        filteredPosts.map(post => (
-                            <div key={post.id} className="c-blog-manager__item">
-                                <div className="c-blog-manager__item-content">
-                                    <div className="c-blog-manager__item-header">
-                                        <h3 className="c-blog-manager__item-title">{post.title}</h3>
-                                        <div className="c-blog-manager__item-meta">
-                                            <span className={`c-blog-manager__status ${post.published ? 'c-blog-manager__status--published' : 'c-blog-manager__status--draft'}`}>
-                                                {post.published ? '公開済み' : '下書き'}
-                                            </span>
-                                            <span className="c-blog-manager__category">{post.category}</span>
-                                            <span className="c-blog-manager__date">
-                                                {new Date(post.updatedAt).toLocaleDateString('ja-JP')}
-                                            </span>
-                                        </div>
+                    </div>
+
+                    <div className="c-projects-manager__editor-form">
+                        <div className="c-projects-manager__form-grid">
+                            <div className="c-projects-manager__field">
+                                <label className="c-projects-manager__label">記事タイトル</label>
+                                <input
+                                    type="text"
+                                    value={editingPost.title || ""}
+                                    onChange={(e) => updateField("title", e.target.value)}
+                                    className="c-projects-manager__input"
+                                    placeholder="例: Next.jsで作るモダンなWebアプリ"
+                                />
+                            </div>
+
+                            <div className="c-projects-manager__field">
+                                <label className="c-projects-manager__label">外部URL</label>
+                                <input
+                                    type="url"
+                                    value={editingPost.externalUrl || ""}
+                                    onChange={(e) => updateField("externalUrl", e.target.value)}
+                                    className="c-projects-manager__input"
+                                    placeholder="https://note.com/... or https://zenn.dev/..."
+                                />
+                            </div>
+
+                            <div className="c-projects-manager__field">
+                                <label className="c-projects-manager__label">カテゴリ</label>
+                                <input
+                                    type="text"
+                                    value={editingPost.category || ""}
+                                    onChange={(e) => updateField("category", e.target.value)}
+                                    className="c-projects-manager__input"
+                                    placeholder="例: Tech, 医療, AI"
+                                />
+                            </div>
+
+                            <div className="c-projects-manager__field">
+                                <label className="c-projects-manager__label">タグ（カンマ区切り）</label>
+                                <input
+                                    type="text"
+                                    value={(editingPost.tags || []).join(", ")}
+                                    onChange={(e) => updateField("tags", e.target.value.split(",").map(t => t.trim()).filter(Boolean))}
+                                    className="c-projects-manager__input"
+                                    placeholder="React, TypeScript, Next.js"
+                                />
+                            </div>
+                        </div>
+
+                        <div className="c-projects-manager__checkboxes">
+                            <label className="c-projects-manager__checkbox">
+                                <input
+                                    type="checkbox"
+                                    checked={editingPost.published || false}
+                                    onChange={(e) => updateField("published", e.target.checked)}
+                                />
+                                公開する
+                            </label>
+                        </div>
+
+                        {/* Preview */}
+                        <div className="c-projects-manager__preview">
+                            <h4>プレビュー</h4>
+                            <div style={{ padding: '16px', border: '2px solid #000', background: '#fff' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                                    {editingPost.category && (
+                                        <span style={{
+                                            background: '#facc15',
+                                            color: '#000',
+                                            padding: '2px 8px',
+                                            fontSize: '12px',
+                                            fontWeight: 'bold',
+                                            border: '1px solid #000'
+                                        }}>
+                                            {editingPost.category}
+                                        </span>
+                                    )}
+                                    <span style={{ fontWeight: 'bold' }}>
+                                        {editingPost.title || "記事タイトル"}
+                                    </span>
+                                </div>
+                                {editingPost.externalUrl && (
+                                    <div style={{ fontSize: '12px', color: '#666' }}>
+                                        {editingPost.externalUrl}
                                     </div>
-                                    <p className="c-blog-manager__item-excerpt">{post.excerpt}</p>
-                                    <div className="c-blog-manager__item-tags">
-                                        {post.tags.map(tag => (
-                                            <span key={tag} className="c-blog-manager__tag">#{tag}</span>
+                                )}
+                                {(editingPost.tags || []).length > 0 && (
+                                    <div style={{ marginTop: '4px', display: 'flex', gap: '6px' }}>
+                                        {(editingPost.tags || []).map((tag, i) => (
+                                            <span key={i} style={{ fontSize: '12px', color: '#888' }}>#{tag}</span>
                                         ))}
                                     </div>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Posts List */}
+            {loading ? (
+                <div className="c-blog-manager__loading">記事を読み込み中...</div>
+            ) : (
+                <div className="c-projects-manager__list">
+                    {posts.length === 0 ? (
+                        <div className="c-projects-manager__empty">
+                            まだ記事が登録されていません
+                        </div>
+                    ) : (
+                        posts.map((post) => (
+                            <div key={post.id} className="c-projects-manager__item">
+                                <div className="c-projects-manager__item-content">
+                                    <div className="c-projects-manager__item-info">
+                                        <div className="c-projects-manager__item-header">
+                                            <div className="c-projects-manager__item-title">
+                                                {post.title}
+                                                {!post.published && <span className="c-projects-manager__draft-badge">下書き</span>}
+                                            </div>
+                                            <div className="c-projects-manager__item-category">
+                                                {post.category}
+                                            </div>
+                                        </div>
+                                        {post.externalUrl && (
+                                            <div className="c-projects-manager__item-description" style={{ fontSize: '13px' }}>
+                                                <a href={post.externalUrl} target="_blank" rel="noopener noreferrer" style={{ color: '#3b82f6' }}>
+                                                    {post.externalUrl}
+                                                </a>
+                                            </div>
+                                        )}
+                                        {post.tags && post.tags.length > 0 && (
+                                            <div className="c-projects-manager__item-technologies">
+                                                {post.tags.map((tag, i) => (
+                                                    <span key={i} className="c-projects-manager__tech-tag">
+                                                        #{tag}
+                                                    </span>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
-                                <div className="c-blog-manager__item-actions">
+                                <div className="c-projects-manager__item-actions">
                                     <button
-                                        onClick={() => handleEditPost(post)}
-                                        className="c-blog-manager__action-btn c-blog-manager__action-btn--edit"
+                                        onClick={() => handleEdit(post)}
+                                        className="c-projects-manager__edit-btn"
+                                        disabled={editingPost !== null}
                                     >
                                         編集
                                     </button>
                                     <button
-                                        onClick={() => handleTogglePublish(post)}
-                                        className={`c-blog-manager__action-btn ${post.published ? 'c-blog-manager__action-btn--unpublish' : 'c-blog-manager__action-btn--publish'}`}
-                                    >
-                                        {post.published ? '非公開' : '公開'}
-                                    </button>
-                                    <button
-                                        onClick={() => handleDeletePost(post.id)}
-                                        className="c-blog-manager__action-btn c-blog-manager__action-btn--delete"
+                                        onClick={() => handleDelete(post.id)}
+                                        className="c-projects-manager__delete-btn"
+                                        disabled={saving}
                                     >
                                         削除
                                     </button>
@@ -261,255 +339,6 @@ export const BlogManager: React.FC<BlogManagerProps> = ({ className = "" }) => {
                     )}
                 </div>
             )}
-        </div>
-    );
-};
-
-// Blog Editor Component
-interface BlogEditorProps {
-    post: BlogPost;
-    isCreating: boolean;
-    categories: BlogCategory[];
-    onSave: (post: BlogPost) => void;
-    onCancel: () => void;
-}
-
-const BlogEditor: React.FC<BlogEditorProps> = ({
-    post,
-    isCreating,
-    categories,
-    onSave,
-    onCancel,
-}) => {
-    const [formData, setFormData] = useState({
-        title: post.title || "",
-        slug: post.slug || "",
-        excerpt: post.excerpt || "",
-        content: post.content || "",
-        thumbnail: post.thumbnail || "",
-        category: post.category || "",
-        tags: post.tags?.join(", ") || "",
-        published: post.published || false,
-    });
-    const [saving, setSaving] = useState(false);
-    const [isDraft, setIsDraft] = useState(false);
-
-    const generateSlug = (title: string) => {
-        return title
-            .toLowerCase()
-            .replace(/[^\w\s-]/g, "")
-            .replace(/\s+/g, "-")
-            .trim();
-    };
-
-    const handleTitleChange = (title: string) => {
-        setFormData(prev => ({
-            ...prev,
-            title,
-            slug: isCreating ? generateSlug(title) : prev.slug,
-        }));
-    };
-
-    const calculateReadTime = (content: string) => {
-        const wordsPerMinute = 200;
-        const wordCount = content.split(/\s+/).length;
-        return Math.ceil(wordCount / wordsPerMinute);
-    };
-
-
-
-    const handleSave = async (asDraft = false) => {
-        if (!formData.title.trim()) {
-            alert("タイトルを入力してください");
-            return;
-        }
-
-        setSaving(true);
-        setIsDraft(asDraft);
-
-        try {
-            const postData = {
-                ...formData,
-                tags: formData.tags.split(",").map(tag => tag.trim()).filter(Boolean),
-                readTime: calculateReadTime(formData.content),
-                published: asDraft ? false : formData.published,
-                publishedAt: asDraft ? null : (formData.published ? new Date().toISOString() : null),
-            };
-
-            const url = isCreating ? "/api/admin/blog/posts" : `/api/admin/blog/posts/${post.id}`;
-            const method = isCreating ? "POST" : "PUT";
-
-            const response = await fetch(url, {
-                method,
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify(postData),
-            });
-
-            if (response.ok) {
-                const result = await response.json();
-                onSave(result.post);
-            } else {
-                const error = await response.json();
-                alert(error.message || "保存に失敗しました");
-            }
-        } catch (error) {
-            // エラーログを無効化
-            alert("保存に失敗しました");
-        } finally {
-            setSaving(false);
-            setIsDraft(false);
-        }
-    };
-
-    return (
-        <div className="c-blog-editor">
-            <div className="c-blog-editor__header">
-                <h2 className="c-blog-editor__title">
-                    {isCreating ? "新しい記事を作成" : "記事を編集"}
-                </h2>
-                <div className="c-blog-editor__actions">
-                    <button
-                        onClick={() => handleSave(true)}
-                        disabled={saving}
-                        className="c-blog-editor__btn c-blog-editor__btn--draft"
-                    >
-                        {isDraft ? "下書き保存中..." : "下書き保存"}
-                    </button>
-                    <button
-                        onClick={() => handleSave(false)}
-                        disabled={saving}
-                        className="c-blog-editor__btn c-blog-editor__btn--save"
-                    >
-                        {saving && !isDraft ? "保存中..." : "保存"}
-                    </button>
-                    <button
-                        onClick={onCancel}
-                        disabled={saving}
-                        className="c-blog-editor__btn c-blog-editor__btn--cancel"
-                    >
-                        キャンセル
-                    </button>
-                </div>
-            </div>
-
-            <div className="c-blog-editor__form">
-                <div className="c-blog-editor__row">
-                    <div className="c-blog-editor__field">
-                        <label className="c-blog-editor__label">タイトル</label>
-                        <input
-                            type="text"
-                            value={formData.title}
-                            onChange={(e) => handleTitleChange(e.target.value)}
-                            className="c-blog-editor__input"
-                            placeholder="記事のタイトルを入力..."
-                        />
-                    </div>
-                </div>
-
-                <div className="c-blog-editor__row">
-                    <div className="c-blog-editor__field">
-                        <label className="c-blog-editor__label">スラッグ</label>
-                        <input
-                            type="text"
-                            value={formData.slug}
-                            onChange={(e) => setFormData(prev => ({ ...prev, slug: e.target.value }))}
-                            className="c-blog-editor__input"
-                            placeholder="url-slug"
-                        />
-                    </div>
-                </div>
-
-                <div className="c-blog-editor__row c-blog-editor__row--two-cols">
-                    <div className="c-blog-editor__field">
-                        <label className="c-blog-editor__label">カテゴリ</label>
-                        <select
-                            value={formData.category}
-                            onChange={(e) => setFormData(prev => ({ ...prev, category: e.target.value }))}
-                            className="c-blog-editor__select"
-                        >
-                            <option value="">カテゴリを選択</option>
-                            {categories.map(category => (
-                                <option key={category.id} value={category.slug}>
-                                    {category.name}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
-                    <div className="c-blog-editor__field">
-                        <label className="c-blog-editor__label">タグ (カンマ区切り)</label>
-                        <input
-                            type="text"
-                            value={formData.tags}
-                            onChange={(e) => setFormData(prev => ({ ...prev, tags: e.target.value }))}
-                            className="c-blog-editor__input"
-                            placeholder="React, TypeScript, Next.js"
-                        />
-                    </div>
-                </div>
-
-                <div className="c-blog-editor__row">
-                    <div className="c-blog-editor__field">
-                        <label className="c-blog-editor__label">概要</label>
-                        <textarea
-                            value={formData.excerpt}
-                            onChange={(e) => setFormData(prev => ({ ...prev, excerpt: e.target.value }))}
-                            className="c-blog-editor__textarea c-blog-editor__textarea--small"
-                            placeholder="記事の概要を入力..."
-                            rows={3}
-                        />
-                    </div>
-                </div>
-
-                <div className="c-blog-editor__row">
-                    <div className="c-blog-editor__field">
-                        <label className="c-blog-editor__label">サムネイル画像</label>
-                        <ImageUpload
-                            folder="blog"
-                            currentImage={formData.thumbnail}
-                            onUploadComplete={(url) => setFormData(prev => ({ ...prev, thumbnail: url }))}
-                            onUploadError={(error) => console.error('Thumbnail upload error:', error)}
-                            className="c-blog-editor__image-upload"
-                        />
-                        <div className="c-blog-editor__field" style={{ marginTop: '16px' }}>
-                            <label className="c-blog-editor__label">または画像URL</label>
-                            <input
-                                type="url"
-                                value={formData.thumbnail}
-                                onChange={(e) => setFormData(prev => ({ ...prev, thumbnail: e.target.value }))}
-                                className="c-blog-editor__input"
-                                placeholder="https://example.com/image.jpg"
-                            />
-                        </div>
-                    </div>
-                </div>
-
-                <div className="c-blog-editor__row">
-                    <div className="c-blog-editor__field">
-                        <label className="c-blog-editor__label">本文 (Markdown)</label>
-                        <MarkdownEditor
-                            value={formData.content}
-                            onChange={(content) => setFormData(prev => ({ ...prev, content }))}
-                            placeholder="Markdownで記事の本文を入力..."
-                        />
-                    </div>
-                </div>
-
-                <div className="c-blog-editor__row">
-                    <div className="c-blog-editor__field">
-                        <label className="c-blog-editor__checkbox-label">
-                            <input
-                                type="checkbox"
-                                checked={formData.published}
-                                onChange={(e) => setFormData(prev => ({ ...prev, published: e.target.checked }))}
-                                className="c-blog-editor__checkbox"
-                            />
-                            公開する
-                        </label>
-                    </div>
-                </div>
-            </div>
         </div>
     );
 };
