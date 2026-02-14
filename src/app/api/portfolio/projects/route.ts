@@ -5,7 +5,8 @@ export const dynamic = 'force-dynamic'
 
 export async function GET() {
     try {
-        const projects = await getProjects(true)
+        const allProjects = await getProjects(false)
+        const projects = allProjects.filter(p => p.published !== false)
         return NextResponse.json({ projects })
     } catch (error) {
         console.error('Portfolio projects fetch error:', error)

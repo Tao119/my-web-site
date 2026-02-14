@@ -5,7 +5,8 @@ export const dynamic = 'force-dynamic'
 
 export async function GET() {
     try {
-        const posts = await getBlogPosts(true)
+        const allPosts = await getBlogPosts(false)
+        const posts = allPosts.filter(p => p.published !== false)
         return NextResponse.json({ posts })
     } catch (error) {
         console.error('Portfolio blog fetch error:', error)
