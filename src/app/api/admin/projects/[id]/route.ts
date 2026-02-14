@@ -92,6 +92,41 @@ export async function PUT(
     }
 }
 
+// PATCH /api/admin/projects/[id] - Partial update (e.g., order, featured, published)
+export async function PATCH(
+    request: NextRequest,
+    { params }: { params: { id: string } }
+) {
+    try {
+        const { id } = params;
+        const body = await request.json();
+
+        const existing = await getProject(id);
+        if (!existing) {
+            return NextResponse.json(
+                { success: false, error: "Project not found" },
+                { status: 404 }
+            );
+        }
+
+        await updateProject(id, body);
+
+        const updatedProject = await getProject(id);
+
+        return NextResponse.json({
+            success: true,
+            message: "Project updated successfully",
+            project: updatedProject,
+        });
+    } catch (error) {
+        console.error("Error patching project:", error);
+        return NextResponse.json(
+            { success: false, error: "Failed to update project" },
+            { status: 500 }
+        );
+    }
+}
+
 // DELETE /api/admin/projects/[id] - Delete project
 export async function DELETE(
     request: NextRequest,

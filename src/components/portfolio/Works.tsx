@@ -1,13 +1,10 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Image from "next/image";
 import { Project, ProjectCategory } from "@/types/portfolio";
 import ProjectModal from "./ProjectModal";
 import { ScrollAnimation, StaggerAnimation, CardAnimation } from "./ScrollAnimation";
-import { ThumbnailImage } from "./OptimizedImage";
-import { HoverScale, RippleEffect } from "./MicroInteractions";
-import { SectionLoading } from "./LoadingStates";
+import { isValidImageUrl } from "@/lib/utils";
 
 // Technology color mapping for Neobrutalism design
 const TECH_COLORS: Record<string, string> = {
@@ -261,17 +258,23 @@ const Works = () => {
                 >
                   {/* Thumbnail */}
                   <div className="c-works__thumbnail">
-                    <ThumbnailImage
-                      src={project.thumbnail}
-                      alt={project.title}
-                      width={400}
-                      height={300}
-                      className="c-works__thumbnail-image"
-                      aspectRatio="4/3"
-                    />
+                    {project.thumbnail && isValidImageUrl(project.thumbnail) ? (
+                      <img
+                        src={project.thumbnail}
+                        alt={project.title}
+                        className="c-works__thumbnail-image"
+                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                      />
+                    ) : (
+                      <div className="c-works__thumbnail-placeholder">
+                        <svg className="w-12 h-12 text-white/50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3.75 21h16.5A2.25 2.25 0 0022.5 18.75V5.25A2.25 2.25 0 0020.25 3H3.75A2.25 2.25 0 001.5 5.25v13.5A2.25 2.25 0 003.75 21z" />
+                        </svg>
+                      </div>
+                    )}
                     {project.featured && (
                       <div className="c-works__featured-badge">
-                        ⭐ Featured
+                        Featured
                       </div>
                     )}
                   </div>

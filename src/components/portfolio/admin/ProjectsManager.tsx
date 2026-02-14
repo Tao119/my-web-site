@@ -47,6 +47,7 @@ export const ProjectsManager = () => {
     const [selectedCategory, setSelectedCategory] = useState<string>("all");
     const [saving, setSaving] = useState(false);
     const [saveStatus, setSaveStatus] = useState<"idle" | "success" | "error">("idle");
+    const [orderChanged, setOrderChanged] = useState(false);
 
     // データ読み込み
     useEffect(() => {
@@ -214,25 +215,70 @@ export const ProjectsManager = () => {
 
         [newProjects[projectIndex], newProjects[targetIndex]] = [newProjects[targetIndex], newProjects[projectIndex]];
 
-        // Update order values
-        newProjects.forEach((project, index) => {
-            project.order = index + 1;
-        });
+        const updatedProjects = newProjects.map((project, index) => ({
+            ...project,
+            order: index + 1,
+        }));
 
-        setProjects(newProjects);
+        setProjects(updatedProjects);
+        setOrderChanged(true);
+    };
+
+    const saveOrder = async () => {
+        setSaving(true);
+        try {
+            const promises = projects.map(async (project, index) => {
+                const response = await fetch(`/api/admin/projects/${project.id}`, {
+                    method: "PATCH",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ order: index + 1 }),
+                });
+                if (!response.ok) {
+                    throw new Error(`Failed to update order for project ${project.id}`);
+                }
+                return response;
+            });
+            const results = await Promise.allSettled(promises);
+            const failures = results.filter(r => r.status === 'rejected');
+            if (failures.length > 0) {
+                setSaveStatus("error");
+                setTimeout(() => setSaveStatus("idle"), 3000);
+                await loadProjects();
+                return;
+            }
+            setOrderChanged(false);
+            setSaveStatus("success");
+            setTimeout(() => setSaveStatus("idle"), 3000);
+        } catch {
+            setSaveStatus("error");
+            setTimeout(() => setSaveStatus("idle"), 3000);
+        } finally {
+            setSaving(false);
+        }
     };
 
     return (
         <div className="c-projects-manager">
             <div className="c-projects-manager__header">
                 <h2 className="c-projects-manager__title">プロジェクト管理</h2>
-                <button
-                    onClick={handleAddNew}
-                    className="c-projects-manager__add-btn"
-                    disabled={editingProject !== null}
-                >
-                    + 新しいプロジェクト追加
-                </button>
+                <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+                    {orderChanged && (
+                        <button
+                            onClick={saveOrder}
+                            className="c-projects-manager__save-btn"
+                            disabled={saving}
+                        >
+                            {saving ? "保存中..." : "並び順を保存"}
+                        </button>
+                    )}
+                    <button
+                        onClick={handleAddNew}
+                        className="c-projects-manager__add-btn"
+                        disabled={editingProject !== null}
+                    >
+                        + 新しいプロジェクト追加
+                    </button>
+                </div>
             </div>
 
             {saveStatus === "success" && (
