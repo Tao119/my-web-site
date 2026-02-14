@@ -157,14 +157,25 @@ export const BlogManager: React.FC<BlogManagerProps> = ({ className = "" }) => {
     const saveOrder = async () => {
         setSaving(true);
         try {
-            const promises = posts.map((post, index) =>
-                fetch(`/api/admin/blog/posts/${post.id}`, {
+            const promises = posts.map(async (post, index) => {
+                const response = await fetch(`/api/admin/blog/posts/${post.id}`, {
                     method: "PATCH",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ order: index + 1 }),
-                })
-            );
-            await Promise.all(promises);
+                });
+                if (!response.ok) {
+                    throw new Error(`Failed to update order for post ${post.id}`);
+                }
+                return response;
+            });
+            const results = await Promise.allSettled(promises);
+            const failures = results.filter(r => r.status === 'rejected');
+            if (failures.length > 0) {
+                setSaveStatus("error");
+                setTimeout(() => setSaveStatus("idle"), 3000);
+                await loadPosts();
+                return;
+            }
             setOrderChanged(false);
             setSaveStatus("success");
             setTimeout(() => setSaveStatus("idle"), 3000);
