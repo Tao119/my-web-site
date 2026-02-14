@@ -1,17 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import {
-    doc,
-    getDoc,
-    updateDoc,
-    deleteDoc,
-    serverTimestamp,
-    collection,
-    query,
-    where,
-    getDocs
-} from "firebase/firestore";
-import { db } from "@/lib/firebase";
-import { Project } from "@/types/portfolio";
+import { getProject, updateProject, deleteProject } from "@/lib/dataService";
 
 // GET /api/admin/projects/[id] - Get single project
 export async function GET(
@@ -20,29 +8,21 @@ export async function GET(
 ) {
     try {
         const { id } = params;
-        const docRef = doc(db, "projects", id);
-        const docSnap = await getDoc(docRef);
+        const project = await getProject(id);
 
-        if (!docSnap.exists()) {
+        if (!project) {
             return NextResponse.json(
                 { success: false, error: "Project not found" },
                 { status: 404 }
             );
         }
 
-        const data = docSnap.data();
-        const project: Project = {
-            id: docSnap.id,
-            ...data,
-            createdAt: data.createdAt?.toDate() || new Date(),
-            updatedAt: data.updatedAt?.toDate() || new Date(),
-        } as Project;
-
         return NextResponse.json({
             success: true,
             project,
         });
     } catch (error) {
+        console.error("Error fetching project:", error);
         return NextResponse.json(
             { success: false, error: "Failed to fetch project" },
             { status: 500 }
@@ -67,17 +47,16 @@ export async function PUT(
             );
         }
 
-        const docRef = doc(db, "projects", id);
-        const docSnap = await getDoc(docRef);
-
-        if (!docSnap.exists()) {
+        // Check if project exists
+        const existing = await getProject(id);
+        if (!existing) {
             return NextResponse.json(
                 { success: false, error: "Project not found" },
                 { status: 404 }
             );
         }
 
-        const updateData: any = {
+        const updateData = {
             title: body.title,
             description: body.description || "",
             thumbnail: body.thumbnail || "",
@@ -92,20 +71,12 @@ export async function PUT(
             endDate: body.endDate || null,
             order: body.order || 0,
             published: body.published !== undefined ? body.published : true,
-            updatedAt: serverTimestamp(),
         };
 
-        await updateDoc(docRef, updateData);
+        await updateProject(id, updateData);
 
         // Fetch updated document
-        const updatedDoc = await getDoc(docRef);
-        const updatedData = updatedDoc.data();
-        const updatedProject: Project = {
-            id: updatedDoc.id,
-            ...updatedData,
-            createdAt: updatedData?.createdAt?.toDate() || new Date(),
-            updatedAt: updatedData?.updatedAt?.toDate() || new Date(),
-        } as Project;
+        const updatedProject = await getProject(id);
 
         return NextResponse.json({
             success: true,
@@ -128,17 +99,17 @@ export async function DELETE(
 ) {
     try {
         const { id } = params;
-        const docRef = doc(db, "projects", id);
-        const docSnap = await getDoc(docRef);
 
-        if (!docSnap.exists()) {
+        // Check if project exists
+        const existing = await getProject(id);
+        if (!existing) {
             return NextResponse.json(
                 { success: false, error: "Project not found" },
                 { status: 404 }
             );
         }
 
-        await deleteDoc(docRef);
+        await deleteProject(id);
 
         return NextResponse.json({
             success: true,

@@ -181,19 +181,7 @@ const HeroSection = ({
                             <a
                                 href="#works"
                                 className="neo-button neo-button--primary neo-button--large w-full sm:w-auto"
-                                onClick={(e) => {
-                                    e.preventDefault();
-                                    console.log('View My Work button clicked, scrolling to works section');
-                                    const worksElement = document.getElementById('works');
-                                    if (worksElement) {
-                                        worksElement.scrollIntoView({
-                                            behavior: 'smooth',
-                                            block: 'start'
-                                        });
-                                    } else {
-                                        console.error('Works section not found');
-                                    }
-                                }}
+                                onClick={(e) => handleSmoothScrollClick(e, 'works')}
                             >
                                 {ctaText}
                             </a>
@@ -207,19 +195,7 @@ const HeroSection = ({
                             <a
                                 href="#contact"
                                 className="neo-button neo-button--accent neo-button--large w-full sm:w-auto"
-                                onClick={(e) => {
-                                    e.preventDefault();
-                                    console.log('Get In Touch button clicked, scrolling to contact section');
-                                    const contactElement = document.getElementById('contact');
-                                    if (contactElement) {
-                                        contactElement.scrollIntoView({
-                                            behavior: 'smooth',
-                                            block: 'start'
-                                        });
-                                    } else {
-                                        console.error('Contact section not found');
-                                    }
-                                }}
+                                onClick={(e) => handleSmoothScrollClick(e, 'contact')}
                             >
                                 Get In Touch
                             </a>

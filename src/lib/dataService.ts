@@ -429,7 +429,18 @@ export const getBlogPosts = async (publishedOnly = true, limitCount?: number): P
             ...doc.data()
         })) as BlogPost[]
 
-        console.log(`Loaded ${posts.length} blog posts from Firestore${publishedOnly ? ' (published only)' : ''}`)
+        // orderフィールド優先でクライアントサイドソート（composite index回避）
+        posts.sort((a, b) => {
+            if (a.order !== undefined && b.order !== undefined) {
+                return a.order - b.order
+            }
+            if (a.order !== undefined) return -1
+            if (b.order !== undefined) return 1
+            const dateA = new Date(a.publishedAt || a.createdAt).getTime()
+            const dateB = new Date(b.publishedAt || b.createdAt).getTime()
+            return dateB - dateA
+        })
+
         return posts
     } catch (error: any) {
         console.error('Error fetching blog posts:', error)

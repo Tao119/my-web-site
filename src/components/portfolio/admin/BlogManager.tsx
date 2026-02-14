@@ -14,6 +14,7 @@ export const BlogManager: React.FC<BlogManagerProps> = ({ className = "" }) => {
     const [loading, setLoading] = useState(false);
     const [saving, setSaving] = useState(false);
     const [saveStatus, setSaveStatus] = useState<"idle" | "success" | "error">("idle");
+    const [orderChanged, setOrderChanged] = useState(false);
 
     useEffect(() => {
         loadPosts();
@@ -38,6 +39,7 @@ export const BlogManager: React.FC<BlogManagerProps> = ({ className = "" }) => {
         setEditingPost({
             title: "",
             externalUrl: "",
+            thumbnail: "",
             category: "",
             tags: [],
             published: false,
@@ -84,7 +86,7 @@ export const BlogManager: React.FC<BlogManagerProps> = ({ className = "" }) => {
                     : editingPost.title?.toLowerCase().replace(/[^\w\s-]/g, "").replace(/\s+/g, "-").trim() || `post-${Date.now()}`,
                 excerpt: editingPost.title || "",
                 content: "",
-                thumbnail: "",
+                thumbnail: editingPost.thumbnail || "",
                 readTime: 0,
                 publishedAt: editingPost.published
                     ? ((editingPost as BlogPost).publishedAt || new Date().toISOString())
@@ -132,17 +134,70 @@ export const BlogManager: React.FC<BlogManagerProps> = ({ className = "" }) => {
         setEditingPost(prev => prev ? { ...prev, [field]: value } : null);
     };
 
+    const movePost = (postId: string, direction: "up" | "down") => {
+        const postIndex = posts.findIndex(p => p.id === postId);
+        if (postIndex === -1) return;
+
+        const newPosts = [...posts];
+        const targetIndex = direction === "up" ? postIndex - 1 : postIndex + 1;
+
+        if (targetIndex < 0 || targetIndex >= newPosts.length) return;
+
+        [newPosts[postIndex], newPosts[targetIndex]] = [newPosts[targetIndex], newPosts[postIndex]];
+
+        const updatedPosts = newPosts.map((post, index) => ({
+            ...post,
+            order: index + 1,
+        }));
+
+        setPosts(updatedPosts);
+        setOrderChanged(true);
+    };
+
+    const saveOrder = async () => {
+        setSaving(true);
+        try {
+            const promises = posts.map((post, index) =>
+                fetch(`/api/admin/blog/posts/${post.id}`, {
+                    method: "PATCH",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ order: index + 1 }),
+                })
+            );
+            await Promise.all(promises);
+            setOrderChanged(false);
+            setSaveStatus("success");
+            setTimeout(() => setSaveStatus("idle"), 3000);
+        } catch {
+            setSaveStatus("error");
+            setTimeout(() => setSaveStatus("idle"), 3000);
+        } finally {
+            setSaving(false);
+        }
+    };
+
     return (
         <div className={`c-blog-manager ${className}`}>
             <div className="c-blog-manager__header">
                 <h2 className="c-blog-manager__title">記事管理</h2>
-                <button
-                    onClick={handleCreate}
-                    className="c-blog-manager__create-btn"
-                    disabled={editingPost !== null}
-                >
-                    + 新しい記事を追加
-                </button>
+                <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+                    {orderChanged && (
+                        <button
+                            onClick={saveOrder}
+                            className="c-projects-manager__save-btn"
+                            disabled={saving}
+                        >
+                            {saving ? "保存中..." : "並び順を保存"}
+                        </button>
+                    )}
+                    <button
+                        onClick={handleCreate}
+                        className="c-blog-manager__create-btn"
+                        disabled={editingPost !== null}
+                    >
+                        + 新しい記事を追加
+                    </button>
+                </div>
             </div>
 
             {saveStatus === "success" && (
@@ -205,6 +260,17 @@ export const BlogManager: React.FC<BlogManagerProps> = ({ className = "" }) => {
                             </div>
 
                             <div className="c-projects-manager__field">
+                                <label className="c-projects-manager__label">サムネイルURL</label>
+                                <input
+                                    type="url"
+                                    value={editingPost.thumbnail || ""}
+                                    onChange={(e) => updateField("thumbnail", e.target.value)}
+                                    className="c-projects-manager__input"
+                                    placeholder="https://example.com/thumbnail.jpg"
+                                />
+                            </div>
+
+                            <div className="c-projects-manager__field">
                                 <label className="c-projects-manager__label">カテゴリ</label>
                                 <input
                                     type="text"
@@ -242,6 +308,15 @@ export const BlogManager: React.FC<BlogManagerProps> = ({ className = "" }) => {
                         <div className="c-projects-manager__preview">
                             <h4>プレビュー</h4>
                             <div style={{ padding: '16px', border: '2px solid #000', background: '#fff' }}>
+                                {editingPost.thumbnail && (
+                                    <div style={{ marginBottom: '8px', height: '120px', overflow: 'hidden', border: '1px solid #ddd' }}>
+                                        <img
+                                            src={editingPost.thumbnail}
+                                            alt="サムネイル"
+                                            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                        />
+                                    </div>
+                                )}
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
                                     {editingPost.category && (
                                         <span style={{
@@ -287,7 +362,7 @@ export const BlogManager: React.FC<BlogManagerProps> = ({ className = "" }) => {
                             まだ記事が登録されていません
                         </div>
                     ) : (
-                        posts.map((post) => (
+                        posts.map((post, index) => (
                             <div key={post.id} className="c-projects-manager__item">
                                 <div className="c-projects-manager__item-content">
                                     <div className="c-projects-manager__item-info">
@@ -319,6 +394,22 @@ export const BlogManager: React.FC<BlogManagerProps> = ({ className = "" }) => {
                                     </div>
                                 </div>
                                 <div className="c-projects-manager__item-actions">
+                                    <button
+                                        onClick={() => movePost(post.id, "up")}
+                                        disabled={index === 0}
+                                        className="c-projects-manager__move-btn"
+                                        title="上に移動"
+                                    >
+                                        ↑
+                                    </button>
+                                    <button
+                                        onClick={() => movePost(post.id, "down")}
+                                        disabled={index === posts.length - 1}
+                                        className="c-projects-manager__move-btn"
+                                        title="下に移動"
+                                    >
+                                        ↓
+                                    </button>
                                     <button
                                         onClick={() => handleEdit(post)}
                                         className="c-projects-manager__edit-btn"

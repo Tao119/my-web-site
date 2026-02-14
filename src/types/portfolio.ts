@@ -172,6 +172,7 @@ export interface BlogPost {
     published: boolean;
     featured?: boolean;
     externalUrl?: string;
+    order?: number;
     publishedAt: Date;
     createdAt: Date;
     updatedAt: Date;

@@ -310,6 +310,15 @@ export const animation = {
 /**
  * URL utilities
  */
+export function isValidImageUrl(urlStr: string): boolean {
+    try {
+        const parsed = new URL(urlStr);
+        return ['http:', 'https:'].includes(parsed.protocol);
+    } catch {
+        return false;
+    }
+}
+
 export const url = {
     isExternal: (url: string): boolean => {
         return /^https?:\/\//.test(url) && !url.includes(window.location.hostname);

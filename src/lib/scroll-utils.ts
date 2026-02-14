@@ -25,10 +25,11 @@ export const smoothScrollToElement = (targetId: string, additionalOffset: number
     // Calculate header height dynamically
     const headerHeight = getHeaderHeight();
     const totalOffset = headerHeight + additionalOffset;
-    const targetPosition = target.offsetTop - totalOffset;
+    // Use getBoundingClientRect for accurate position regardless of nesting
+    const targetPosition = target.getBoundingClientRect().top + window.scrollY - totalOffset;
 
     window.scrollTo({
-        top: Math.max(0, targetPosition), // Ensure we don't scroll to negative position
+        top: Math.max(0, targetPosition),
         behavior: 'smooth'
     });
 };

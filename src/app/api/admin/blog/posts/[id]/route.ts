@@ -1,17 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import {
-    doc,
-    getDoc,
-    updateDoc,
-    deleteDoc,
-    serverTimestamp,
     collection,
     query,
     where,
-    getDocs
+    getDocs,
 } from "firebase/firestore";
-import { db } from "@/lib/firebase";
-import { BlogPost } from "@/types/portfolio";
+import { getFirestoreInstance } from "@/lib/firebase";
+import { getBlogPost, updateBlogPost, deleteBlogPost } from "@/lib/dataService";
 
 // GET /api/admin/blog/posts/[id] - Get single blog post
 export async function GET(
@@ -20,31 +15,21 @@ export async function GET(
 ) {
     try {
         const { id } = params;
-        const docRef = doc(db, "blog", id);
-        const docSnap = await getDoc(docRef);
+        const post = await getBlogPost(id);
 
-        if (!docSnap.exists()) {
+        if (!post) {
             return NextResponse.json(
                 { success: false, error: "Blog post not found" },
                 { status: 404 }
             );
         }
 
-        const data = docSnap.data();
-        const post: BlogPost = {
-            id: docSnap.id,
-            ...data,
-            createdAt: data.createdAt?.toDate() || new Date(),
-            updatedAt: data.updatedAt?.toDate() || new Date(),
-            publishedAt: data.publishedAt?.toDate() || null,
-        } as BlogPost;
-
         return NextResponse.json({
             success: true,
             post,
         });
     } catch (error) {
-        // エラーログを無効化
+        console.error("Error fetching blog post:", error);
         return NextResponse.json(
             { success: false, error: "Failed to fetch blog post" },
             { status: 500 }
@@ -70,12 +55,12 @@ export async function PUT(
         }
 
         // Check if slug already exists (excluding current post)
+        const db = getFirestoreInstance();
         const existingQuery = query(
             collection(db, "blog"),
             where("slug", "==", body.slug)
         );
         const existingDocs = await getDocs(existingQuery);
-
         const conflictingPost = existingDocs.docs.find(doc => doc.id !== id);
         if (conflictingPost) {
             return NextResponse.json(
@@ -84,17 +69,16 @@ export async function PUT(
             );
         }
 
-        const docRef = doc(db, "blog", id);
-        const docSnap = await getDoc(docRef);
-
-        if (!docSnap.exists()) {
+        // Check if post exists
+        const existing = await getBlogPost(id);
+        if (!existing) {
             return NextResponse.json(
                 { success: false, error: "Blog post not found" },
                 { status: 404 }
             );
         }
 
-        const updateData: any = {
+        const updateData: Record<string, unknown> = {
             title: body.title,
             slug: body.slug,
             excerpt: body.excerpt || "",
@@ -104,29 +88,19 @@ export async function PUT(
             tags: body.tags || [],
             readTime: body.readTime || 0,
             published: body.published || false,
-            updatedAt: serverTimestamp(),
         };
 
         // Update publishedAt only if publishing for the first time
-        const currentData = docSnap.data();
-        if (body.published && !currentData.published) {
-            updateData.publishedAt = serverTimestamp();
+        if (body.published && !existing.published) {
+            updateData.publishedAt = new Date().toISOString();
         } else if (!body.published) {
             updateData.publishedAt = null;
         }
 
-        await updateDoc(docRef, updateData);
+        await updateBlogPost(id, updateData);
 
         // Fetch updated document
-        const updatedDoc = await getDoc(docRef);
-        const updatedData = updatedDoc.data();
-        const updatedPost: BlogPost = {
-            id: updatedDoc.id,
-            ...updatedData,
-            createdAt: updatedData?.createdAt?.toDate() || new Date(),
-            updatedAt: updatedData?.updatedAt?.toDate() || new Date(),
-            publishedAt: updatedData?.publishedAt?.toDate() || null,
-        } as BlogPost;
+        const updatedPost = await getBlogPost(id);
 
         return NextResponse.json({
             success: true,
@@ -151,43 +125,29 @@ export async function PATCH(
         const { id } = params;
         const body = await request.json();
 
-        const docRef = doc(db, "blog", id);
-        const docSnap = await getDoc(docRef);
-
-        if (!docSnap.exists()) {
+        const existing = await getBlogPost(id);
+        if (!existing) {
             return NextResponse.json(
                 { success: false, error: "Blog post not found" },
                 { status: 404 }
             );
         }
 
-        const updateData: any = {
-            ...body,
-            updatedAt: serverTimestamp(),
-        };
+        const updateData: Record<string, unknown> = { ...body };
 
         // Handle publishedAt when toggling publish status
         if (typeof body.published === "boolean") {
-            const currentData = docSnap.data();
-            if (body.published && !currentData.published) {
-                updateData.publishedAt = serverTimestamp();
+            if (body.published && !existing.published) {
+                updateData.publishedAt = new Date().toISOString();
             } else if (!body.published) {
                 updateData.publishedAt = null;
             }
         }
 
-        await updateDoc(docRef, updateData);
+        await updateBlogPost(id, updateData);
 
         // Fetch updated document
-        const updatedDoc = await getDoc(docRef);
-        const updatedData = updatedDoc.data();
-        const updatedPost: BlogPost = {
-            id: updatedDoc.id,
-            ...updatedData,
-            createdAt: updatedData?.createdAt?.toDate() || new Date(),
-            updatedAt: updatedData?.updatedAt?.toDate() || new Date(),
-            publishedAt: updatedData?.publishedAt?.toDate() || null,
-        } as BlogPost;
+        const updatedPost = await getBlogPost(id);
 
         return NextResponse.json({
             success: true,
@@ -210,17 +170,16 @@ export async function DELETE(
 ) {
     try {
         const { id } = params;
-        const docRef = doc(db, "blog", id);
-        const docSnap = await getDoc(docRef);
 
-        if (!docSnap.exists()) {
+        const existing = await getBlogPost(id);
+        if (!existing) {
             return NextResponse.json(
                 { success: false, error: "Blog post not found" },
                 { status: 404 }
             );
         }
 
-        await deleteDoc(docRef);
+        await deleteBlogPost(id);
 
         return NextResponse.json({
             success: true,
