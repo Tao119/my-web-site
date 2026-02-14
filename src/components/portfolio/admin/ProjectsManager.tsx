@@ -29,6 +29,15 @@ const projectCategories = [
     { id: "other", label: "その他", color: "#6b7280" },
 ];
 
+const formatTimestamp = (value: unknown): string => {
+    if (!value) return '-';
+    if (typeof value === 'string') return value.split('T')[0];
+    if (typeof value === 'object' && value !== null && 'seconds' in value) {
+        return new Date((value as { seconds: number }).seconds * 1000).toISOString().split('T')[0];
+    }
+    return String(value);
+};
+
 export const ProjectsManager = () => {
     const [projects, setProjects] = useState<Project[]>([]);
     const [loading, setLoading] = useState(true);
@@ -510,7 +519,7 @@ export const ProjectsManager = () => {
                                             </div>
                                         )}
                                         <div className="c-projects-manager__item-meta">
-                                            作成: {project.createdAt} | 更新: {project.updatedAt}
+                                            作成: {formatTimestamp(project.createdAt)} | 更新: {formatTimestamp(project.updatedAt)}
                                         </div>
                                     </div>
                                 </div>
