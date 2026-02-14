@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { Project } from "@/types/portfolio";
 import { isValidImageUrl } from "@/lib/utils";
 
@@ -12,6 +13,11 @@ interface ProjectModalProps {
 
 const ProjectModal = ({ project, isOpen, onClose }: ProjectModalProps) => {
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
+    const [mounted, setMounted] = useState(false);
+
+    useEffect(() => {
+        setMounted(true);
+    }, []);
 
     // Close modal on escape key
     useEffect(() => {
@@ -32,7 +38,7 @@ const ProjectModal = ({ project, isOpen, onClose }: ProjectModalProps) => {
         };
     }, [isOpen, onClose]);
 
-    if (!isOpen || !project) return null;
+    if (!isOpen || !project || !mounted) return null;
 
     const images = project.images.length > 0 ? project.images : [project.thumbnail];
 
@@ -75,7 +81,7 @@ const ProjectModal = ({ project, isOpen, onClose }: ProjectModalProps) => {
         return colors[tech] || colors.default;
     };
 
-    return (
+    const modalContent = (
         <div className="c-project-modal">
             {/* Backdrop */}
             <div
@@ -159,7 +165,7 @@ const ProjectModal = ({ project, isOpen, onClose }: ProjectModalProps) => {
                         </h2>
                         {project.featured && (
                             <span className="c-project-modal__featured">
-                                ⭐ Featured
+                                Featured
                             </span>
                         )}
                     </div>
@@ -193,7 +199,18 @@ const ProjectModal = ({ project, isOpen, onClose }: ProjectModalProps) => {
 
                     {/* Links */}
                     <div className="c-project-modal__actions">
-                        {project.demoUrl && (
+                        {project.projectUrl && (
+                            <a
+                                href={project.projectUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="c-project-modal__link c-project-modal__link--demo"
+                            >
+                                <span>🌐</span>
+                                サイトを見る
+                            </a>
+                        )}
+                        {project.demoUrl && !project.projectUrl && (
                             <a
                                 href={project.demoUrl}
                                 target="_blank"
@@ -220,6 +237,8 @@ const ProjectModal = ({ project, isOpen, onClose }: ProjectModalProps) => {
             </div>
         </div>
     );
+
+    return createPortal(modalContent, document.body);
 };
 
 export default ProjectModal;

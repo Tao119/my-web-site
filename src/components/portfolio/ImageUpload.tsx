@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useRef, useCallback } from 'react';
-import Image from 'next/image';
 
 interface ImageUploadProps {
     onUploadComplete: (url: string) => void;
@@ -123,12 +122,11 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
             >
                 {previewUrl && showPreview ? (
                     <div className="c-image-upload__preview">
-                        <Image
+                        <img
                             src={previewUrl}
                             alt="Preview"
-                            width={200}
-                            height={200}
                             className="c-image-upload__preview-image"
+                            style={{ width: '200px', height: '200px', objectFit: 'cover' }}
                         />
                         {!uploading && (
                             <button
