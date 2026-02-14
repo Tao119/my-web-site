@@ -5,10 +5,6 @@ import { getSkills } from "@/lib/dataService";
 import { Skill, SkillCategory } from "@/types/portfolio";
 import { ScrollAnimation } from "./ScrollAnimation";
 
-interface SkillsProps {
-  animateOnScroll?: boolean;
-}
-
 const CATEGORY_CONFIG: Record<string, { label: string; icon: string; color: string }> = {
   [SkillCategory.LANGUAGE]: { label: "プログラミング言語", icon: "💻", color: "#3b82f6" },
   [SkillCategory.FRONTEND]: { label: "フロントエンド", icon: "🎨", color: "#06b6d4" },
@@ -22,18 +18,7 @@ const CATEGORY_CONFIG: Record<string, { label: string; icon: string; color: stri
   [SkillCategory.MANAGEMENT]: { label: "マネジメント", icon: "📋", color: "#6b7280" },
 };
 
-const SKILL_ICONS: Record<string, string> = {
-  "React": "⚛️", "Next.js": "▲", "Vue.js": "💚", "TypeScript": "🔷",
-  "JavaScript": "🟨", "HTML": "🌐", "CSS": "🎨", "Sass": "💗",
-  "Tailwind": "🌊", "Node.js": "🟢", "Python": "🐍", "Java": "☕",
-  "C#": "#️⃣", "PHP": "🐘", "Go": "🐹", "Rust": "🦀",
-  "MySQL": "🐬", "PostgreSQL": "🐘", "MongoDB": "🍃", "Redis": "🔴",
-  "Firebase": "🔥", "AWS": "☁️", "Docker": "🐳", "Kubernetes": "⚓",
-  "Linux": "🐧", "Git": "📝", "Unity": "🎮", "C# Unity": "🎯",
-  "TensorFlow": "🧠", "PyTorch": "🔥", "OpenAI": "🤖", "Machine Learning": "📊",
-};
-
-const Skills = ({ animateOnScroll = true }: SkillsProps) => {
+const Skills = () => {
   const [skills, setSkills] = useState<Skill[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -132,58 +117,41 @@ const Skills = ({ animateOnScroll = true }: SkillsProps) => {
           </header>
         </ScrollAnimation>
 
-        <div className="space-y-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {sortedCategories.map((category, catIdx) => {
             const config = CATEGORY_CONFIG[category];
             const categorySkills = groupedSkills[category].sort((a, b) => b.level - a.level);
 
             return (
-              <ScrollAnimation key={category} animation="fade-up" delay={catIdx * 100}>
+              <ScrollAnimation key={category} animation="fade-up" delay={catIdx * 80}>
                 <div
-                  className="border-2 border-black dark:border-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:shadow-[4px_4px_0px_0px_rgba(255,255,255,0.2)] bg-white dark:bg-gray-800"
+                  className="border-2 border-black dark:border-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:shadow-[4px_4px_0px_0px_rgba(255,255,255,0.2)] bg-white dark:bg-gray-800 h-full"
                 >
                   {/* Category Header */}
                   <div
                     className="flex items-center gap-3 px-5 py-3 border-b-2 border-black dark:border-white"
-                    style={{ backgroundColor: `${config.color}15` }}
+                    style={{ backgroundColor: `${config.color}25` }}
                   >
-                    <span className="text-xl" aria-hidden="true">{config.icon}</span>
-                    <h3 className="text-base font-bold">{config.label}</h3>
-                    <span className="text-sm text-gray-500 dark:text-gray-400">
-                      ({categorySkills.length})
-                    </span>
+                    <span className="text-2xl" aria-hidden="true">{config.icon}</span>
+                    <h3 className="text-lg font-bold">{config.label}</h3>
                   </div>
 
-                  {/* Skills Grid */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 divide-y sm:divide-y-0 divide-gray-200 dark:divide-gray-700">
-                    {categorySkills.map((skill) => {
-                      const icon = skill.icon || SKILL_ICONS[skill.name] || "💻";
-                      return (
-                        <div
-                          key={skill.id}
-                          className="flex items-center gap-3 px-5 py-3 sm:border-r-0 lg:border-r last:border-r-0 border-gray-200 dark:border-gray-700"
+                  {/* Skills as chips */}
+                  <div className="flex flex-wrap gap-2.5 p-5">
+                    {categorySkills.map((skill) => (
+                      <div
+                        key={skill.id}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 border-2 border-black dark:border-gray-500 bg-gray-50 dark:bg-gray-700 text-sm font-semibold shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] dark:shadow-[2px_2px_0px_0px_rgba(255,255,255,0.15)]"
+                      >
+                        <span>{skill.name}</span>
+                        <span
+                          className="text-xs font-bold px-1.5 py-0.5 rounded-sm text-white"
+                          style={{ backgroundColor: config.color }}
                         >
-                          <span className="text-lg shrink-0" aria-hidden="true">{icon}</span>
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center justify-between gap-2">
-                              <span className="font-semibold text-sm truncate">{skill.name}</span>
-                              <span className="text-xs text-gray-500 dark:text-gray-400 shrink-0">
-                                {skill.years}年
-                              </span>
-                            </div>
-                            <div className="mt-1 h-1.5 bg-gray-200 dark:bg-gray-600 rounded-full overflow-hidden">
-                              <div
-                                className="h-full rounded-full transition-all duration-700"
-                                style={{
-                                  width: `${skill.level}%`,
-                                  backgroundColor: config.color,
-                                }}
-                              />
-                            </div>
-                          </div>
-                        </div>
-                      );
-                    })}
+                          {skill.years}y
+                        </span>
+                      </div>
+                    ))}
                   </div>
                 </div>
               </ScrollAnimation>
