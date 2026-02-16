@@ -176,7 +176,21 @@ const DetailedProfile = ({ className = "" }: DetailedProfileProps) => {
                                                 </div>
                                                 <div className="neo-timeline-content">
                                                     <div className="neo-timeline-header">
-                                                        <h4 className="neo-timeline-title">{exp.company}</h4>
+                                                        <h4 className="neo-timeline-title">
+                                                            {(exp as any).url ? (
+                                                                <a
+                                                                    href={(exp as any).url}
+                                                                    target="_blank"
+                                                                    rel="noopener noreferrer"
+                                                                    className="neo-timeline-title__link"
+                                                                >
+                                                                    {exp.company}
+                                                                    <span className="neo-timeline-title__link-icon">↗</span>
+                                                                </a>
+                                                            ) : (
+                                                                exp.company
+                                                            )}
+                                                        </h4>
                                                         <span className="neo-timeline-period">
                                                             {formatDateRange(exp.startDate, exp.endDate)}
                                                         </span>

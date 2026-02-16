@@ -38,6 +38,7 @@ interface ProfileData {
         endDate?: string;
         description: string;
         technologies: string[];
+        url?: string;
         order?: number;
     }>;
 }
@@ -213,6 +214,7 @@ export const ProfileEditor = () => {
                 endDate: "",
                 description: "",
                 technologies: [],
+                url: "",
                 order: prev.experience.length
             }]
         }));
@@ -720,6 +722,16 @@ export const ProfileEditor = () => {
                                             onChange={(e) => handleExperienceChange(index, "technologies", e.target.value.split(", ").filter(t => t.trim()))}
                                             className="c-profile-editor__input"
                                             placeholder="React, Node.js, TypeScript"
+                                        />
+                                    </div>
+                                    <div className="c-profile-editor__field">
+                                        <label className="c-profile-editor__label">WebサイトURL</label>
+                                        <input
+                                            type="url"
+                                            value={exp.url || ""}
+                                            onChange={(e) => handleExperienceChange(index, "url", e.target.value)}
+                                            className="c-profile-editor__input"
+                                            placeholder="https://example.com"
                                         />
                                     </div>
                                 </div>

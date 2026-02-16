@@ -30,6 +30,7 @@ export interface Profile {
         endDate?: string;
         description: string;
         technologies?: string[];
+        url?: string;
         order?: number;
     }[];
     education: {
@@ -89,6 +90,7 @@ export interface Experience {
     endDate?: Date;
     description: string;
     technologies: string[];
+    url?: string;
     order: number;
 }
 
