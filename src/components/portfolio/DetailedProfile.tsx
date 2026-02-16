@@ -170,25 +170,26 @@ const DetailedProfile = ({ className = "" }: DetailedProfileProps) => {
                                     {profileData.experience
                                         .sort((a, b) => (a.order || 0) - (b.order || 0))
                                         .map((exp, index) => (
-                                            <div key={index} className="neo-timeline-item">
+                                            <div
+                                                key={index}
+                                                className={`neo-timeline-item ${(exp as any).url ? 'neo-timeline-item--clickable' : ''}`}
+                                                onClick={() => {
+                                                    if ((exp as any).url) {
+                                                        window.open((exp as any).url, '_blank', 'noopener,noreferrer');
+                                                    }
+                                                }}
+                                                role={(exp as any).url ? 'link' : undefined}
+                                                style={(exp as any).url ? { cursor: 'pointer' } : undefined}
+                                            >
                                                 <div className="neo-timeline-marker">
                                                     <div className="neo-timeline-dot"></div>
                                                 </div>
                                                 <div className="neo-timeline-content">
                                                     <div className="neo-timeline-header">
                                                         <h4 className="neo-timeline-title">
-                                                            {(exp as any).url ? (
-                                                                <a
-                                                                    href={(exp as any).url}
-                                                                    target="_blank"
-                                                                    rel="noopener noreferrer"
-                                                                    className="neo-timeline-title__link"
-                                                                >
-                                                                    {exp.company}
-                                                                    <span className="neo-timeline-title__link-icon">↗</span>
-                                                                </a>
-                                                            ) : (
-                                                                exp.company
+                                                            {exp.company}
+                                                            {(exp as any).url && (
+                                                                <span className="neo-timeline-title__link-icon">↗</span>
                                                             )}
                                                         </h4>
                                                         <span className="neo-timeline-period">
