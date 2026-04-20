@@ -24,6 +24,7 @@ import type {
 
 // ─── constants ───────────────────────────────────────────────────────────────
 const GAME_KEY = "molkky_game";
+const SUSPENDED_KEY = "molkky_suspended";
 const PROJECT_KEY = "molkky_project";
 const MOLKKY_COL = "molkky_games";
 const PROJECT_COL = "molkky_projects";
@@ -94,6 +95,7 @@ export default function Page() {
 
   const [game, setGame] = useState<GameState>(initGame);
   const [gameLoaded, setGameLoaded] = useState(false);
+  const [suspended, setSuspended] = useState<GameState | null>(null);
 
   // ── project state ───────────────────────────────────────────────────────
   const [project, setProject] = useState<Project | null>(null);
@@ -163,6 +165,10 @@ export default function Page() {
     try {
       const p = localStorage.getItem(PROJECT_KEY);
       if (p) setProject(JSON.parse(p) as Project);
+    } catch {}
+    try {
+      const s = localStorage.getItem(SUSPENDED_KEY);
+      if (s) setSuspended(JSON.parse(s) as GameState);
     } catch {}
     setGameLoaded(true);
     setProjectLoaded(true);
@@ -421,7 +427,14 @@ export default function Page() {
     setAddScoreStr("");
   };
 
-  const resetGame = (keepPlayers: boolean) => {
+  const resetGame = (keepPlayers: boolean, suspend = false) => {
+    if (suspend) {
+      localStorage.setItem(SUSPENDED_KEY, JSON.stringify(game));
+      setSuspended(game);
+    } else {
+      localStorage.removeItem(SUSPENDED_KEY);
+      setSuspended(null);
+    }
     if (keepPlayers) {
       const g = initGame();
       g.playerOrder = [...players];
@@ -432,6 +445,13 @@ export default function Page() {
       setGame(initGame());
     }
     setAddScoreStr("");
+  };
+
+  const resumeGame = () => {
+    if (!suspended) return;
+    setGame(suspended);
+    localStorage.removeItem(SUSPENDED_KEY);
+    setSuspended(null);
   };
 
   // ── rank helpers ──────────────────────────────────────────────────────────
@@ -483,6 +503,30 @@ export default function Page() {
           {setupTab === "game" && (
             <div className="p-molkky__setup-body">
               <div className="p-molkky__title">ゲーム設定</div>
+
+              {suspended && (
+                <div className="p-molkky__resume-banner">
+                  <div className="p-molkky__resume-info">
+                    中断中のゲームがあります（{suspended.playerOrder.join(" / ")}）
+                  </div>
+                  <Button
+                    label="再開する"
+                    addClass="p-molkky__resume-btn"
+                    onClick={resumeGame}
+                  />
+                  <button
+                    className="p-molkky__resume-discard"
+                    onClick={() => {
+                      if (confirm("中断データを削除しますか？")) {
+                        localStorage.removeItem(SUSPENDED_KEY);
+                        setSuspended(null);
+                      }
+                    }}
+                  >
+                    破棄
+                  </button>
+                </div>
+              )}
 
               {project ? (
                 /* プロジェクトメンバーから参加者選択 */
@@ -738,7 +782,7 @@ export default function Page() {
               <Button
                 label="トップへ"
                 addClass="p-molkky__score-end"
-                onClick={() => { if (confirm("ゲームを中断してトップに戻りますか？")) resetGame(false); }}
+                onClick={() => { if (confirm("ゲームを中断して保存しますか？")) resetGame(false, true); }}
               />
             </div>
 
