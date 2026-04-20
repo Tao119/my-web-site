@@ -107,6 +107,7 @@ export default function Page() {
   const [newProjectName, setNewProjectName] = useState("");
   const [selectedParticipants, setSelectedParticipants] = useState<string[]>([]);
   const [practiceMode, setPracticeMode] = useState(false);
+  const [penaltyMode, setPenaltyMode] = useState(true);
 
   // ── gameplay UI state ───────────────────────────────────────────────────
   const [addScoreStr, setAddScoreStr] = useState("");
@@ -117,6 +118,7 @@ export default function Page() {
   // ── history ─────────────────────────────────────────────────────────────
   const [history, setHistory] = useState<FirestoreGameRecord[]>([]);
   const [historyLoading, setHistoryLoading] = useState(false);
+  const [expandedHistoryId, setExpandedHistoryId] = useState<string | null>(null);
 
   const scoreInputRef = useRef<HTMLInputElement>(null);
   const penaltyInputRef = useRef<HTMLInputElement>(null);
@@ -130,8 +132,12 @@ export default function Page() {
   const loser = getLoser(game);
   const winner = finishedPlayers[0] ?? null;
 
+  // 罰則モード: undefinedはtrue扱い（後方互換）
+  const isPenaltyMode = game.penaltyMode !== false;
+
   // 1位とビリが確定したか（罰則フェーズ移行条件）
   const penaltyReady =
+    isPenaltyMode &&
     winner !== null &&
     loser !== null &&
     winner !== loser &&
@@ -233,7 +239,12 @@ export default function Page() {
       // 1位・ビリ確定チェック
       const newActive = getActive(g);
       const newLoser = getLoser(g);
-      if (g.finishedPlayers.length >= 1 && newLoser && (newActive.length === 1 || newActive.length === 0)) {
+      if (
+        (g.penaltyMode !== false) &&
+        g.finishedPlayers.length >= 1 &&
+        newLoser &&
+        (newActive.length === 1 || newActive.length === 0)
+      ) {
         // 罰則フェーズへ
         g.penaltyPhase = true;
         g.penaltyThrows = [];
@@ -277,6 +288,9 @@ export default function Page() {
       g.penaltyPhase = false;
       const penaltyPoints = throws[0] + throws[1];
       savePenaltyRecord(g, penaltyPoints, throws);
+      // 終了扱い: 中断データをクリア
+      localStorage.removeItem(SUSPENDED_KEY);
+      setSuspended(null);
     }
 
     setPenaltyScoreStr("");
@@ -416,12 +430,20 @@ export default function Page() {
     );
   };
 
+  // ── finish game (non-suspend) ─────────────────────────────────────────────
+  const finishGame = (keepPlayers: boolean) => {
+    localStorage.removeItem(SUSPENDED_KEY);
+    setSuspended(null);
+    resetGame(keepPlayers, false);
+  };
+
   // ── game reset / start ────────────────────────────────────────────────────
   const startGame = (participants: string[]) => {
     if (participants.length < 2) return;
     const g = initGame();
     g.playerOrder = [...participants];
     g.practiceMode = practiceMode;
+    g.penaltyMode = penaltyMode;
     participants.forEach((p) => { g.data[p] = []; });
     setGame(g);
     setAddScoreStr("");
@@ -536,18 +558,47 @@ export default function Page() {
                   </div>
                   <div className="p-molkky__input-users-label">参加者を選択</div>
                   <ul className="p-molkky__users">
-                    {project.members.map((m) => (
-                      <li
-                        key={m}
-                        className={`p-molkky__user-column ${selectedParticipants.includes(m) ? "is-selected" : ""}`}
-                        onClick={() => toggleParticipant(m)}
-                      >
-                        <span className="p-molkky__user-check">
-                          {selectedParticipants.includes(m) ? "✓" : "　"}
-                        </span>
-                        <span className="p-molkky__user-name">{m}</span>
-                      </li>
-                    ))}
+                    {project.members.map((m) => {
+                      const selIdx = selectedParticipants.indexOf(m);
+                      const isSelected = selIdx >= 0;
+                      return (
+                        <li
+                          key={m}
+                          className={`p-molkky__user-column ${isSelected ? "is-selected" : ""}`}
+                          onClick={() => toggleParticipant(m)}
+                        >
+                          <span className="p-molkky__user-check">
+                            {isSelected ? "✓" : "　"}
+                          </span>
+                          <span className="p-molkky__user-name">{m}</span>
+                          {isSelected && (
+                            <div
+                              className="p-molkky__user-actions"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <button
+                                className="p-molkky__order-btn"
+                                disabled={selIdx === 0}
+                                onClick={() => setSelectedParticipants((prev) => {
+                                  const next = [...prev];
+                                  [next[selIdx - 1], next[selIdx]] = [next[selIdx], next[selIdx - 1]];
+                                  return next;
+                                })}
+                              >▲</button>
+                              <button
+                                className="p-molkky__order-btn"
+                                disabled={selIdx === selectedParticipants.length - 1}
+                                onClick={() => setSelectedParticipants((prev) => {
+                                  const next = [...prev];
+                                  [next[selIdx], next[selIdx + 1]] = [next[selIdx + 1], next[selIdx]];
+                                  return next;
+                                })}
+                              >▼</button>
+                            </div>
+                          )}
+                        </li>
+                      );
+                    })}
                   </ul>
                 </>
               ) : (
@@ -583,12 +634,32 @@ export default function Page() {
                     {selectedParticipants.map((n, i) => (
                       <li className="p-molkky__user-column" key={i}>
                         <span className="p-molkky__user-name">{n}</span>
-                        <button
-                          className="p-molkky__delete-btn"
-                          onClick={() => setSelectedParticipants((prev) => prev.filter((_, j) => j !== i))}
-                        >
-                          ✕
-                        </button>
+                        <div className="p-molkky__user-actions">
+                          <button
+                            className="p-molkky__order-btn"
+                            disabled={i === 0}
+                            onClick={() => setSelectedParticipants((prev) => {
+                              const next = [...prev];
+                              [next[i - 1], next[i]] = [next[i], next[i - 1]];
+                              return next;
+                            })}
+                          >▲</button>
+                          <button
+                            className="p-molkky__order-btn"
+                            disabled={i === selectedParticipants.length - 1}
+                            onClick={() => setSelectedParticipants((prev) => {
+                              const next = [...prev];
+                              [next[i], next[i + 1]] = [next[i + 1], next[i]];
+                              return next;
+                            })}
+                          >▼</button>
+                          <button
+                            className="p-molkky__delete-btn"
+                            onClick={() => setSelectedParticipants((prev) => prev.filter((_, j) => j !== i))}
+                          >
+                            ✕
+                          </button>
+                        </div>
                       </li>
                     ))}
                   </ul>
@@ -603,6 +674,15 @@ export default function Page() {
                   onChange={(e) => setPracticeMode(e.target.checked)}
                 />
                 練習モード（0連続でも脱落なし）
+              </label>
+              <label className="p-molkky__practice-label">
+                <input
+                  type="checkbox"
+                  className="p-molkky__practice-check"
+                  checked={penaltyMode}
+                  onChange={(e) => setPenaltyMode(e.target.checked)}
+                />
+                罰則投げあり（1位がビリのために2投）
               </label>
               <Button
                 label={`開始${selectedParticipants.length < 2 ? "（2人以上必要）" : ""}`}
@@ -723,31 +803,67 @@ export default function Page() {
                 <div className="p-molkky__history-empty">記録がありません</div>
               ) : (
                 <ul className="p-molkky__history-list">
-                  {history.map((r, i) => (
-                    <li key={r.id ?? i} className="p-molkky__history-item">
-                      <div className="p-molkky__history-winner">🏆 {r.winner}</div>
-                      <div className="p-molkky__history-date">
-                        {r.createdAt
-                          ? new Date(r.createdAt.seconds * 1000).toLocaleDateString("ja-JP", {
-                              year: "numeric", month: "2-digit", day: "2-digit",
-                              hour: "2-digit", minute: "2-digit",
-                            })
-                          : ""}
-                      </div>
-                      <div className="p-molkky__history-scores">
-                        {r.players?.map((p) => (
-                          <span key={p} className="p-molkky__history-score">
-                            {p}: {r.finalScores?.[p] ?? "-"}
-                          </span>
-                        ))}
-                        {r.penaltyPoints > 0 && (
-                          <span className="p-molkky__history-score p-molkky__history-score--penalty">
-                            罰則: {r.loser} {r.penaltyPoints}pt
-                          </span>
+                  {history.map((r, i) => {
+                    const rid = r.id ?? String(i);
+                    const isExpanded = expandedHistoryId === rid;
+                    const canAddToProject =
+                      project !== null &&
+                      r.projectId !== project.id;
+                    return (
+                      <li
+                        key={rid}
+                        className={`p-molkky__history-item p-molkky__history-item--clickable${isExpanded ? " is-expanded" : ""}`}
+                        onClick={() => setExpandedHistoryId(isExpanded ? null : rid)}
+                      >
+                        <div className="p-molkky__history-winner">🏆 {r.winner}</div>
+                        <div className="p-molkky__history-date">
+                          {r.createdAt
+                            ? new Date(r.createdAt.seconds * 1000).toLocaleDateString("ja-JP", {
+                                year: "numeric", month: "2-digit", day: "2-digit",
+                                hour: "2-digit", minute: "2-digit",
+                              })
+                            : ""}
+                        </div>
+                        {isExpanded && (
+                          <>
+                            <div className="p-molkky__history-scores">
+                              {r.players?.map((p) => (
+                                <span key={p} className="p-molkky__history-score">
+                                  {p}: {r.finalScores?.[p] ?? "-"}
+                                </span>
+                              ))}
+                              {r.penaltyPoints > 0 && (
+                                <span className="p-molkky__history-score p-molkky__history-score--penalty">
+                                  罰則: {r.loser} {r.penaltyPoints}pt
+                                </span>
+                              )}
+                            </div>
+                            {canAddToProject && (
+                              <button
+                                className="p-molkky__history-add-pj-btn"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  if (!project) return;
+                                  const match: MatchRecord = {
+                                    id: r.id ?? newId(),
+                                    participants: r.players ?? [],
+                                    winner: r.winner,
+                                    loser: r.loser,
+                                    penaltyPoints: r.penaltyPoints,
+                                    penaltyBreakdown: [],
+                                    createdAt: r.createdAt ? r.createdAt.seconds * 1000 : Date.now(),
+                                  };
+                                  setProject({ ...project, matches: [...project.matches, match] });
+                                }}
+                              >
+                                このPJに追加
+                              </button>
+                            )}
+                          </>
                         )}
-                      </div>
-                    </li>
-                  ))}
+                      </li>
+                    );
+                  })}
                 </ul>
               )}
             </div>
@@ -814,13 +930,13 @@ export default function Page() {
                   💸 {game.penaltyTarget} の支払い: {penaltyPoints}pt
                   （{(game.penaltyThrows ?? []).join(" + ")}）
                 </div>
-                <Button label="もう一度" addClass="p-molkky__score-add u-wt u-bg-bl" onClick={() => resetGame(true)} />
-                <Button label="トップへ" addClass="p-molkky__score-continue" onClick={() => resetGame(false)} />
+                <Button label="もう一度" addClass="p-molkky__score-add u-wt u-bg-bl" onClick={() => finishGame(true)} />
+                <Button label="トップへ" addClass="p-molkky__score-continue" onClick={() => finishGame(false)} />
               </div>
             ) : allDone ? (
               <div className="p-molkky__menu-bottom">
-                <Button label="もう一度" addClass="p-molkky__score-add u-wt u-bg-bl" onClick={() => resetGame(true)} />
-                <Button label="トップへ" addClass="p-molkky__score-continue" onClick={() => resetGame(false)} />
+                <Button label="もう一度" addClass="p-molkky__score-add u-wt u-bg-bl" onClick={() => finishGame(true)} />
+                <Button label="トップへ" addClass="p-molkky__score-continue" onClick={() => finishGame(false)} />
               </div>
             ) : (
               /* 通常入力 */

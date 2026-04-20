@@ -259,6 +259,38 @@ $col-total: 72px;
         border-radius: 10px;
         padding: 14px 18px;
         background: #fafafa;
+
+        &--clickable {
+            cursor: pointer;
+            transition: background 0.15s, border-color 0.15s;
+
+            &:hover {
+                background: #f0f4ff;
+                border-color: $light-blue;
+            }
+
+            &.is-expanded {
+                background: #f0f4ff;
+                border-color: $light-blue;
+            }
+        }
+    }
+
+    &__history-add-pj-btn {
+        margin-top: 10px;
+        display: inline-block;
+        font-size: $fs-small;
+        font-weight: bold;
+        padding: 6px 14px;
+        background: $light-blue;
+        color: $white;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+
+        &:hover {
+            opacity: 0.85;
+        }
     }
 
     &__history-winner {

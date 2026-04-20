@@ -10,6 +10,7 @@ export type GameState = {
   data: { [name: string]: TurnScore[] };
   playerOrder: string[];
   practiceMode: boolean;
+  penaltyMode?: boolean;    // 罰則投げあり（undefinedはtrue扱い）
   // ゴール順（1位から）
   finishedPlayers: string[];
   // 罰則フェーズ: 1位が投げた2投の点数
