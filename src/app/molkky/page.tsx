@@ -37,6 +37,18 @@ type GameRecord = {
   createdAt: Timestamp | null;
 };
 
+// あるプレイヤーのターン配列を、index番目のスコアを newScore に変えて再計算する
+const recalcTurns = (turns: TurnScore[], index: number, newScore: number): TurnScore[] => {
+  const result: TurnScore[] = [];
+  for (let i = 0; i < turns.length; i++) {
+    const score = i === index ? newScore : turns[i].score;
+    const prevTotal = i === 0 ? 0 : result[i - 1].total;
+    const raw = prevTotal + score;
+    result.push({ score, total: raw > 50 ? 25 : raw });
+  }
+  return result;
+};
+
 const Page = () => {
   const [appState, setAppState] = useState<string | null>("");
   const [state, setState] = useState<Molkky>({
@@ -53,11 +65,21 @@ const Page = () => {
   const [tab, setTab] = useState<"game" | "history">("game");
   const [history, setHistory] = useState<GameRecord[]>([]);
   const [historyLoading, setHistoryLoading] = useState(false);
+
+  // 編集中セル: { player, turnIndex }
+  const [editCell, setEditCell] = useState<{ player: string; turnIndex: number } | null>(null);
+  const [editStr, setEditStr] = useState("");
+  const editInputRef = useRef<HTMLInputElement>(null);
   const scoreInputRef = useRef<HTMLInputElement>(null);
 
   const players = state.playerOrder.length > 0 ? state.playerOrder : [];
   const num = players.length;
   const nowPlayer = num > 0 ? players[state.turns % num] : "";
+
+  // 全プレイヤーの最大ターン数
+  const maxTurns = players.length > 0
+    ? Math.max(...players.map((p) => state.data[p]?.length ?? 0))
+    : 0;
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -81,20 +103,19 @@ const Page = () => {
     localStorage.setItem(APP_KEY, JSON.stringify(state));
   }, [state]);
 
+  useEffect(() => {
+    if (editCell) {
+      setTimeout(() => editInputRef.current?.focus(), 30);
+    }
+  }, [editCell]);
+
   const getLastTotal = (player: string): number => {
     const turns = state.data[player];
     if (!turns || turns.length === 0) return 0;
     return turns[turns.length - 1].total;
   };
 
-  const getLastScore = (player: string): number | null => {
-    const turns = state.data[player];
-    if (!turns || turns.length === 0) return null;
-    return turns[turns.length - 1].score;
-  };
-
-  const getConsecutiveZeros = (player: string): number => {
-    const turns = state.data[player];
+  const getConsecutiveZerosFromTurns = (turns: TurnScore[]): number => {
     if (!turns || turns.length === 0) return 0;
     let count = 0;
     for (let i = turns.length - 1; i >= 0; i--) {
@@ -104,6 +125,9 @@ const Page = () => {
     return count;
   };
 
+  const getConsecutiveZeros = (player: string): number =>
+    getConsecutiveZerosFromTurns(state.data[player] ?? []);
+
   const registerScore = () => {
     const addScore = parseInt(addScoreStr, 10);
     if (isNaN(addScore)) return;
@@ -112,10 +136,7 @@ const Page = () => {
       return;
     }
 
-    const s: Molkky = {
-      ...state,
-      data: { ...state.data },
-    };
+    const s: Molkky = { ...state, data: { ...state.data } };
 
     const currentTotal = getLastTotal(nowPlayer);
     const newTotal = currentTotal + addScore;
@@ -146,15 +167,48 @@ const Page = () => {
     s.turns = state.turns + 1;
     setAddScoreStr("");
     setState(s);
-
     setTimeout(() => scoreInputRef.current?.focus(), 50);
+  };
+
+  // 直前の1手を巻き戻す
+  const undoLastTurn = () => {
+    if (state.turns === 0) return;
+    const prevTurns = state.turns - 1;
+    const prevPlayer = players[prevTurns % num];
+    const s: Molkky = { ...state, data: { ...state.data } };
+    s.data[prevPlayer] = s.data[prevPlayer].slice(0, -1);
+    s.turns = prevTurns;
+    setFinish(false);
+    setState(s);
+    setTimeout(() => scoreInputRef.current?.focus(), 50);
+  };
+
+  // セルをダブルクリックで編集開始
+  const startEdit = (player: string, turnIndex: number, currentScore: number) => {
+    setEditCell({ player, turnIndex });
+    setEditStr(String(currentScore));
+  };
+
+  // 編集確定
+  const commitEdit = () => {
+    if (!editCell) return;
+    const newScore = parseInt(editStr, 10);
+    if (isNaN(newScore) || newScore < 0 || newScore > 12) {
+      setEditCell(null);
+      return;
+    }
+    const s: Molkky = { ...state, data: { ...state.data } };
+    s.data[editCell.player] = recalcTurns(s.data[editCell.player], editCell.turnIndex, newScore);
+    setEditCell(null);
+    setState(s);
   };
 
   const saveGameRecord = async (winnerName: string, finalState: Molkky) => {
     try {
       const finalScores: { [name: string]: number } = {};
       finalState.playerOrder.forEach((p) => {
-        finalScores[p] = getLastTotalFromState(finalState, p);
+        const turns = finalState.data[p];
+        finalScores[p] = turns?.length ? turns[turns.length - 1].total : 0;
       });
       await addDoc(collection(db, MOLKKY_COLLECTION), {
         winner: winnerName,
@@ -163,12 +217,6 @@ const Page = () => {
         createdAt: Timestamp.now(),
       });
     } catch {}
-  };
-
-  const getLastTotalFromState = (s: Molkky, player: string): number => {
-    const turns = s.data[player];
-    if (!turns || turns.length === 0) return 0;
-    return turns[turns.length - 1].total;
   };
 
   const loadHistory = async () => {
@@ -207,9 +255,7 @@ const Page = () => {
   const resetGame = (keepPlayers: boolean) => {
     if (keepPlayers) {
       const a: Molkky = { turns: 0, data: {}, playerOrder: players };
-      players.forEach((n) => {
-        a.data[n] = [];
-      });
+      players.forEach((n) => { a.data[n] = []; });
       setState(a);
     } else {
       setState({ turns: 0, data: {}, playerOrder: [] });
@@ -222,9 +268,7 @@ const Page = () => {
   const startGame = () => {
     if (names.length === 0) return;
     const a: Molkky = { turns: 0, data: {}, playerOrder: [...names], practiceMode };
-    names.forEach((n) => {
-      a.data[n] = [];
-    });
+    names.forEach((n) => { a.data[n] = []; });
     setState(a);
   };
 
@@ -243,10 +287,7 @@ const Page = () => {
             </button>
             <button
               className={`p-molkky__tab ${tab === "history" ? "is-active" : ""}`}
-              onClick={() => {
-                setTab("history");
-                loadHistory();
-              }}
+              onClick={() => { setTab("history"); loadHistory(); }}
             >
               過去の結果
             </button>
@@ -272,26 +313,9 @@ const Page = () => {
                   <li className="p-molkky__user-column" key={index}>
                     <span className="p-molkky__user-name">{n}</span>
                     <div className="p-molkky__user-actions">
-                      <button
-                        className="p-molkky__order-btn"
-                        onClick={() => movePlayer(index, -1)}
-                        disabled={index === 0}
-                      >
-                        ▲
-                      </button>
-                      <button
-                        className="p-molkky__order-btn"
-                        onClick={() => movePlayer(index, 1)}
-                        disabled={index === names.length - 1}
-                      >
-                        ▼
-                      </button>
-                      <button
-                        className="p-molkky__delete-btn"
-                        onClick={() => setNames(names.filter((_, i) => i !== index))}
-                      >
-                        ✕
-                      </button>
+                      <button className="p-molkky__order-btn" onClick={() => movePlayer(index, -1)} disabled={index === 0}>▲</button>
+                      <button className="p-molkky__order-btn" onClick={() => movePlayer(index, 1)} disabled={index === names.length - 1}>▼</button>
+                      <button className="p-molkky__delete-btn" onClick={() => setNames(names.filter((_, i) => i !== index))}>✕</button>
                     </div>
                   </li>
                 ))}
@@ -308,9 +332,7 @@ const Page = () => {
               <Button
                 label="開始"
                 addClass="p-molkky__start"
-                onClick={() => {
-                  if (names.length > 0 && confirm("開始しますか？")) startGame();
-                }}
+                onClick={() => { if (names.length > 0 && confirm("開始しますか？")) startGame(); }}
               />
             </>
           ) : (
@@ -324,19 +346,12 @@ const Page = () => {
                 <ul className="p-molkky__history-list">
                   {history.map((record, i) => (
                     <li key={record.id || i} className="p-molkky__history-item">
-                      <div className="p-molkky__history-winner">
-                        🏆 {record.winner}
-                      </div>
+                      <div className="p-molkky__history-winner">🏆 {record.winner}</div>
                       <div className="p-molkky__history-date">
                         {record.createdAt
-                          ? new Date(
-                              record.createdAt.seconds * 1000
-                            ).toLocaleDateString("ja-JP", {
-                              year: "numeric",
-                              month: "2-digit",
-                              day: "2-digit",
-                              hour: "2-digit",
-                              minute: "2-digit",
+                          ? new Date(record.createdAt.seconds * 1000).toLocaleDateString("ja-JP", {
+                              year: "numeric", month: "2-digit", day: "2-digit",
+                              hour: "2-digit", minute: "2-digit",
                             })
                           : ""}
                       </div>
@@ -365,12 +380,18 @@ const Page = () => {
                     <span className="p-molkky__practice-badge">練習</span>
                   )}
                 </div>
+                <button
+                  className="p-molkky__undo-btn"
+                  onClick={undoLastTurn}
+                  disabled={state.turns === 0}
+                  title="1手戻す"
+                >
+                  ↩ 巻き戻し
+                </button>
                 <Button
                   label="終了"
                   addClass="p-molkky__score-end"
-                  onClick={() => {
-                    if (confirm("ゲームを終了しますか？")) resetGame(false);
-                  }}
+                  onClick={() => { if (confirm("ゲームを終了しますか？")) resetGame(false); }}
                 />
               </div>
               <div className="p-molkky__menu-bottom">
@@ -383,39 +404,29 @@ const Page = () => {
                   placeholder="スコアを入力"
                   value={addScoreStr}
                   onChange={(e) => setAddScoreStr(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") registerScore();
-                  }}
+                  onKeyDown={(e) => { if (e.key === "Enter") registerScore(); }}
                   autoFocus
                 />
-                <Button
-                  label="登録"
-                  addClass="p-molkky__score-add"
-                  onClick={registerScore}
-                />
+                <Button label="登録" addClass="p-molkky__score-add" onClick={registerScore} />
               </div>
             </div>
           ) : (
             <div className="p-molkky__menu">
               <div className="p-molkky__menu-top">
                 <div className="p-molkky__win-player">{winner}の勝ちです🎉</div>
-                <Button
-                  label="終了"
-                  addClass="p-molkky__score-end"
-                  onClick={() => resetGame(false)}
-                />
+                <button
+                  className="p-molkky__undo-btn"
+                  onClick={undoLastTurn}
+                  disabled={state.turns === 0}
+                  title="1手戻す"
+                >
+                  ↩ 巻き戻し
+                </button>
+                <Button label="終了" addClass="p-molkky__score-end" onClick={() => resetGame(false)} />
               </div>
               <div className="p-molkky__menu-bottom">
-                <Button
-                  label="続ける"
-                  addClass="p-molkky__score-continue"
-                  onClick={() => setFinish(false)}
-                />
-                <Button
-                  label="もう一度"
-                  addClass="p-molkky__score-add u-wt u-bg-bl"
-                  onClick={() => resetGame(true)}
-                />
+                <Button label="続ける" addClass="p-molkky__score-continue" onClick={() => setFinish(false)} />
+                <Button label="もう一度" addClass="p-molkky__score-add u-wt u-bg-bl" onClick={() => resetGame(true)} />
               </div>
             </div>
           )}
@@ -425,14 +436,8 @@ const Page = () => {
               <thead>
                 <tr>
                   <th className="p-molkky__th-name">名前</th>
-                  {Array.from({
-                    length: Math.max(
-                      ...players.map((p) => (state.data[p]?.length ?? 0))
-                    ),
-                  }).map((_, i) => (
-                    <th key={i} className="p-molkky__th-turn">
-                      {i + 1}
-                    </th>
+                  {Array.from({ length: maxTurns }).map((_, i) => (
+                    <th key={i} className="p-molkky__th-turn">{i + 1}</th>
                   ))}
                   <th className="p-molkky__th-total">計</th>
                 </tr>
@@ -440,33 +445,51 @@ const Page = () => {
               <tbody>
                 {players.map((p) => {
                   const turns = state.data[p] ?? [];
-                  const consecutiveZeros = getConsecutiveZeros(p);
-                  const isEliminated = consecutiveZeros >= 2;
-                  const hasOneZero = consecutiveZeros === 1;
+                  const consecutiveZeros = getConsecutiveZerosFromTurns(turns);
+                  const isEliminated = !state.practiceMode && consecutiveZeros >= 2;
                   return (
                     <tr
                       key={p}
                       className={`p-molkky__tr ${p === nowPlayer && !finish ? "is-current" : ""} ${isEliminated ? "is-eliminated" : ""}`}
                     >
                       <td className="p-molkky__td-name">{p}</td>
-                      {turns.map((t, i) => {
-                        const isZero = t.score === 0;
-                        const isLast = i === turns.length - 1;
+                      {Array.from({ length: maxTurns }).map((_, i) => {
+                        const t = turns[i];
+                        if (!t) {
+                          return <td key={i} className="p-molkky__td-turn is-empty" />;
+                        }
                         const prevZero = i > 0 && turns[i - 1].score === 0;
-                        const cellClass = isZero
-                          ? prevZero
-                            ? "is-miss-2"
-                            : "is-miss-1"
-                          : 50 - t.total <= 12
-                          ? "u-re"
-                          : "";
+                        const isEditing = editCell?.player === p && editCell?.turnIndex === i;
+                        const cellClass = t.score === 0
+                          ? prevZero ? "is-miss-2" : "is-miss-1"
+                          : 50 - t.total <= 12 ? "u-re" : "";
                         return (
                           <td
                             key={i}
                             className={`p-molkky__td-turn ${cellClass}`}
+                            onDoubleClick={() => startEdit(p, i, t.score)}
                           >
-                            <div className="p-molkky__cell-score">{t.score}</div>
-                            <div className="p-molkky__cell-total">{t.total}</div>
+                            {isEditing ? (
+                              <input
+                                ref={editInputRef}
+                                className="p-molkky__edit-input"
+                                type="number"
+                                min={0}
+                                max={12}
+                                value={editStr}
+                                onChange={(e) => setEditStr(e.target.value)}
+                                onKeyDown={(e) => {
+                                  if (e.key === "Enter") commitEdit();
+                                  if (e.key === "Escape") setEditCell(null);
+                                }}
+                                onBlur={commitEdit}
+                              />
+                            ) : (
+                              <>
+                                <div className="p-molkky__cell-score">{t.score}</div>
+                                <div className="p-molkky__cell-total">{t.total}</div>
+                              </>
+                            )}
                           </td>
                         );
                       })}
