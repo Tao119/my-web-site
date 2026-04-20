@@ -605,11 +605,11 @@ export default function Page() {
                 練習モード（0連続でも脱落なし）
               </label>
               <Button
-                label="開始"
+                label={`開始${selectedParticipants.length < 2 ? "（2人以上必要）" : ""}`}
                 addClass="p-molkky__start"
                 onClick={() => {
-                  if (selectedParticipants.length >= 2 && confirm("開始しますか？"))
-                    startGame(selectedParticipants);
+                  if (selectedParticipants.length < 2) return;
+                  startGame(selectedParticipants);
                 }}
               />
             </div>
