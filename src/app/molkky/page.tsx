@@ -262,7 +262,7 @@ const Page = () => {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 onKeyDown={(e) => {
-                  if (e.key === "Enter") addName();
+                  if (e.key === "Enter" && !e.nativeEvent.isComposing) addName();
                 }}
               />
               <Button addClass="p-molkky__add" label="追加" onClick={addName} />
