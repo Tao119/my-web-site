@@ -509,7 +509,13 @@ export default function Page() {
 
   const resumeGame = () => {
     if (!suspended) return;
-    setGame(suspended);
+    // turns % active.length が正しい次プレイヤーを指すよう正規化する
+    const activeOnResume = getActive(suspended);
+    const g =
+      activeOnResume.length > 0
+        ? { ...suspended, turns: suspended.turns % activeOnResume.length }
+        : suspended;
+    setGame(g);
     localStorage.removeItem(SUSPENDED_KEY);
     setSuspended(null);
   };
