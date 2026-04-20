@@ -46,7 +46,9 @@ export type FirestoreGameRecord = {
   loser: string;
   players: string[];
   finalScores: { [name: string]: number };
+  turnData?: { [name: string]: TurnScore[] };
   penaltyPoints: number;
+  penaltyBreakdown?: number[];
   projectId?: string;
   createdAt: Timestamp | null;
 };

@@ -120,6 +120,14 @@ $col-total: 72px;
         margin-right: 8px;
     }
 
+    &__user-order {
+        font-size: $fs-small;
+        color: $dark-gray;
+        width: 20px;
+        flex-shrink: 0;
+        font-weight: bold;
+    }
+
     &__user-actions {
         display: flex;
         gap: 6px;
@@ -274,6 +282,91 @@ $col-total: 72px;
                 border-color: $light-blue;
             }
         }
+    }
+
+    // ── History detail table ──────────────────────────────────────────────────
+    &__hist-table-wrap {
+        overflow-x: auto;
+        margin-top: 10px;
+        border-radius: 8px;
+        border: 1px solid $pale-gray;
+    }
+
+    &__hist-table {
+        border-collapse: collapse;
+        table-layout: fixed;
+        width: max-content;
+        min-width: 100%;
+    }
+
+    &__hist-th-name {
+        padding: 6px 10px;
+        background: #ececec;
+        border: 1px solid $pale-gray;
+        font-size: $fs-small;
+        font-weight: bold;
+        white-space: nowrap;
+        min-width: 80px;
+        position: sticky;
+        left: 0;
+        z-index: 2;
+    }
+
+    &__hist-th-turn {
+        padding: 6px 4px;
+        background: #f8f8f8;
+        border: 1px solid $pale-gray;
+        font-size: $fs-small;
+        color: $dark-gray;
+        text-align: center;
+        min-width: 52px;
+    }
+
+    &__hist-th-total {
+        padding: 6px 4px;
+        background: #e0e8ff;
+        border: 1px solid $pale-gray;
+        font-size: $fs-small;
+        font-weight: bold;
+        text-align: center;
+        min-width: 44px;
+        position: sticky;
+        right: 0;
+        z-index: 2;
+    }
+
+    &__hist-td-name {
+        padding: 4px 10px;
+        border: 1px solid $pale-gray;
+        font-size: $fs-small;
+        font-weight: bold;
+        white-space: nowrap;
+        background: $white;
+        position: sticky;
+        left: 0;
+        z-index: 1;
+    }
+
+    &__hist-td-turn {
+        padding: 2px;
+        border: 1px solid $pale-gray;
+        text-align: center;
+        vertical-align: top;
+        cursor: default;
+
+        &:hover { background: #f0f4ff; }
+    }
+
+    &__hist-td-total {
+        padding: 4px 4px;
+        border: 1px solid $pale-gray;
+        text-align: center;
+        font-weight: bold;
+        font-size: $fs-small;
+        background: #eaedff;
+        position: sticky;
+        right: 0;
+        z-index: 1;
     }
 
     &__history-add-pj-btn {

@@ -11,8 +11,7 @@ import {
   limit,
   Timestamp,
   doc,
-  setDoc,
-  getDoc,
+  updateDoc,
 } from "firebase/firestore";
 import type {
   TurnScore,
@@ -119,6 +118,8 @@ export default function Page() {
   const [history, setHistory] = useState<FirestoreGameRecord[]>([]);
   const [historyLoading, setHistoryLoading] = useState(false);
   const [expandedHistoryId, setExpandedHistoryId] = useState<string | null>(null);
+  const [histEditCell, setHistEditCell] = useState<{ id: string; player: string; turnIndex: number } | null>(null);
+  const [histEditStr, setHistEditStr] = useState("");
 
   const scoreInputRef = useRef<HTMLInputElement>(null);
   const penaltyInputRef = useRef<HTMLInputElement>(null);
@@ -364,7 +365,9 @@ export default function Page() {
       finalScores: Object.fromEntries(
         g.playerOrder.map((p) => [p, lastTotal(g.data[p] ?? [])])
       ),
+      turnData: g.data,
       penaltyPoints,
+      penaltyBreakdown: throws,
       projectId: project?.id,
       createdAt: Timestamp.now(),
     };
@@ -397,6 +400,41 @@ export default function Page() {
       setHistory(snap.docs.map((d) => ({ id: d.id, ...(d.data() as Omit<FirestoreGameRecord, "id">) })));
     } catch {}
     setHistoryLoading(false);
+  };
+
+  // ── history cell edit ────────────────────────────────────────────────────
+  const commitHistEdit = async () => {
+    if (!histEditCell) return;
+    const score = parseInt(histEditStr, 10);
+    if (isNaN(score) || score < 0 || score > 12) { setHistEditCell(null); return; }
+    const { id, player, turnIndex } = histEditCell;
+
+    setHistory((prev) => prev.map((r) => {
+      if (r.id !== id) return r;
+      const newTurnData = { ...(r.turnData ?? {}) };
+      newTurnData[player] = recalcTurns(newTurnData[player] ?? [], turnIndex, score);
+      const newFinalScores = { ...r.finalScores };
+      const turns = newTurnData[player];
+      newFinalScores[player] = turns.length > 0 ? turns[turns.length - 1].total : 0;
+      return { ...r, turnData: newTurnData, finalScores: newFinalScores };
+    }));
+
+    // Firestoreにも保存
+    try {
+      const updated = history.find((r) => r.id === id);
+      if (updated) {
+        const newTurnData = { ...(updated.turnData ?? {}) };
+        newTurnData[player] = recalcTurns(newTurnData[player] ?? [], turnIndex, score);
+        const newFinalScores = { ...updated.finalScores };
+        const turns = newTurnData[player];
+        newFinalScores[player] = turns.length > 0 ? turns[turns.length - 1].total : 0;
+        await updateDoc(doc(collection(db, MOLKKY_COL), id), {
+          turnData: newTurnData,
+          finalScores: newFinalScores,
+        });
+      }
+    } catch {}
+    setHistEditCell(null);
   };
 
   // ── project management ───────────────────────────────────────────────────
@@ -556,49 +594,52 @@ export default function Page() {
                   <div className="p-molkky__input-name-label">
                     プロジェクト: {project.name}
                   </div>
-                  <div className="p-molkky__input-users-label">参加者を選択</div>
+                  <div className="p-molkky__input-users-label">投げる順番（タップで選択、▲▼で並び替え）</div>
                   <ul className="p-molkky__users">
-                    {project.members.map((m) => {
-                      const selIdx = selectedParticipants.indexOf(m);
-                      const isSelected = selIdx >= 0;
-                      return (
-                        <li
-                          key={m}
-                          className={`p-molkky__user-column ${isSelected ? "is-selected" : ""}`}
-                          onClick={() => toggleParticipant(m)}
-                        >
-                          <span className="p-molkky__user-check">
-                            {isSelected ? "✓" : "　"}
-                          </span>
-                          <span className="p-molkky__user-name">{m}</span>
-                          {isSelected && (
-                            <div
-                              className="p-molkky__user-actions"
-                              onClick={(e) => e.stopPropagation()}
-                            >
-                              <button
-                                className="p-molkky__order-btn"
-                                disabled={selIdx === 0}
-                                onClick={() => setSelectedParticipants((prev) => {
-                                  const next = [...prev];
-                                  [next[selIdx - 1], next[selIdx]] = [next[selIdx], next[selIdx - 1]];
-                                  return next;
-                                })}
-                              >▲</button>
-                              <button
-                                className="p-molkky__order-btn"
-                                disabled={selIdx === selectedParticipants.length - 1}
-                                onClick={() => setSelectedParticipants((prev) => {
-                                  const next = [...prev];
-                                  [next[selIdx], next[selIdx + 1]] = [next[selIdx + 1], next[selIdx]];
-                                  return next;
-                                })}
-                              >▼</button>
-                            </div>
-                          )}
-                        </li>
-                      );
-                    })}
+                    {/* 選択済み: selectedParticipants の順で表示 */}
+                    {selectedParticipants.map((m, selIdx) => (
+                      <li
+                        key={m}
+                        className="p-molkky__user-column is-selected"
+                        onClick={() => toggleParticipant(m)}
+                      >
+                        <span className="p-molkky__user-check">✓</span>
+                        <span className="p-molkky__user-order">{selIdx + 1}.</span>
+                        <span className="p-molkky__user-name">{m}</span>
+                        <div className="p-molkky__user-actions" onClick={(e) => e.stopPropagation()}>
+                          <button
+                            className="p-molkky__order-btn"
+                            disabled={selIdx === 0}
+                            onClick={() => setSelectedParticipants((prev) => {
+                              const next = [...prev];
+                              [next[selIdx - 1], next[selIdx]] = [next[selIdx], next[selIdx - 1]];
+                              return next;
+                            })}
+                          >▲</button>
+                          <button
+                            className="p-molkky__order-btn"
+                            disabled={selIdx === selectedParticipants.length - 1}
+                            onClick={() => setSelectedParticipants((prev) => {
+                              const next = [...prev];
+                              [next[selIdx], next[selIdx + 1]] = [next[selIdx + 1], next[selIdx]];
+                              return next;
+                            })}
+                          >▼</button>
+                        </div>
+                      </li>
+                    ))}
+                    {/* 未選択メンバー */}
+                    {project.members.filter((m) => !selectedParticipants.includes(m)).map((m) => (
+                      <li
+                        key={m}
+                        className="p-molkky__user-column"
+                        onClick={() => toggleParticipant(m)}
+                      >
+                        <span className="p-molkky__user-check">　</span>
+                        <span className="p-molkky__user-order" />
+                        <span className="p-molkky__user-name">{m}</span>
+                      </li>
+                    ))}
                   </ul>
                 </>
               ) : (
@@ -825,19 +866,85 @@ export default function Page() {
                             : ""}
                         </div>
                         {isExpanded && (
-                          <>
-                            <div className="p-molkky__history-scores">
-                              {r.players?.map((p) => (
-                                <span key={p} className="p-molkky__history-score">
-                                  {p}: {r.finalScores?.[p] ?? "-"}
-                                </span>
-                              ))}
-                              {r.penaltyPoints > 0 && (
-                                <span className="p-molkky__history-score p-molkky__history-score--penalty">
-                                  罰則: {r.loser} {r.penaltyPoints}pt
-                                </span>
-                              )}
-                            </div>
+                          <div onClick={(e) => e.stopPropagation()}>
+                            {r.turnData ? (
+                              /* ターン詳細テーブル */
+                              <div className="p-molkky__hist-table-wrap">
+                                <table className="p-molkky__hist-table">
+                                  <thead>
+                                    <tr>
+                                      <th className="p-molkky__hist-th-name">名前</th>
+                                      {Array.from({
+                                        length: Math.max(0, ...Object.values(r.turnData).map((t) => t.length)),
+                                      }).map((_, i) => (
+                                        <th key={i} className="p-molkky__hist-th-turn">{i + 1}</th>
+                                      ))}
+                                      <th className="p-molkky__hist-th-total">計</th>
+                                    </tr>
+                                  </thead>
+                                  <tbody>
+                                    {(r.players ?? []).map((p) => {
+                                      const turns = r.turnData?.[p] ?? [];
+                                      const maxT = Math.max(0, ...Object.values(r.turnData ?? {}).map((t) => t.length));
+                                      return (
+                                        <tr key={p}>
+                                          <td className="p-molkky__hist-td-name">{p}</td>
+                                          {Array.from({ length: maxT }).map((_, i) => {
+                                            const t = turns[i];
+                                            const isEditing = histEditCell?.id === rid && histEditCell.player === p && histEditCell.turnIndex === i;
+                                            if (!t) return <td key={i} className="p-molkky__hist-td-turn" />;
+                                            return (
+                                              <td
+                                                key={i}
+                                                className="p-molkky__hist-td-turn"
+                                                onDoubleClick={() => { setHistEditCell({ id: rid, player: p, turnIndex: i }); setHistEditStr(String(t.score)); }}
+                                              >
+                                                {isEditing ? (
+                                                  <input
+                                                    className="p-molkky__edit-input"
+                                                    type="number"
+                                                    inputMode="numeric"
+                                                    autoFocus
+                                                    value={histEditStr}
+                                                    onChange={(e) => setHistEditStr(e.target.value)}
+                                                    onKeyDown={(e) => {
+                                                      if (e.key === "Enter") commitHistEdit();
+                                                      if (e.key === "Escape") setHistEditCell(null);
+                                                    }}
+                                                    onBlur={commitHistEdit}
+                                                  />
+                                                ) : (
+                                                  <>
+                                                    <div className="p-molkky__cell-score">{t.score}</div>
+                                                    <div className="p-molkky__cell-total">{t.total}</div>
+                                                  </>
+                                                )}
+                                              </td>
+                                            );
+                                          })}
+                                          <td className="p-molkky__hist-td-total">{r.finalScores?.[p] ?? "-"}</td>
+                                        </tr>
+                                      );
+                                    })}
+                                  </tbody>
+                                </table>
+                              </div>
+                            ) : (
+                              /* 旧データ: スコアのみ */
+                              <div className="p-molkky__history-scores">
+                                {r.players?.map((p) => (
+                                  <span key={p} className="p-molkky__history-score">
+                                    {p}: {r.finalScores?.[p] ?? "-"}
+                                  </span>
+                                ))}
+                              </div>
+                            )}
+                            {r.penaltyPoints > 0 && (
+                              <div className="p-molkky__history-score p-molkky__history-score--penalty" style={{ marginTop: 8 }}>
+                                💸 罰則: {r.loser} {r.penaltyPoints}pt
+                                {r.penaltyBreakdown && r.penaltyBreakdown.length > 0 && ` (${r.penaltyBreakdown.join(" + ")})`}
+                              </div>
+                            )}
                             {canAddToProject && (
                               <button
                                 className="p-molkky__history-add-pj-btn"
@@ -850,7 +957,7 @@ export default function Page() {
                                     winner: r.winner,
                                     loser: r.loser,
                                     penaltyPoints: r.penaltyPoints,
-                                    penaltyBreakdown: [],
+                                    penaltyBreakdown: r.penaltyBreakdown ?? [],
                                     createdAt: r.createdAt ? r.createdAt.seconds * 1000 : Date.now(),
                                   };
                                   setProject({ ...project, matches: [...project.matches, match] });
@@ -859,7 +966,7 @@ export default function Page() {
                                 このPJに追加
                               </button>
                             )}
-                          </>
+                          </div>
                         )}
                       </li>
                     );
