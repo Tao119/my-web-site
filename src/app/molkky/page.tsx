@@ -736,9 +736,9 @@ export default function Page() {
                 ↩ 戻す
               </button>
               <Button
-                label="終了"
+                label="トップへ"
                 addClass="p-molkky__score-end"
-                onClick={() => { if (confirm("終了しますか？")) resetGame(false); }}
+                onClick={() => { if (confirm("ゲームを中断してトップに戻りますか？")) resetGame(false); }}
               />
             </div>
 
