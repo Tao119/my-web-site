@@ -10,316 +10,547 @@ import {
   query,
   limit,
   Timestamp,
+  doc,
+  setDoc,
+  getDoc,
 } from "firebase/firestore";
+import type {
+  TurnScore,
+  GameState,
+  Project,
+  MatchRecord,
+  FirestoreGameRecord,
+} from "./types";
 
-const APP_KEY = "molkky";
-const MOLKKY_COLLECTION = "molkky_games";
+// ─── constants ───────────────────────────────────────────────────────────────
+const GAME_KEY = "molkky_game";
+const PROJECT_KEY = "molkky_project";
+const MOLKKY_COL = "molkky_games";
+const PROJECT_COL = "molkky_projects";
+const RANK_LABEL = ["1位", "2位", "3位", "4位", "5位", "6位", "7位", "8位"];
 
-type TurnScore = {
-  score: number;
-  total: number;
-};
+// ─── helpers ─────────────────────────────────────────────────────────────────
+const newId = () => Math.random().toString(36).slice(2);
 
-type Molkky = {
-  turns: number;
-  data: {
-    [name: string]: TurnScore[];
-  };
-  playerOrder: string[];
-  practiceMode?: boolean;
-};
+const recalcTurns = (turns: TurnScore[], idx: number, newScore: number): TurnScore[] =>
+  turns.map((t, i) => {
+    const score = i === idx ? newScore : t.score;
+    const prev = i === 0 ? 0 : 0; // 再計算は下で
+    return { score, total: 0 };
+  }).reduce<TurnScore[]>((acc, t, i) => {
+    const prevTotal = i === 0 ? 0 : acc[i - 1].total;
+    const raw = prevTotal + t.score;
+    acc.push({ score: t.score, total: raw > 50 ? 25 : raw });
+    return acc;
+  }, []);
 
-type GameRecord = {
-  id?: string;
-  winner: string;
-  players: string[];
-  finalScores: { [name: string]: number };
-  createdAt: Timestamp | null;
-};
-
-// あるプレイヤーのターン配列を、index番目のスコアを newScore に変えて再計算する
-const recalcTurns = (turns: TurnScore[], index: number, newScore: number): TurnScore[] => {
-  const result: TurnScore[] = [];
-  for (let i = 0; i < turns.length; i++) {
-    const score = i === index ? newScore : turns[i].score;
-    const prevTotal = i === 0 ? 0 : result[i - 1].total;
-    const raw = prevTotal + score;
-    result.push({ score, total: raw > 50 ? 25 : raw });
+const trailingZeros = (turns: TurnScore[]): number => {
+  let n = 0;
+  for (let i = turns.length - 1; i >= 0; i--) {
+    if (turns[i].score === 0) n++;
+    else break;
   }
-  return result;
+  return n;
 };
 
-const Page = () => {
-  const [appState, setAppState] = useState<string | null>("");
-  const [state, setState] = useState<Molkky>({
+const lastTotal = (turns: TurnScore[]): number =>
+  turns.length > 0 ? turns[turns.length - 1].total : 0;
+
+// アクティブ（ゴール・脱落していない）プレイヤーを返す
+const getActive = (s: GameState): string[] =>
+  s.playerOrder.filter((p) => {
+    if (s.finishedPlayers.includes(p)) return false;
+    if (!s.practiceMode && trailingZeros(s.data[p] ?? []) >= 2) return false;
+    return true;
+  });
+
+// ビリ（最下位確定）: アクティブ1人 or 全員ゴール以外の最後
+const getLoser = (s: GameState): string | null => {
+  const active = getActive(s);
+  if (active.length === 1) return active[0];
+  // 全員ゴール or 全員脱落の中で最後に残った人
+  const eliminated = s.playerOrder.filter(
+    (p) => !s.finishedPlayers.includes(p) && trailingZeros(s.data[p] ?? []) >= 2
+  );
+  const notFinished = s.playerOrder.filter((p) => !s.finishedPlayers.includes(p));
+  if (notFinished.length === 1) return notFinished[0];
+  return null;
+};
+
+// ─── component ───────────────────────────────────────────────────────────────
+export default function Page() {
+  // ── game state ──────────────────────────────────────────────────────────
+  const initGame = (): GameState => ({
     turns: 0,
     data: {},
     playerOrder: [],
+    practiceMode: false,
+    finishedPlayers: [],
+    penaltyPhase: false,
+    penaltyThrows: [],
+    penaltyTarget: "",
+    penaltyPayer: "",
   });
-  const [name, setName] = useState("");
-  const [names, setNames] = useState<string[]>([]);
-  const [practiceMode, setPracticeMode] = useState(false);
-  const [addScoreStr, setAddScoreStr] = useState("");
-  const [finish, setFinish] = useState(false);
-  const [winner, setWinner] = useState("");
-  const [tab, setTab] = useState<"game" | "history">("game");
-  const [history, setHistory] = useState<GameRecord[]>([]);
-  const [historyLoading, setHistoryLoading] = useState(false);
 
-  // 編集中セル: { player, turnIndex }
+  const [game, setGame] = useState<GameState>(initGame);
+  const [gameLoaded, setGameLoaded] = useState(false);
+
+  // ── project state ───────────────────────────────────────────────────────
+  const [project, setProject] = useState<Project | null>(null);
+  const [projectLoaded, setProjectLoaded] = useState(false);
+
+  // ── setup UI state ──────────────────────────────────────────────────────
+  const [setupTab, setSetupTab] = useState<"game" | "project" | "history">("game");
+  const [newMemberName, setNewMemberName] = useState("");
+  const [newProjectName, setNewProjectName] = useState("");
+  const [selectedParticipants, setSelectedParticipants] = useState<string[]>([]);
+  const [practiceMode, setPracticeMode] = useState(false);
+
+  // ── gameplay UI state ───────────────────────────────────────────────────
+  const [addScoreStr, setAddScoreStr] = useState("");
+  const [penaltyScoreStr, setPenaltyScoreStr] = useState("");
   const [editCell, setEditCell] = useState<{ player: string; turnIndex: number } | null>(null);
   const [editStr, setEditStr] = useState("");
-  const editInputRef = useRef<HTMLInputElement>(null);
+
+  // ── history ─────────────────────────────────────────────────────────────
+  const [history, setHistory] = useState<FirestoreGameRecord[]>([]);
+  const [historyLoading, setHistoryLoading] = useState(false);
+
   const scoreInputRef = useRef<HTMLInputElement>(null);
+  const penaltyInputRef = useRef<HTMLInputElement>(null);
+  const editInputRef = useRef<HTMLInputElement>(null);
 
-  const players = state.playerOrder.length > 0 ? state.playerOrder : [];
-  const num = players.length;
-  const nowPlayer = num > 0 ? players[state.turns % num] : "";
+  // ── derived ─────────────────────────────────────────────────────────────
+  const players = game.playerOrder;
+  const active = getActive(game);
+  const nowPlayer = active.length > 0 ? active[game.turns % active.length] : "";
+  const finishedPlayers = game.finishedPlayers;
+  const loser = getLoser(game);
+  const winner = finishedPlayers[0] ?? null;
 
-  // 全プレイヤーの最大ターン数
-  const maxTurns = players.length > 0
-    ? Math.max(...players.map((p) => state.data[p]?.length ?? 0))
-    : 0;
+  // 1位とビリが確定したか（罰則フェーズ移行条件）
+  const penaltyReady =
+    winner !== null &&
+    loser !== null &&
+    winner !== loser &&
+    !game.penaltyPhase &&
+    (active.length === 1 || active.length === 0);
 
+  const penaltyDone =
+    game.penaltyPhase &&
+    (game.penaltyThrows?.length ?? 0) >= 2;
+
+  const allDone =
+    active.length === 0 && !game.penaltyPhase;
+
+  const maxTurns =
+    players.length > 0
+      ? Math.max(0, ...players.map((p) => game.data[p]?.length ?? 0))
+      : 0;
+
+  // ── load from localStorage ───────────────────────────────────────────────
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      setAppState(localStorage.getItem(APP_KEY));
-    }
+    if (typeof window === "undefined") return;
+    try {
+      const g = localStorage.getItem(GAME_KEY);
+      if (g) {
+        const parsed = JSON.parse(g) as GameState;
+        if (!parsed.finishedPlayers) parsed.finishedPlayers = [];
+        if (!parsed.penaltyThrows) parsed.penaltyThrows = [];
+        setGame(parsed);
+      }
+    } catch {}
+    try {
+      const p = localStorage.getItem(PROJECT_KEY);
+      if (p) setProject(JSON.parse(p) as Project);
+    } catch {}
+    setGameLoaded(true);
+    setProjectLoaded(true);
   }, []);
 
   useEffect(() => {
-    if (appState) {
-      try {
-        const parsed = JSON.parse(appState) as Molkky;
-        if (!parsed.playerOrder) {
-          parsed.playerOrder = Object.keys(parsed.data);
-        }
-        setState(parsed);
-      } catch {}
-    }
-  }, [appState]);
+    if (!gameLoaded) return;
+    localStorage.setItem(GAME_KEY, JSON.stringify(game));
+  }, [game, gameLoaded]);
 
   useEffect(() => {
-    localStorage.setItem(APP_KEY, JSON.stringify(state));
-  }, [state]);
+    if (!projectLoaded) return;
+    localStorage.setItem(PROJECT_KEY, JSON.stringify(project));
+  }, [project, projectLoaded]);
 
   useEffect(() => {
-    if (editCell) {
-      setTimeout(() => editInputRef.current?.focus(), 30);
-    }
+    if (editCell) setTimeout(() => editInputRef.current?.focus(), 30);
   }, [editCell]);
 
-  const getLastTotal = (player: string): number => {
-    const turns = state.data[player];
-    if (!turns || turns.length === 0) return 0;
-    return turns[turns.length - 1].total;
-  };
-
-  const getConsecutiveZerosFromTurns = (turns: TurnScore[]): number => {
-    if (!turns || turns.length === 0) return 0;
-    let count = 0;
-    for (let i = turns.length - 1; i >= 0; i--) {
-      if (turns[i].score === 0) count++;
-      else break;
-    }
-    return count;
-  };
-
-  const getConsecutiveZeros = (player: string): number =>
-    getConsecutiveZerosFromTurns(state.data[player] ?? []);
-
+  // ── score registration ───────────────────────────────────────────────────
   const registerScore = () => {
-    const addScore = parseInt(addScoreStr, 10);
-    if (isNaN(addScore)) return;
-    if (addScore < 0 || addScore > 12) {
-      alert("0~12の数字を入力してください");
+    const score = parseInt(addScoreStr, 10);
+    if (isNaN(score) || score < 0 || score > 12) {
+      alert("0〜12の数字を入力してください");
       return;
     }
+    if (!nowPlayer) return;
 
-    const s: Molkky = { ...state, data: { ...state.data } };
+    const prev = lastTotal(game.data[nowPlayer] ?? []);
+    const raw = prev + score;
+    const total = raw > 50 ? 25 : raw;
 
-    const currentTotal = getLastTotal(nowPlayer);
-    const newTotal = currentTotal + addScore;
-    const finalTotal = newTotal > 50 ? 25 : newTotal;
+    const g: GameState = {
+      ...game,
+      data: {
+        ...game.data,
+        [nowPlayer]: [...(game.data[nowPlayer] ?? []), { score, total }],
+      },
+      finishedPlayers: [...game.finishedPlayers],
+    };
 
-    const newTurn: TurnScore = { score: addScore, total: finalTotal };
-    s.data[nowPlayer] = [...(s.data[nowPlayer] || []), newTurn];
+    const zeros = trailingZeros(game.data[nowPlayer] ?? []) + (score === 0 ? 1 : 0);
+    const prevActive = [...active];
 
-    const consecutiveZeros = getConsecutiveZeros(nowPlayer) + (addScore === 0 ? 1 : 0);
-
-    if (!state.practiceMode && consecutiveZeros >= 2) {
-      s.data[nowPlayer][s.data[nowPlayer].length - 1] = { score: 0, total: 0 };
-      s.turns = state.turns + 1;
+    // 脱落
+    if (!game.practiceMode && zeros >= 2) {
+      g.data[nowPlayer] = [
+        ...g.data[nowPlayer].slice(0, -1),
+        { score: 0, total: 0 },
+      ];
+      g.turns = nextTurns(g, prevActive, nowPlayer);
       setAddScoreStr("");
-      setState(s);
+      setGame(g);
       return;
     }
 
-    if (finalTotal === 50) {
-      setWinner(nowPlayer);
-      setFinish(true);
+    // ゴール
+    if (total === 50) {
+      g.finishedPlayers = [...g.finishedPlayers, nowPlayer];
+      g.turns = nextTurns(g, prevActive, nowPlayer);
       setAddScoreStr("");
-      setState(s);
-      saveGameRecord(nowPlayer, s);
+      // 1位・ビリ確定チェック
+      const newActive = getActive(g);
+      const newLoser = getLoser(g);
+      if (g.finishedPlayers.length >= 1 && newLoser && (newActive.length === 1 || newActive.length === 0)) {
+        // 罰則フェーズへ
+        g.penaltyPhase = true;
+        g.penaltyThrows = [];
+        g.penaltyTarget = newLoser;
+        g.penaltyPayer = newLoser;
+      }
+      setGame(g);
       return;
     }
 
-    s.turns = state.turns + 1;
+    g.turns = nextTurns(g, prevActive, nowPlayer);
     setAddScoreStr("");
-    setState(s);
+    setGame(g);
     setTimeout(() => scoreInputRef.current?.focus(), 50);
   };
 
-  // 直前の1手を巻き戻す
+  // turns を進めてアクティブプレイヤーを正しく選ぶ
+  // 現在のプレイヤーが active から抜けた（ゴール/脱落）場合は turns を変えない
+  // → active が縮んだ後も turns % newActive.length が正しい次のプレイヤーを指す
+  const nextTurns = (g: GameState, prevActive: string[], prevPlayer: string): number => {
+    const newActive = getActive(g);
+    if (newActive.length === 0) return g.turns;
+    // prevPlayer が newActive にいる → まだ残っている（通常の次ターン）
+    if (newActive.includes(prevPlayer)) return g.turns + 1;
+    // prevPlayer が抜けた → turns はそのまま（active 縮小で次が自動的に正しくなる）
+    return g.turns;
+  };
+
+  // ── penalty phase ────────────────────────────────────────────────────────
+  const registerPenaltyThrow = () => {
+    const score = parseInt(penaltyScoreStr, 10);
+    if (isNaN(score) || score < 0 || score > 12) {
+      alert("0〜12の数字を入力してください");
+      return;
+    }
+    const throws = [...(game.penaltyThrows ?? []), score];
+    const g: GameState = { ...game, penaltyThrows: throws };
+
+    if (throws.length >= 2) {
+      // 罰則確定 → 試合記録を保存
+      g.penaltyPhase = false;
+      const penaltyPoints = throws[0] + throws[1];
+      savePenaltyRecord(g, penaltyPoints, throws);
+    }
+
+    setPenaltyScoreStr("");
+    setGame(g);
+  };
+
+  // ── undo ─────────────────────────────────────────────────────────────────
   const undoLastTurn = () => {
-    if (state.turns === 0) return;
-    const prevTurns = state.turns - 1;
-    const prevPlayer = players[prevTurns % num];
-    const s: Molkky = { ...state, data: { ...state.data } };
-    s.data[prevPlayer] = s.data[prevPlayer].slice(0, -1);
-    s.turns = prevTurns;
-    setFinish(false);
-    setState(s);
+    if (game.penaltyPhase) {
+      // 罰則フェーズ中のundo
+      const throws = game.penaltyThrows ?? [];
+      if (throws.length > 0) {
+        setGame({ ...game, penaltyThrows: throws.slice(0, -1) });
+      } else {
+        // 罰則フェーズ自体を取り消す
+        setGame({ ...game, penaltyPhase: false, penaltyThrows: [], penaltyTarget: "", penaltyPayer: "" });
+      }
+      return;
+    }
+    if (game.turns === 0) return;
+
+    const g: GameState = {
+      ...game,
+      data: { ...game.data },
+      finishedPlayers: [...game.finishedPlayers],
+    };
+
+    // 直前のプレイヤーを特定: turns-1 の状態でnowPlayerを計算
+    const prevTurns = game.turns - 1;
+    const prevLastFinished = g.finishedPlayers[g.finishedPlayers.length - 1];
+    // 直前はfinishedが1人少ない状態
+    const tempFinished = prevLastFinished
+      ? g.finishedPlayers.slice(0, -1)
+      : g.finishedPlayers;
+    const tempActive = g.playerOrder.filter((p) => {
+      if (tempFinished.includes(p)) return false;
+      if (!g.practiceMode && trailingZeros(g.data[p] ?? []) >= 2) return false;
+      return true;
+    });
+    const prevPlayer =
+      tempActive.length > 0 ? tempActive[prevTurns % tempActive.length] : "";
+
+    if (prevPlayer && g.data[prevPlayer]?.length > 0) {
+      g.data[prevPlayer] = g.data[prevPlayer].slice(0, -1);
+    }
+    if (prevLastFinished === prevPlayer) {
+      g.finishedPlayers = g.finishedPlayers.slice(0, -1);
+    }
+    g.turns = prevTurns;
+    setGame(g);
     setTimeout(() => scoreInputRef.current?.focus(), 50);
   };
 
-  // セルをダブルクリックで編集開始
-  const startEdit = (player: string, turnIndex: number, currentScore: number) => {
-    setEditCell({ player, turnIndex });
-    setEditStr(String(currentScore));
-  };
-
-  // 編集確定
+  // ── edit cell ────────────────────────────────────────────────────────────
   const commitEdit = () => {
     if (!editCell) return;
-    const newScore = parseInt(editStr, 10);
-    if (isNaN(newScore) || newScore < 0 || newScore > 12) {
-      setEditCell(null);
-      return;
-    }
-    const s: Molkky = { ...state, data: { ...state.data } };
-    s.data[editCell.player] = recalcTurns(s.data[editCell.player], editCell.turnIndex, newScore);
+    const score = parseInt(editStr, 10);
+    if (isNaN(score) || score < 0 || score > 12) { setEditCell(null); return; }
+    const g: GameState = { ...game, data: { ...game.data } };
+    g.data[editCell.player] = recalcTurns(g.data[editCell.player], editCell.turnIndex, score);
     setEditCell(null);
-    setState(s);
+    setGame(g);
   };
 
-  const saveGameRecord = async (winnerName: string, finalState: Molkky) => {
+  // ── save records ──────────────────────────────────────────────────────────
+  const savePenaltyRecord = async (g: GameState, penaltyPoints: number, throws: number[]) => {
+    const record: FirestoreGameRecord = {
+      winner: g.finishedPlayers[0] ?? "",
+      loser: g.penaltyTarget ?? "",
+      players: g.playerOrder,
+      finalScores: Object.fromEntries(
+        g.playerOrder.map((p) => [p, lastTotal(g.data[p] ?? [])])
+      ),
+      penaltyPoints,
+      projectId: project?.id,
+      createdAt: Timestamp.now(),
+    };
     try {
-      const finalScores: { [name: string]: number } = {};
-      finalState.playerOrder.forEach((p) => {
-        const turns = finalState.data[p];
-        finalScores[p] = turns?.length ? turns[turns.length - 1].total : 0;
-      });
-      await addDoc(collection(db, MOLKKY_COLLECTION), {
-        winner: winnerName,
-        players: finalState.playerOrder,
-        finalScores,
-        createdAt: Timestamp.now(),
-      });
+      await addDoc(collection(db, MOLKKY_COL), record);
     } catch {}
+
+    // プロジェクトに記録
+    if (project) {
+      const match: MatchRecord = {
+        id: newId(),
+        participants: g.playerOrder,
+        winner: g.finishedPlayers[0] ?? "",
+        loser: g.penaltyTarget ?? "",
+        penaltyPoints,
+        penaltyBreakdown: throws,
+        createdAt: Date.now(),
+      };
+      const updated: Project = { ...project, matches: [...project.matches, match] };
+      setProject(updated);
+    }
   };
 
+  // ── history ──────────────────────────────────────────────────────────────
   const loadHistory = async () => {
     setHistoryLoading(true);
     try {
-      const q = query(
-        collection(db, MOLKKY_COLLECTION),
-        orderBy("createdAt", "desc"),
-        limit(20)
-      );
+      const q = query(collection(db, MOLKKY_COL), orderBy("createdAt", "desc"), limit(20));
       const snap = await getDocs(q);
-      const records: GameRecord[] = snap.docs.map((doc) => ({
-        id: doc.id,
-        ...(doc.data() as Omit<GameRecord, "id">),
-      }));
-      setHistory(records);
+      setHistory(snap.docs.map((d) => ({ id: d.id, ...(d.data() as Omit<FirestoreGameRecord, "id">) })));
     } catch {}
     setHistoryLoading(false);
   };
 
-  const movePlayer = (index: number, dir: -1 | 1) => {
-    const newOrder = [...names];
-    const target = index + dir;
-    if (target < 0 || target >= newOrder.length) return;
-    [newOrder[index], newOrder[target]] = [newOrder[target], newOrder[index]];
-    setNames(newOrder);
+  // ── project management ───────────────────────────────────────────────────
+  const createProject = () => {
+    const n = newProjectName.trim();
+    if (!n) return;
+    const p: Project = { id: newId(), name: n, members: [], matches: [], createdAt: Date.now() };
+    setProject(p);
+    setNewProjectName("");
+    setSelectedParticipants([]);
   };
 
-  const addName = () => {
-    const trimmed = name.trim();
-    if (!trimmed || names.includes(trimmed)) return;
-    setNames([...names, trimmed]);
-    setName("");
+  const addMember = () => {
+    const n = newMemberName.trim();
+    if (!n || !project || project.members.includes(n)) return;
+    const updated = { ...project, members: [...project.members, n] };
+    setProject(updated);
+    setSelectedParticipants((prev) => [...prev, n]);
+    setNewMemberName("");
+  };
+
+  const removeMember = (m: string) => {
+    if (!project) return;
+    setProject({ ...project, members: project.members.filter((x) => x !== m) });
+    setSelectedParticipants((prev) => prev.filter((x) => x !== m));
+  };
+
+  const toggleParticipant = (m: string) => {
+    setSelectedParticipants((prev) =>
+      prev.includes(m) ? prev.filter((x) => x !== m) : [...prev, m]
+    );
+  };
+
+  // ── game reset / start ────────────────────────────────────────────────────
+  const startGame = (participants: string[]) => {
+    if (participants.length < 2) return;
+    const g = initGame();
+    g.playerOrder = [...participants];
+    g.practiceMode = practiceMode;
+    participants.forEach((p) => { g.data[p] = []; });
+    setGame(g);
+    setAddScoreStr("");
   };
 
   const resetGame = (keepPlayers: boolean) => {
     if (keepPlayers) {
-      const a: Molkky = { turns: 0, data: {}, playerOrder: players };
-      players.forEach((n) => { a.data[n] = []; });
-      setState(a);
+      const g = initGame();
+      g.playerOrder = [...players];
+      g.practiceMode = game.practiceMode;
+      players.forEach((p) => { g.data[p] = []; });
+      setGame(g);
     } else {
-      setState({ turns: 0, data: {}, playerOrder: [] });
-      setNames([]);
+      setGame(initGame());
     }
-    setFinish(false);
-    setWinner("");
+    setAddScoreStr("");
   };
 
-  const startGame = () => {
-    if (names.length === 0) return;
-    const a: Molkky = { turns: 0, data: {}, playerOrder: [...names], practiceMode };
-    names.forEach((n) => { a.data[n] = []; });
-    setState(a);
+  // ── rank helpers ──────────────────────────────────────────────────────────
+  const getRank = (p: string) => {
+    const i = finishedPlayers.indexOf(p);
+    if (i >= 0) return RANK_LABEL[i] ?? `${i + 1}位`;
+    const isElim = !game.practiceMode && trailingZeros(game.data[p] ?? []) >= 2;
+    if (isElim) return "脱落";
+    return null;
   };
 
-  const isSetup = num === 0;
+  const isSetup = players.length === 0;
+  const penaltyPoints = (game.penaltyThrows ?? []).reduce((a, b) => a + b, 0);
 
+  // ── project totals ───────────────────────────────────────────────────────
+  const memberTotals = project
+    ? Object.fromEntries(
+        project.members.map((m) => [
+          m,
+          project.matches.reduce((sum, match) => {
+            if (match.loser === m) return sum + match.penaltyPoints;
+            return sum;
+          }, 0),
+        ])
+      )
+    : {};
+
+  // ─── render ──────────────────────────────────────────────────────────────
   return (
     <div className="p-molkky">
       {isSetup ? (
+        /* ═══════════════ SETUP ═══════════════ */
         <>
           <div className="p-molkky__tabs">
-            <button
-              className={`p-molkky__tab ${tab === "game" ? "is-active" : ""}`}
-              onClick={() => setTab("game")}
-            >
-              ゲーム
-            </button>
-            <button
-              className={`p-molkky__tab ${tab === "history" ? "is-active" : ""}`}
-              onClick={() => { setTab("history"); loadHistory(); }}
-            >
-              過去の結果
-            </button>
+            {(["game", "project", "history"] as const).map((t) => (
+              <button
+                key={t}
+                className={`p-molkky__tab ${setupTab === t ? "is-active" : ""}`}
+                onClick={() => {
+                  setSetupTab(t);
+                  if (t === "history") loadHistory();
+                }}
+              >
+                {t === "game" ? "ゲーム" : t === "project" ? "プロジェクト" : "履歴"}
+              </button>
+            ))}
           </div>
 
-          {tab === "game" ? (
-            <>
-              <div className="p-molkky__title">ユーザーを追加</div>
-              <div className="p-molkky__input-name-label">ユーザー名</div>
-              <input
-                className="p-molkky__input-name"
-                placeholder="user name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" && !e.nativeEvent.isComposing) addName();
-                }}
-              />
-              <Button addClass="p-molkky__add" label="追加" onClick={addName} />
-              <div className="p-molkky__input-users-label">ユーザー一覧（順番）</div>
-              <ul className="p-molkky__users">
-                {names.map((n, index) => (
-                  <li className="p-molkky__user-column" key={index}>
-                    <span className="p-molkky__user-name">{n}</span>
-                    <div className="p-molkky__user-actions">
-                      <button className="p-molkky__order-btn" onClick={() => movePlayer(index, -1)} disabled={index === 0}>▲</button>
-                      <button className="p-molkky__order-btn" onClick={() => movePlayer(index, 1)} disabled={index === names.length - 1}>▼</button>
-                      <button className="p-molkky__delete-btn" onClick={() => setNames(names.filter((_, i) => i !== index))}>✕</button>
-                    </div>
-                  </li>
-                ))}
-              </ul>
+          {setupTab === "game" && (
+            <div className="p-molkky__setup-body">
+              <div className="p-molkky__title">ゲーム設定</div>
+
+              {project ? (
+                /* プロジェクトメンバーから参加者選択 */
+                <>
+                  <div className="p-molkky__input-name-label">
+                    プロジェクト: {project.name}
+                  </div>
+                  <div className="p-molkky__input-users-label">参加者を選択</div>
+                  <ul className="p-molkky__users">
+                    {project.members.map((m) => (
+                      <li
+                        key={m}
+                        className={`p-molkky__user-column ${selectedParticipants.includes(m) ? "is-selected" : ""}`}
+                        onClick={() => toggleParticipant(m)}
+                      >
+                        <span className="p-molkky__user-check">
+                          {selectedParticipants.includes(m) ? "✓" : "　"}
+                        </span>
+                        <span className="p-molkky__user-name">{m}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </>
+              ) : (
+                /* プロジェクトなし: 直接入力 */
+                <>
+                  <div className="p-molkky__input-name-label">ユーザー名</div>
+                  <input
+                    className="p-molkky__input-name"
+                    placeholder="user name"
+                    value={newMemberName}
+                    onChange={(e) => setNewMemberName(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" && !e.nativeEvent.isComposing) {
+                        const n = newMemberName.trim();
+                        if (!n || selectedParticipants.includes(n)) return;
+                        setSelectedParticipants((prev) => [...prev, n]);
+                        setNewMemberName("");
+                      }
+                    }}
+                  />
+                  <Button
+                    addClass="p-molkky__add"
+                    label="追加"
+                    onClick={() => {
+                      const n = newMemberName.trim();
+                      if (!n || selectedParticipants.includes(n)) return;
+                      setSelectedParticipants((prev) => [...prev, n]);
+                      setNewMemberName("");
+                    }}
+                  />
+                  <div className="p-molkky__input-users-label">参加者一覧</div>
+                  <ul className="p-molkky__users">
+                    {selectedParticipants.map((n, i) => (
+                      <li className="p-molkky__user-column" key={i}>
+                        <span className="p-molkky__user-name">{n}</span>
+                        <button
+                          className="p-molkky__delete-btn"
+                          onClick={() => setSelectedParticipants((prev) => prev.filter((_, j) => j !== i))}
+                        >
+                          ✕
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                </>
+              )}
+
               <label className="p-molkky__practice-label">
                 <input
                   type="checkbox"
@@ -332,35 +563,144 @@ const Page = () => {
               <Button
                 label="開始"
                 addClass="p-molkky__start"
-                onClick={() => { if (names.length > 0 && confirm("開始しますか？")) startGame(); }}
+                onClick={() => {
+                  if (selectedParticipants.length >= 2 && confirm("開始しますか？"))
+                    startGame(selectedParticipants);
+                }}
               />
-            </>
-          ) : (
+            </div>
+          )}
+
+          {setupTab === "project" && (
+            <div className="p-molkky__setup-body">
+              {project ? (
+                <>
+                  <div className="p-molkky__title">{project.name}</div>
+
+                  {/* メンバー追加 */}
+                  <div className="p-molkky__input-name-label">メンバーを追加</div>
+                  <input
+                    className="p-molkky__input-name"
+                    placeholder="member name"
+                    value={newMemberName}
+                    onChange={(e) => setNewMemberName(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" && !e.nativeEvent.isComposing) addMember();
+                    }}
+                  />
+                  <Button addClass="p-molkky__add" label="追加" onClick={addMember} />
+
+                  <div className="p-molkky__input-users-label">メンバー</div>
+                  <ul className="p-molkky__users">
+                    {project.members.map((m) => (
+                      <li className="p-molkky__user-column" key={m}>
+                        <span className="p-molkky__user-name">{m}</span>
+                        <button className="p-molkky__delete-btn" onClick={() => removeMember(m)}>✕</button>
+                      </li>
+                    ))}
+                  </ul>
+
+                  {/* 支払いポイント集計 */}
+                  {project.matches.length > 0 && (
+                    <>
+                      <div className="p-molkky__input-users-label">支払いポイント集計</div>
+                      <div className="p-molkky__penalty-totals">
+                        {project.members
+                          .slice()
+                          .sort((a, b) => (memberTotals[b] ?? 0) - (memberTotals[a] ?? 0))
+                          .map((m) => (
+                            <div key={m} className="p-molkky__penalty-row">
+                              <span className="p-molkky__penalty-name">{m}</span>
+                              <span className="p-molkky__penalty-pts">{memberTotals[m] ?? 0} pt</span>
+                            </div>
+                          ))}
+                      </div>
+
+                      <div className="p-molkky__input-users-label">試合履歴</div>
+                      <ul className="p-molkky__history-list">
+                        {project.matches
+                          .slice()
+                          .reverse()
+                          .map((m) => (
+                            <li key={m.id} className="p-molkky__history-item">
+                              <div className="p-molkky__history-winner">🏆 {m.winner}</div>
+                              <div className="p-molkky__history-date">
+                                {new Date(m.createdAt).toLocaleDateString("ja-JP", {
+                                  month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit",
+                                })}
+                              </div>
+                              <div className="p-molkky__history-scores">
+                                <span className="p-molkky__history-score">
+                                  罰則: {m.loser} → {m.penaltyPoints}pt ({m.penaltyBreakdown.join(" + ")})
+                                </span>
+                              </div>
+                            </li>
+                          ))}
+                      </ul>
+                    </>
+                  )}
+
+                  <Button
+                    label="プロジェクトを削除"
+                    addClass="p-molkky__score-end"
+                    onClick={() => {
+                      if (confirm("プロジェクトを削除しますか？")) {
+                        setProject(null);
+                        setSelectedParticipants([]);
+                      }
+                    }}
+                  />
+                </>
+              ) : (
+                <>
+                  <div className="p-molkky__title">プロジェクト作成</div>
+                  <div className="p-molkky__input-name-label">プロジェクト名</div>
+                  <input
+                    className="p-molkky__input-name"
+                    placeholder="project name"
+                    value={newProjectName}
+                    onChange={(e) => setNewProjectName(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" && !e.nativeEvent.isComposing) createProject();
+                    }}
+                  />
+                  <Button addClass="p-molkky__start" label="作成" onClick={createProject} />
+                </>
+              )}
+            </div>
+          )}
+
+          {setupTab === "history" && (
             <div className="p-molkky__history">
-              <div className="p-molkky__title">過去の結果</div>
+              <div className="p-molkky__title">履歴</div>
               {historyLoading ? (
                 <div className="p-molkky__history-loading">読み込み中...</div>
               ) : history.length === 0 ? (
                 <div className="p-molkky__history-empty">記録がありません</div>
               ) : (
                 <ul className="p-molkky__history-list">
-                  {history.map((record, i) => (
-                    <li key={record.id || i} className="p-molkky__history-item">
-                      <div className="p-molkky__history-winner">🏆 {record.winner}</div>
+                  {history.map((r, i) => (
+                    <li key={r.id ?? i} className="p-molkky__history-item">
+                      <div className="p-molkky__history-winner">🏆 {r.winner}</div>
                       <div className="p-molkky__history-date">
-                        {record.createdAt
-                          ? new Date(record.createdAt.seconds * 1000).toLocaleDateString("ja-JP", {
+                        {r.createdAt
+                          ? new Date(r.createdAt.seconds * 1000).toLocaleDateString("ja-JP", {
                               year: "numeric", month: "2-digit", day: "2-digit",
                               hour: "2-digit", minute: "2-digit",
                             })
                           : ""}
                       </div>
                       <div className="p-molkky__history-scores">
-                        {record.players?.map((p) => (
+                        {r.players?.map((p) => (
                           <span key={p} className="p-molkky__history-score">
-                            {p}: {record.finalScores?.[p] ?? "-"}
+                            {p}: {r.finalScores?.[p] ?? "-"}
                           </span>
                         ))}
+                        {r.penaltyPoints > 0 && (
+                          <span className="p-molkky__history-score p-molkky__history-score--penalty">
+                            罰則: {r.loser} {r.penaltyPoints}pt
+                          </span>
+                        )}
                       </div>
                     </li>
                   ))}
@@ -370,38 +710,85 @@ const Page = () => {
           )}
         </>
       ) : (
+        /* ═══════════════ GAMEPLAY ═══════════════ */
         <div className="p-molkky__playing">
-          {!finish ? (
-            <div className="p-molkky__menu">
-              <div className="p-molkky__menu-top">
+          {/* ── menu bar ── */}
+          <div className="p-molkky__menu">
+            <div className="p-molkky__menu-top">
+              {penaltyReady || game.penaltyPhase ? (
+                <div className="p-molkky__now-player p-molkky__now-player--penalty">
+                  🎯 罰則: {winner}が投げる
+                </div>
+              ) : allDone ? (
+                <div className="p-molkky__win-player">ゲーム終了！</div>
+              ) : (
                 <div className="p-molkky__now-player">
                   {nowPlayer}の番です
-                  {state.practiceMode && (
-                    <span className="p-molkky__practice-badge">練習</span>
-                  )}
+                  {game.practiceMode && <span className="p-molkky__practice-badge">練習</span>}
                 </div>
-                <button
-                  className="p-molkky__undo-btn"
-                  onClick={undoLastTurn}
-                  disabled={state.turns === 0}
-                  title="1手戻す"
-                >
-                  ↩ 巻き戻し
-                </button>
-                <Button
-                  label="終了"
-                  addClass="p-molkky__score-end"
-                  onClick={() => { if (confirm("ゲームを終了しますか？")) resetGame(false); }}
+              )}
+              <button
+                className="p-molkky__undo-btn"
+                onClick={undoLastTurn}
+                disabled={game.turns === 0 && !(game.penaltyThrows ?? []).length}
+                title="1手戻す"
+              >
+                ↩ 戻す
+              </button>
+              <Button
+                label="終了"
+                addClass="p-molkky__score-end"
+                onClick={() => { if (confirm("終了しますか？")) resetGame(false); }}
+              />
+            </div>
+
+            {game.penaltyPhase && !penaltyDone ? (
+              /* 罰則投げ入力 */
+              <div className="p-molkky__menu-bottom">
+                <div className="p-molkky__penalty-label">
+                  {(game.penaltyThrows ?? []).length + 1}投目 / 2投
+                </div>
+                <input
+                  ref={penaltyInputRef}
+                  className="p-molkky__score-input"
+                  type="number"
+                  inputMode="numeric"
+                  min={0}
+                  max={12}
+                  placeholder="点数"
+                  value={penaltyScoreStr}
+                  onChange={(e) => setPenaltyScoreStr(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === "Enter") registerPenaltyThrow(); }}
+                  autoFocus
                 />
+                <Button label="登録" addClass="p-molkky__score-add" onClick={registerPenaltyThrow} />
               </div>
+            ) : penaltyDone ? (
+              /* 罰則確定後 */
+              <div className="p-molkky__menu-bottom">
+                <div className="p-molkky__penalty-result">
+                  💸 {game.penaltyTarget} の支払い: {penaltyPoints}pt
+                  （{(game.penaltyThrows ?? []).join(" + ")}）
+                </div>
+                <Button label="もう一度" addClass="p-molkky__score-add u-wt u-bg-bl" onClick={() => resetGame(true)} />
+                <Button label="トップへ" addClass="p-molkky__score-continue" onClick={() => resetGame(false)} />
+              </div>
+            ) : allDone ? (
+              <div className="p-molkky__menu-bottom">
+                <Button label="もう一度" addClass="p-molkky__score-add u-wt u-bg-bl" onClick={() => resetGame(true)} />
+                <Button label="トップへ" addClass="p-molkky__score-continue" onClick={() => resetGame(false)} />
+              </div>
+            ) : (
+              /* 通常入力 */
               <div className="p-molkky__menu-bottom">
                 <input
                   ref={scoreInputRef}
                   className="p-molkky__score-input"
                   type="number"
+                  inputMode="numeric"
                   min={0}
                   max={12}
-                  placeholder="スコアを入力"
+                  placeholder="スコア"
                   value={addScoreStr}
                   onChange={(e) => setAddScoreStr(e.target.value)}
                   onKeyDown={(e) => { if (e.key === "Enter") registerScore(); }}
@@ -409,32 +796,15 @@ const Page = () => {
                 />
                 <Button label="登録" addClass="p-molkky__score-add" onClick={registerScore} />
               </div>
-            </div>
-          ) : (
-            <div className="p-molkky__menu">
-              <div className="p-molkky__menu-top">
-                <div className="p-molkky__win-player">{winner}の勝ちです🎉</div>
-                <button
-                  className="p-molkky__undo-btn"
-                  onClick={undoLastTurn}
-                  disabled={state.turns === 0}
-                  title="1手戻す"
-                >
-                  ↩ 巻き戻し
-                </button>
-                <Button label="終了" addClass="p-molkky__score-end" onClick={() => resetGame(false)} />
-              </div>
-              <div className="p-molkky__menu-bottom">
-                <Button label="続ける" addClass="p-molkky__score-continue" onClick={() => setFinish(false)} />
-                <Button label="もう一度" addClass="p-molkky__score-add u-wt u-bg-bl" onClick={() => resetGame(true)} />
-              </div>
-            </div>
-          )}
+            )}
+          </div>
 
+          {/* ── score table ── */}
           <div className="p-molkky__table-wrap">
             <table className="p-molkky__table">
               <thead>
                 <tr>
+                  <th className="p-molkky__th-rank">順位</th>
                   <th className="p-molkky__th-name">名前</th>
                   {Array.from({ length: maxTurns }).map((_, i) => (
                     <th key={i} className="p-molkky__th-turn">{i + 1}</th>
@@ -444,38 +814,49 @@ const Page = () => {
               </thead>
               <tbody>
                 {players.map((p) => {
-                  const turns = state.data[p] ?? [];
-                  const consecutiveZeros = getConsecutiveZerosFromTurns(turns);
-                  const isEliminated = !state.practiceMode && consecutiveZeros >= 2;
+                  const turns = game.data[p] ?? [];
+                  const elim = !game.practiceMode && trailingZeros(turns) >= 2;
+                  const goaled = finishedPlayers.includes(p);
+                  const rank = getRank(p);
+                  const isCurrent = p === nowPlayer && !game.penaltyPhase && active.length > 0;
                   return (
                     <tr
                       key={p}
-                      className={`p-molkky__tr ${p === nowPlayer && !finish ? "is-current" : ""} ${isEliminated ? "is-eliminated" : ""}`}
+                      className={[
+                        "p-molkky__tr",
+                        isCurrent ? "is-current" : "",
+                        elim ? "is-eliminated" : "",
+                        goaled ? "is-goaled" : "",
+                      ].join(" ")}
                     >
+                      <td className="p-molkky__td-rank">
+                        {rank && (
+                          <span className={`p-molkky__rank-badge ${elim ? "rank-out" : `rank-${finishedPlayers.indexOf(p) + 1}`}`}>
+                            {rank}
+                          </span>
+                        )}
+                      </td>
                       <td className="p-molkky__td-name">{p}</td>
                       {Array.from({ length: maxTurns }).map((_, i) => {
                         const t = turns[i];
-                        if (!t) {
-                          return <td key={i} className="p-molkky__td-turn is-empty" />;
-                        }
+                        if (!t) return <td key={i} className="p-molkky__td-turn is-empty" />;
                         const prevZero = i > 0 && turns[i - 1].score === 0;
                         const isEditing = editCell?.player === p && editCell?.turnIndex === i;
-                        const cellClass = t.score === 0
+                        const cls = t.score === 0
                           ? prevZero ? "is-miss-2" : "is-miss-1"
                           : 50 - t.total <= 12 ? "u-re" : "";
                         return (
                           <td
                             key={i}
-                            className={`p-molkky__td-turn ${cellClass}`}
-                            onDoubleClick={() => startEdit(p, i, t.score)}
+                            className={`p-molkky__td-turn ${cls}`}
+                            onDoubleClick={() => { setEditCell({ player: p, turnIndex: i }); setEditStr(String(t.score)); }}
                           >
                             {isEditing ? (
                               <input
                                 ref={editInputRef}
                                 className="p-molkky__edit-input"
                                 type="number"
-                                min={0}
-                                max={12}
+                                inputMode="numeric"
                                 value={editStr}
                                 onChange={(e) => setEditStr(e.target.value)}
                                 onKeyDown={(e) => {
@@ -493,19 +874,42 @@ const Page = () => {
                           </td>
                         );
                       })}
-                      <td className="p-molkky__td-total">
-                        {turns.length > 0 ? turns[turns.length - 1].total : 0}
-                      </td>
+                      <td className="p-molkky__td-total">{lastTotal(turns)}</td>
                     </tr>
                   );
                 })}
               </tbody>
             </table>
+
+            {/* ── 罰則フェーズテーブル ── */}
+            {(game.penaltyPhase || penaltyDone) && (
+              <div className="p-molkky__penalty-section">
+                <div className="p-molkky__penalty-title">
+                  🎯 罰則投げ（{winner} → {game.penaltyTarget}）
+                </div>
+                <table className="p-molkky__penalty-table">
+                  <thead>
+                    <tr>
+                      <th>1投目</th>
+                      <th>2投目</th>
+                      <th>合計</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>{(game.penaltyThrows ?? [])[0] ?? "−"}</td>
+                      <td>{(game.penaltyThrows ?? [])[1] ?? "−"}</td>
+                      <td className="p-molkky__penalty-sum">
+                        {penaltyDone ? penaltyPoints : "−"}
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            )}
           </div>
         </div>
       )}
     </div>
   );
-};
-
-export default Page;
+}

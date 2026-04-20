@@ -179,6 +179,14 @@ $col-total: 72px;
         margin: 14px 24px 24px;
     }
 
+    // ── Setup scrollable body ─────────────────────────────────────────────────
+    &__setup-body {
+        flex: 1;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+    }
+
     // ── History tab ───────────────────────────────────────────────────────────
     &__history {
         width: 100%;
@@ -233,6 +241,186 @@ $col-total: 72px;
         border: 1px solid $pale-gray;
         border-radius: 6px;
         padding: 3px 10px;
+
+        &--penalty {
+            background: #fff3e0;
+            border-color: #ffcc80;
+            color: #e65100;
+        }
+    }
+
+    // ── Participant selection ─────────────────────────────────────────────────
+    &__user-column {
+        &.is-selected {
+            background: #e8f5e9;
+        }
+    }
+
+    &__user-check {
+        width: 24px;
+        font-size: $fs-medium;
+        color: #2e7d32;
+        font-weight: bold;
+        flex-shrink: 0;
+        text-align: center;
+    }
+
+    // ── Rank badge column ─────────────────────────────────────────────────────
+    &__th-rank {
+        padding: 8px 4px;
+        border: 1px solid $pale-gray;
+        text-align: center;
+        font-size: $fs-small;
+        color: $dark-gray;
+        width: 44px;
+        background: #f8f8f8;
+    }
+
+    &__td-rank {
+        padding: 4px 2px;
+        border: 1px solid $pale-gray;
+        text-align: center;
+        width: 44px;
+    }
+
+    &__rank-badge {
+        display: inline-block;
+        font-size: 11px;
+        font-weight: bold;
+        border-radius: 4px;
+        padding: 2px 4px;
+        white-space: nowrap;
+        background: #f0f0f0;
+        color: $dark-gray;
+        border: 1px solid $pale-gray;
+
+        &.rank-1 {
+            background: #fff8c0;
+            color: #8a6d00;
+            border-color: #f0c040;
+        }
+
+        &.rank-2 {
+            background: #e8e8e8;
+            color: #555;
+            border-color: #bbb;
+        }
+
+        &.rank-3 {
+            background: #ffe8d6;
+            color: #a04010;
+            border-color: #e09060;
+        }
+
+        &.rank-out {
+            background: #fde0e0;
+            color: #c00;
+            border-color: #f99;
+        }
+    }
+
+    &__tr {
+        &.is-goaled {
+            background: #f0fff4;
+            .p-molkky__td-name { background: #e0f8ea; }
+        }
+    }
+
+    // ── Penalty section ───────────────────────────────────────────────────────
+    &__penalty-section {
+        margin-top: 20px;
+        border: 2px solid #ff8f00;
+        border-radius: 10px;
+        overflow: hidden;
+    }
+
+    &__penalty-title {
+        background: #fff3e0;
+        color: #e65100;
+        font-size: $fs-text;
+        font-weight: bold;
+        padding: 10px 16px;
+        border-bottom: 1px solid #ffcc80;
+    }
+
+    &__penalty-table {
+        width: 100%;
+        border-collapse: collapse;
+
+        th {
+            background: #fafafa;
+            padding: 8px;
+            font-size: $fs-small;
+            text-align: center;
+            border-bottom: 1px solid $pale-gray;
+            border-right: 1px solid $pale-gray;
+            &:last-child { border-right: none; }
+        }
+
+        td {
+            padding: 12px 8px;
+            text-align: center;
+            font-size: $fs-medium;
+            font-weight: bold;
+            border-right: 1px solid $pale-gray;
+            &:last-child { border-right: none; }
+        }
+    }
+
+    &__penalty-sum {
+        color: #e65100;
+        font-size: $fs-title;
+    }
+
+    &__penalty-label {
+        font-size: $fs-text;
+        color: $dark-gray;
+        white-space: nowrap;
+        flex-shrink: 0;
+    }
+
+    &__penalty-result {
+        font-size: $fs-text;
+        font-weight: bold;
+        color: #e65100;
+        flex: 1;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    // ── Project penalty totals ────────────────────────────────────────────────
+    &__penalty-totals {
+        margin: 0 24px;
+        border: 1px solid $pale-gray;
+        border-radius: 10px;
+        overflow: hidden;
+    }
+
+    &__penalty-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 10px 16px;
+        border-bottom: 1px solid $pale-gray;
+        font-size: $fs-text;
+
+        &:last-child { border-bottom: none; }
+    }
+
+    &__penalty-name {
+        flex: 1;
+        font-weight: bold;
+    }
+
+    &__penalty-pts {
+        font-size: $fs-medium;
+        font-weight: bold;
+        color: #e65100;
+    }
+
+    &__now-player--penalty {
+        color: #e65100;
     }
 
     // ── Playing screen ────────────────────────────────────────────────────────
