@@ -39,6 +39,22 @@ const nextConfig = {
         ],
       },
       {
+        source: "/shibuya-rush/Build/:file*.unityweb",
+        headers: [{ key: "Content-Encoding", value: "gzip" }, { key: "Cache-Control", value: "public, max-age=0, must-revalidate" }],
+      },
+      {
+        source: "/shibuya-rush/Build/:file*.wasm.unityweb",
+        headers: [{ key: "Content-Type", value: "application/wasm" }],
+      },
+      {
+        source: "/shibuya-rush/Build/:file*.framework.js.unityweb",
+        headers: [{ key: "Content-Type", value: "application/javascript" }],
+      },
+      {
+        source: "/shibuya-rush/Build/:file*.data.unityweb",
+        headers: [{ key: "Content-Type", value: "application/octet-stream" }],
+      },
+      {
         source: "/uploads/:path*",
         headers: [
           {
