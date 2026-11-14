@@ -1,205 +1,241 @@
 "use client";
 
-import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import type { GameEntry } from "src/lib/games";
+import { ATOM, ATOM_PALETTE, BLOCK, BLOCK_PALETTE, RUNNER_A, RUNNER_B, RUNNER_PALETTE, Sprite } from "./Sprite";
 import styles from "./hub.module.css";
 
-const EMOJI = ["🎮", "✨", "⭐", "🕹️", "💥", "🚀", "🍡", "⚡"];
-const SOON = ["???", "つくってる…", "おたのしみに", "ひみつ!", "もうすこし…"];
+const KONAMI = ["ArrowUp", "ArrowUp", "ArrowDown", "ArrowDown", "ArrowLeft", "ArrowRight", "ArrowLeft", "ArrowRight", "b", "a"];
+const HI_KEY = "tao-arcade-hi";
 
-/** ロゴをクリックしたとき、絵文字を弾けさせる */
-function burst(x: number, y: number) {
-  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-  for (let i = 0; i < 18; i++) {
-    const el = document.createElement("span");
-    el.textContent = EMOJI[i % EMOJI.length];
-    el.style.cssText = `position:fixed;left:${x}px;top:${y}px;font-size:${18 + Math.random() * 18}px;pointer-events:none;z-index:99;will-change:transform,opacity`;
-    document.body.appendChild(el);
-    const a = Math.random() * Math.PI * 2;
-    const d = 80 + Math.random() * 160;
-    el.animate(
-      [
-        { transform: "translate(-50%,-50%) scale(.4)", opacity: 1 },
-        { transform: `translate(calc(-50% + ${Math.cos(a) * d}px), calc(-50% + ${Math.sin(a) * d + 90}px)) rotate(${Math.random() * 540 - 270}deg) scale(1)`, opacity: 0 },
-      ],
-      { duration: 900 + Math.random() * 500, easing: "cubic-bezier(.2,.7,.3,1)" },
-    ).onfinish = () => el.remove();
-  }
-}
+type Cart = GameEntry | { slug: "soon"; title: string; tagline: string; color: string; tags: string[]; href?: undefined };
 
-/** ポインタに合わせて傾き、光が追いかけるカード */
-function useTilt<T extends HTMLElement>() {
-  const ref = useRef<T>(null);
-  const onMove = useCallback((e: React.PointerEvent<T>) => {
-    const el = ref.current;
-    if (!el || e.pointerType === "touch") return;
-    const r = el.getBoundingClientRect();
-    const px = (e.clientX - r.left) / r.width;
-    const py = (e.clientY - r.top) / r.height;
-    el.style.setProperty("--rx", `${(0.5 - py) * 10}deg`);
-    el.style.setProperty("--ry", `${(px - 0.5) * 12}deg`);
-    el.style.setProperty("--gx", `${px * 100}%`);
-    el.style.setProperty("--gy", `${py * 100}%`);
-  }, []);
-  const onLeave = useCallback(() => {
-    const el = ref.current;
-    if (!el) return;
-    el.style.setProperty("--rx", "0deg");
-    el.style.setProperty("--ry", "0deg");
-  }, []);
-  return { ref, onPointerMove: onMove, onPointerLeave: onLeave };
-}
+const SOON: Cart = {
+  slug: "soon",
+  title: "???",
+  tagline: "つぎのカートリッジを準備中…。できたらここに差さります。",
+  color: "#8b95b8",
+  tags: ["COMING SOON"],
+};
 
-function Runners() {
-  // 群衆の中を、オレンジの自分が追い抜いていく
-  const crowd = [
-    { d: 7.5, t: 14, c: "#5b6b88" }, { d: 9, t: 38, c: "#7a86a0" }, { d: 6.8, t: 62, c: "#4f5d78" },
-    { d: 8.2, t: 80, c: "#8794ad" }, { d: 10, t: 26, c: "#66748f" }, { d: 7.1, t: 70, c: "#5b6b88" },
-  ];
+const pad = (n: number) => String(n).padStart(6, "0");
+
+function Art({ slug }: { slug: string }) {
+  if (slug === "shibuya-rush")
+    return (
+      <div className={styles.artRush}>
+        <i className={styles.speed} />
+        <i className={`${styles.speed} ${styles.s2}`} />
+        <Sprite rows={RUNNER_A} palette={RUNNER_PALETTE} px={6} className={styles.frameA} />
+        <Sprite rows={RUNNER_B} palette={RUNNER_PALETTE} px={6} className={styles.frameB} />
+      </div>
+    );
+  if (slug === "dopamine")
+    return (
+      <div className={styles.artAtom}>
+        <Sprite rows={ATOM} palette={ATOM_PALETTE} px={7} />
+      </div>
+    );
   return (
-    <div className={styles.track} aria-hidden>
-      {crowd.map((r, i) => (
-        <i key={i} className={styles.runner} style={{ top: `${r.t}%`, animationDuration: `${r.d}s`, animationDelay: `${-i * 1.3}s`, background: r.c }} />
-      ))}
-      <i className={`${styles.runner} ${styles.me}`} />
-      <span className={styles.goal}>🏁</span>
+    <div className={styles.artBlock}>
+      <Sprite rows={BLOCK} palette={BLOCK_PALETTE} px={7} />
     </div>
-  );
-}
-
-function Molecule() {
-  return (
-    <div className={styles.mol} aria-hidden>
-      <i className={styles.nucleus} />
-      {[0, 1, 2].map((i) => (
-        <i key={i} className={styles.orbit} style={{ animationDelay: `${-i * 1.6}s`, ["--s" as string]: 1 + i * 0.45 }}>
-          <b />
-        </i>
-      ))}
-    </div>
-  );
-}
-
-function TiltLink({ g, children, className }: { g: GameEntry; children: React.ReactNode; className: string }) {
-  const tilt = useTilt<HTMLAnchorElement>();
-  return (
-    <Link href={g.href} className={className} style={{ ["--c" as string]: g.color }} {...tilt}>
-      {children}
-    </Link>
   );
 }
 
 export default function HubClient({ games }: { games: GameEntry[] }) {
-  const rootRef = useRef<HTMLDivElement>(null);
-  const [soon, setSoon] = useState(0);
-  const featured = games.find((g) => g.featured);
-  const others = games.filter((g) => !g.featured);
+  const carts: Cart[] = [...games, SOON];
+  const [sel, setSel] = useState(0);
+  const [score, setScore] = useState(0);
+  const [hi, setHi] = useState(50000);
+  const [typed, setTyped] = useState("");
+  const [cheat, setCheat] = useState(false);
+  const [jump, setJump] = useState(false);
+  const konami = useRef(0);
+  const cur = carts[sel];
 
-  // マウスに合わせて背景の光が動く
+  const addScore = useCallback((n: number) => setScore((s) => s + n), []);
+
   useEffect(() => {
-    const el = rootRef.current;
-    if (!el) return;
-    const move = (e: PointerEvent) => {
-      el.style.setProperty("--mx", `${e.clientX}px`);
-      el.style.setProperty("--my", `${e.clientY}px`);
-    };
-    window.addEventListener("pointermove", move, { passive: true });
-    return () => window.removeEventListener("pointermove", move);
+    try {
+      const v = Number(localStorage.getItem(HI_KEY));
+      if (v > 0) setHi(v);
+    } catch {}
+  }, []);
+  useEffect(() => {
+    if (score > hi) {
+      setHi(score);
+      try {
+        localStorage.setItem(HI_KEY, String(score));
+      } catch {}
+    }
+  }, [score, hi]);
+
+  const choose = useCallback(
+    (i: number) => {
+      setSel((p) => {
+        if (p !== i) addScore(100);
+        return i;
+      });
+    },
+    [addScore],
+  );
+
+  const open = useCallback((c: Cart) => {
+    if (c.href) window.location.assign(c.href);
   }, []);
 
-  // スクロールで順番に現れる
+  // キーボード: 矢印で選び、Enter で開く。コナミコマンドの隠し要素も。
   useEffect(() => {
-    const els = document.querySelectorAll<HTMLElement>("[data-reveal]");
-    const io: IntersectionObserver = new IntersectionObserver(
-      (entries) => {
-        for (const e of entries) {
-          if (!e.isIntersecting) continue;
-          e.target.classList.add(styles.in);
-          io.unobserve(e.target);
+    const onKey = (e: KeyboardEvent) => {
+      const k = e.key.length === 1 ? e.key.toLowerCase() : e.key;
+      if (k === KONAMI[konami.current]) {
+        konami.current += 1;
+        if (konami.current === KONAMI.length) {
+          konami.current = 0;
+          setCheat(true);
+          addScore(30000);
         }
-      },
-      { threshold: 0.12 },
-    );
-    els.forEach((el) => io.observe(el));
-    return () => io.disconnect();
-  }, []);
+      } else {
+        konami.current = k === KONAMI[0] ? 1 : 0;
+      }
+      if (k === "ArrowRight" || k === "ArrowDown") {
+        setSel((p) => (p + 1) % carts.length);
+        addScore(100);
+      } else if (k === "ArrowLeft" || k === "ArrowUp") {
+        setSel((p) => (p + carts.length - 1) % carts.length);
+        addScore(100);
+      }
+      else if (k === "Enter") open(carts[sel]);
+      else if (k === " ") {
+        setJump(true);
+        setTimeout(() => setJump(false), 520);
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  });
+
+  // RPG 風の 1 文字ずつ表示
+  useEffect(() => {
+    const text = cheat ? "コナミコマンド!! ライフが 30 ふえた! ゲームをたのしんでね!" : cur.tagline;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      setTyped(text);
+      return;
+    }
+    setTyped("");
+    let i = 0;
+    const t = setInterval(() => {
+      i += 1;
+      setTyped(text.slice(0, i));
+      if (i >= text.length) clearInterval(t);
+    }, 28);
+    return () => clearInterval(t);
+  }, [cur, cheat]);
+
+  const doJump = () => {
+    if (jump) return;
+    setJump(true);
+    addScore(100);
+    setTimeout(() => setJump(false), 520);
+  };
 
   return (
-    <div className={styles.root} ref={rootRef}>
-      <div className={styles.bg} aria-hidden>
-        <i className={styles.blob1} />
-        <i className={styles.blob2} />
-        <i className={styles.blob3} />
-        <i className={styles.gridlines} />
-        <i className={styles.spot} />
-      </div>
-
+    <div className={`${styles.root} ${cheat ? styles.cheat : ""}`}>
+      <div className={styles.crt} aria-hidden />
       <main className={styles.page}>
+        <div className={styles.hud}>
+          <span>1UP <b>{pad(score)}</b></span>
+          <span>HI-SCORE <b>{pad(hi)}</b></span>
+          <span>CREDIT <b>01</b></span>
+        </div>
+
         <header className={styles.header}>
-          <h1
-            className={styles.logo}
-            onClick={(e) => burst(e.clientX, e.clientY)}
-            title="クリックしてみて"
-          >
-            {"TAO GAMES".split("").map((ch, i) => (
-              <span key={i} className={styles.ch} style={{ animationDelay: `${i * 70}ms` }}>
+          <h1 className={styles.logo} onClick={() => addScore(1000)}>
+            {"TAO ARCADE".split("").map((ch, i) => (
+              <span key={i} className={styles.ch} style={{ animationDelay: `${i * 90}ms` }}>
                 {ch === " " ? " " : ch}
               </span>
             ))}
           </h1>
-          <p className={styles.lead}>ブラウザですぐ遊べる、ちいさなゲームの集まり。</p>
+          <p className={styles.sub}>ブラウザで遊べる、ちいさなゲームたち</p>
+          <p className={styles.start}>▶ カートリッジを えらんでね</p>
         </header>
 
-        <div className={styles.ticker} aria-hidden>
-          <div>
-            {Array.from({ length: 2 }).map((_, k) => (
-              <span key={k}>
-                PLAY NOW ▶ NO INSTALL ▶ FREE ▶ BROWSER GAMES ▶ PLAY NOW ▶ NO INSTALL ▶ FREE ▶ BROWSER GAMES ▶
-              </span>
-            ))}
-          </div>
-        </div>
-
-        {featured && (
-          <TiltLink g={featured} className={styles.hero}>
-            <span className={styles.shine} />
-            <span className={styles.badge}>NEW</span>
-            <Runners />
-            <h2>{featured.title}</h2>
-            <p>{featured.tagline}</p>
-            <ul className={styles.tags}>{featured.tags.map((t) => <li key={t}>{t}</li>)}</ul>
-            <span className={styles.play}>いますぐ遊ぶ <b>▶</b></span>
-          </TiltLink>
-        )}
-
-        <section className={styles.grid} aria-label="ゲーム一覧">
-          {others.map((g, i) => (
-            <div key={g.slug} data-reveal className={styles.reveal} style={{ transitionDelay: `${i * 90}ms` }}>
-              <TiltLink g={g} className={styles.card}>
-                <span className={styles.shine} />
-                {g.slug === "dopamine" && <Molecule />}
-                <h3>{g.title}</h3>
-                <p>{g.tagline}</p>
-                <ul className={styles.tags}>{g.tags.map((t) => <li key={t}>{t}</li>)}</ul>
-                <span className={styles.go}>開く <b>→</b></span>
-              </TiltLink>
-            </div>
-          ))}
-
-          <div data-reveal className={styles.reveal} style={{ transitionDelay: `${others.length * 90}ms` }}>
-            <button type="button" className={styles.soon} onClick={() => setSoon((s) => (s + 1) % SOON.length)}>
-              <span className={styles.q}>?</span>
-              <span>{SOON[soon]}</span>
-              <small>つぎのゲームを準備中</small>
-            </button>
-          </div>
+        <section className={styles.shelf} aria-label="ゲーム一覧">
+          {carts.map((c, i) => {
+            const on = i === sel;
+            const inner = (
+              <>
+                <span className={styles.grip} />
+                <span className={styles.label}>
+                  <Art slug={c.slug} />
+                </span>
+                <span className={styles.name}>{c.title}</span>
+                {on && <span className={styles.arrow}>▼</span>}
+              </>
+            );
+            const style = { ["--c" as string]: c.color };
+            const cls = `${styles.cart} ${on ? styles.on : ""}`;
+            return c.href ? (
+              <a
+                key={c.slug}
+                href={c.href}
+                className={cls}
+                style={style}
+                onPointerEnter={(e) => e.pointerType === "mouse" && choose(i)}
+                onClick={(e) => {
+                  if (!on) {
+                    e.preventDefault();
+                    choose(i);
+                  }
+                }}
+              >
+                {inner}
+              </a>
+            ) : (
+              <button key={c.slug} type="button" className={cls} style={style} onClick={() => choose(i)} onPointerEnter={(e) => e.pointerType === "mouse" && choose(i)}>
+                {inner}
+              </button>
+            );
+          })}
         </section>
+
+        <section className={styles.msg} aria-live="polite">
+          <div className={styles.msgTitle}>{cur.title}</div>
+          <p className={styles.msgText}>
+            {typed}
+            <i className={styles.caret} />
+          </p>
+          <div className={styles.msgFoot}>
+            <ul className={styles.tags}>{cur.tags.map((t) => <li key={t}>{t}</li>)}</ul>
+            {cur.href ? (
+              <a className={styles.btn} href={cur.href} onClick={() => addScore(500)}>
+                ▶ START
+              </a>
+            ) : (
+              <span className={`${styles.btn} ${styles.off}`}>NOT YET</span>
+            )}
+          </div>
+          <p className={styles.keys}>← → えらぶ　ENTER あそぶ　SPACE ジャンプ</p>
+        </section>
+
+        <div className={styles.ground} onClick={doJump} role="presentation">
+          <div className={`${styles.hero} ${jump ? styles.jump : ""}`}>
+            <Sprite rows={RUNNER_A} palette={RUNNER_PALETTE} px={4} className={styles.frameA} />
+            <Sprite rows={RUNNER_B} palette={RUNNER_PALETTE} px={4} className={styles.frameB} />
+          </div>
+          <span className={styles.coin} style={{ left: "22%" }} />
+          <span className={styles.coin} style={{ left: "58%", animationDelay: "-.4s" }} />
+          <span className={styles.coin} style={{ left: "83%", animationDelay: "-.8s" }} />
+          <i className={styles.tiles} />
+        </div>
 
         <footer className={styles.footer}>
           <Link href="/portfolio">作者について</Link>
           <Link href="/privacy">プライバシーポリシー</Link>
-          <span>© Tao Matsumura</span>
+          <span>© 2026 TAO MATSUMURA</span>
         </footer>
       </main>
     </div>
