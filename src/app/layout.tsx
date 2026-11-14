@@ -32,6 +32,12 @@ export default function RootLayout({
         {/* Favicon and meta tags */}
         <link rel="icon" href="/favicon.ico" />
         <meta name="theme-color" content="#1e3a8a" />
+        {/* Google AdSense */}
+        <script
+          async
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8444745750773771"
+          crossOrigin="anonymous"
+        />
       </head>
       <body className="font-sans antialiased bg-white text-black">
         {children}

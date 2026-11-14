@@ -27,6 +27,10 @@ const nextConfig = {
     config.resolve.alias["@"] = path.join(__dirname, "src");
     return config;
   },
+  async rewrites() {
+    // dopamine は静的に書き出して public/dopamine に置いてある
+    return [{ source: "/dopamine", destination: "/dopamine/index.html" }];
+  },
   async headers() {
     return [
       {
@@ -53,6 +57,10 @@ const nextConfig = {
       {
         source: "/shibuya-rush/Build/:file*.data.unityweb",
         headers: [{ key: "Content-Type", value: "application/octet-stream" }],
+      },
+      {
+        source: "/dopamine/(apple-icon|opengraph-image|twitter-image)",
+        headers: [{ key: "Content-Type", value: "image/png" }],
       },
       {
         source: "/uploads/:path*",

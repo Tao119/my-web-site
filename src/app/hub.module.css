@@ -1,19 +1,100 @@
-.root{width:100%;min-height:100vh;background:#0d1117}
-.page{width:100%;text-align:left;min-height:100vh;color:#f2f5fa;padding:48px 16px 32px;max-width:960px;margin:0 auto;font-family:Inter,"Hiragino Sans","Noto Sans JP",sans-serif}
-.header{text-align:center;margin-bottom:32px}
-.logo{font-size:clamp(32px,8vw,56px);font-weight:900;letter-spacing:.08em;margin:0}
-.lead{color:#9aa6b8;margin:8px 0 0}
-.hero{display:block;position:relative;padding:28px 24px;border-radius:20px;background:linear-gradient(135deg,var(--c),#1b2230 85%);color:#fff;text-decoration:none;margin-bottom:24px;box-shadow:0 10px 30px rgba(0,0,0,.4)}
-.hero h2{font-size:clamp(28px,7vw,44px);font-weight:900;margin:0 0 8px}
-.hero p{margin:0 0 16px;line-height:1.7;max-width:36em}
-.badge{position:absolute;top:16px;right:16px;background:#fff;color:#000;font-weight:800;font-size:12px;padding:3px 10px;border-radius:99px}
-.play{display:inline-block;background:#fff;color:#111;font-weight:800;padding:12px 22px;border-radius:12px}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:16px}
-.card{display:block;padding:20px;border-radius:16px;background:#161c28;border:2px solid var(--c);color:#f2f5fa;text-decoration:none;transition:transform .15s}
-.card:hover{transform:translateY(-3px)}
-.card h3{margin:0 0 8px;font-size:22px;color:var(--c)}
-.card p{margin:0 0 12px;color:#c3cbd8;line-height:1.6;font-size:14px}
-.card ul{display:flex;gap:6px;flex-wrap:wrap;list-style:none;padding:0;margin:0}
-.card li{font-size:11px;padding:2px 8px;border-radius:99px;background:#232b3b;color:#9aa6b8}
-.footer{display:flex;gap:16px;flex-wrap:wrap;justify-content:center;margin-top:48px;color:#6f7b8e;font-size:13px}
-.footer a{color:#9aa6b8}
+.root{position:relative;width:100%;min-height:100vh;background:#0a0d14;overflow:hidden;--mx:50vw;--my:30vh}
+.page{position:relative;z-index:1;width:100%;text-align:left;min-height:100vh;color:#f2f5fa;padding:56px 16px 32px;max-width:980px;margin:0 auto;font-family:Inter,"Hiragino Sans","Noto Sans JP",sans-serif}
+
+/* 背景 */
+.bg{position:fixed;inset:0;z-index:0;pointer-events:none}
+.bg i{position:absolute;display:block}
+.blob1,.blob2,.blob3{border-radius:50%;filter:blur(90px);opacity:.5}
+.blob1{width:46vw;height:46vw;left:-10vw;top:-12vw;background:#ff9a2e;animation:drift1 18s ease-in-out infinite alternate}
+.blob2{width:42vw;height:42vw;right:-12vw;top:14vh;background:#b66bff;animation:drift2 22s ease-in-out infinite alternate}
+.blob3{width:36vw;height:36vw;left:22vw;bottom:-16vw;background:#2fb7ff;animation:drift3 20s ease-in-out infinite alternate;opacity:.4}
+.gridlines{inset:0;background-image:linear-gradient(rgba(255,255,255,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.04) 1px,transparent 1px);background-size:44px 44px;mask-image:radial-gradient(ellipse at 50% 30%,#000 20%,transparent 75%)}
+.spot{inset:0;background:radial-gradient(360px circle at var(--mx) var(--my),rgba(255,255,255,.09),transparent 70%)}
+@keyframes drift1{to{transform:translate(14vw,10vh) scale(1.15)}}
+@keyframes drift2{to{transform:translate(-12vw,12vh) scale(.9)}}
+@keyframes drift3{to{transform:translate(10vw,-10vh) scale(1.2)}}
+
+/* ロゴ */
+.header{text-align:center;margin-bottom:28px}
+.logo{display:inline-block;font-size:clamp(36px,9vw,68px)!important;font-weight:900;letter-spacing:.06em;margin:0;cursor:pointer;user-select:none;line-height:1.1}
+.ch{display:inline-block;animation:drop .7s cubic-bezier(.3,1.5,.5,1) both;transition:transform .2s,color .2s;background:linear-gradient(180deg,#fff,#ffcf9a);-webkit-background-clip:text;background-clip:text;color:transparent}
+.ch:hover{transform:translateY(-10px) rotate(-8deg) scale(1.15);-webkit-text-fill-color:#ff9a2e}
+@keyframes drop{from{opacity:0;transform:translateY(-40px) rotate(12deg) scale(.6)}to{opacity:1;transform:none}}
+.lead{color:#a5b0c4;margin:10px 0 0;animation:fade 1s .7s both}
+@keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+/* ティッカー */
+.ticker{overflow:hidden;white-space:nowrap;margin:0 -16px 28px;padding:9px 0;border-block:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.04);font-weight:800;letter-spacing:.22em;font-size:12px;color:#ffb866;transform:rotate(-1deg)}
+.ticker>div{display:inline-block;animation:marq 26s linear infinite}
+.ticker span{display:inline-block;padding-right:2em}
+@keyframes marq{to{transform:translateX(-50%)}}
+
+/* カード共通 */
+.hero,.card{--rx:0deg;--ry:0deg;--gx:50%;--gy:50%;position:relative;display:block;overflow:hidden;color:#fff;text-decoration:none;transform:perspective(900px) rotateX(var(--rx)) rotateY(var(--ry));transition:transform .18s ease-out,box-shadow .25s;will-change:transform}
+.shine{position:absolute;inset:0;pointer-events:none;background:radial-gradient(260px circle at var(--gx) var(--gy),rgba(255,255,255,.22),transparent 65%);opacity:0;transition:opacity .25s}
+.hero:hover .shine,.card:hover .shine{opacity:1}
+.tags{display:flex;gap:6px;flex-wrap:wrap;list-style:none;padding:0;margin:0 0 4px}
+.tags li{font-size:11px;padding:3px 10px;border-radius:99px;background:rgba(255,255,255,.14);backdrop-filter:blur(4px)}
+
+/* ヒーロー */
+.hero{padding:34px 28px 30px;border-radius:24px;margin-bottom:22px;background:linear-gradient(135deg,var(--c),#2a1f3d 88%);box-shadow:0 16px 44px rgba(255,154,46,.22),0 2px 0 rgba(255,255,255,.2) inset;animation:rise .8s .5s cubic-bezier(.2,.9,.3,1) both}
+.hero:hover{box-shadow:0 22px 60px rgba(255,154,46,.4),0 2px 0 rgba(255,255,255,.2) inset}
+@keyframes rise{from{opacity:0;transform:translateY(40px) scale(.97)}to{opacity:1}}
+.hero h2{position:relative;font-size:clamp(30px,8vw,52px)!important;font-weight:900;margin:0 0 10px;letter-spacing:.02em}
+.hero p{position:relative;margin:0 0 14px;line-height:1.75;max-width:30em;color:#fff6ea}
+.hero .tags{position:relative;margin-bottom:18px}
+.badge{position:absolute;top:16px;right:16px;z-index:2;background:#fff;color:#111;font-weight:900;font-size:12px;padding:4px 12px;border-radius:99px;animation:pulse 1.6s ease-in-out infinite}
+@keyframes pulse{50%{transform:scale(1.14) rotate(4deg)}}
+.play{position:relative;display:inline-flex;align-items:center;gap:8px;background:#fff;color:#111;font-weight:900;padding:13px 26px;border-radius:14px;box-shadow:0 6px 0 rgba(0,0,0,.28);transition:transform .12s,box-shadow .12s}
+.play b{display:inline-block;animation:nudge 1s ease-in-out infinite}
+@keyframes nudge{50%{transform:translateX(5px)}}
+.hero:hover .play{transform:translateY(-2px);box-shadow:0 8px 0 rgba(0,0,0,.28)}
+.hero:active .play{transform:translateY(4px);box-shadow:0 2px 0 rgba(0,0,0,.28)}
+
+/* ヒーロー内の走る群衆 */
+.track{position:absolute;inset:0;pointer-events:none;opacity:.9}
+.runner{position:absolute;left:-6%;width:14px;height:22px;border-radius:7px 7px 4px 4px;animation:run 8s linear infinite;opacity:.55}
+.runner::after{content:"";position:absolute;left:1px;top:-9px;width:12px;height:12px;border-radius:50%;background:inherit}
+.me{top:50%;width:18px;height:28px;background:#fff;opacity:1;animation-duration:4.2s;box-shadow:0 0 18px 4px rgba(255,255,255,.7)}
+.me::after{width:15px;height:15px;top:-12px;left:1.5px}
+@keyframes run{0%{transform:translateX(0) translateY(0)}25%{transform:translateX(30vw) translateY(-3px)}50%{transform:translateX(60vw) translateY(0)}75%{transform:translateX(90vw) translateY(-3px)}100%{transform:translateX(125%) translateY(0)}}
+.goal{position:absolute;right:20px;bottom:18px;font-size:34px;animation:wave 1.4s ease-in-out infinite;transform-origin:bottom left}
+@keyframes wave{50%{transform:rotate(12deg)}}
+
+/* グリッド */
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:18px}
+.reveal{opacity:0;transform:translateY(34px);transition:opacity .7s,transform .7s cubic-bezier(.2,.9,.3,1)}
+.in{opacity:1;transform:none}
+.card{height:100%;padding:24px 22px;border-radius:20px;background:linear-gradient(160deg,color-mix(in srgb,var(--c) 30%,#141a27),#141a27 70%);border:1.5px solid color-mix(in srgb,var(--c) 70%,transparent);box-shadow:0 10px 30px rgba(0,0,0,.35)}
+.card:hover{box-shadow:0 16px 44px color-mix(in srgb,var(--c) 40%,transparent)}
+.card h3{position:relative;margin:0 0 8px;font-size:26px!important;font-weight:900;color:var(--c);letter-spacing:.03em}
+.card p{position:relative;margin:0 0 14px;color:#cdd5e3;line-height:1.7;font-size:14px;max-width:24em}
+.go{position:relative;display:inline-block;margin-top:12px;font-weight:800;color:var(--c)}
+.go b{display:inline-block;transition:transform .2s}
+.card:hover .go b{transform:translateX(6px)}
+
+/* ドーパミン: 回る分子 */
+.mol{position:absolute;right:16px;top:14px;width:84px;height:84px;pointer-events:none}
+.nucleus{position:absolute;left:50%;top:50%;width:16px;height:16px;margin:-8px;border-radius:50%;background:#fff;box-shadow:0 0 22px 8px rgba(182,107,255,.9);animation:beat 1.2s ease-in-out infinite}
+@keyframes beat{50%{transform:scale(1.35)}}
+.orbit{position:absolute;inset:0;border-radius:50%;border:1px dashed rgba(182,107,255,.55);transform:scale(var(--s));animation:spin 4.8s linear infinite}
+.orbit b{position:absolute;left:50%;top:-4px;width:8px;height:8px;margin-left:-4px;border-radius:50%;background:#e1c2ff}
+@keyframes spin{to{transform:scale(var(--s)) rotate(360deg)}}
+
+/* 準備中 */
+.soon{width:100%;height:100%;min-height:200px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;border-radius:20px;border:2px dashed rgba(255,255,255,.25);background:rgba(255,255,255,.03);color:#cdd5e3;font-weight:800;font-size:18px;cursor:pointer;transition:border-color .2s,background .2s}
+.soon:hover{border-color:#ffb866;background:rgba(255,184,102,.07)}
+.soon small{font-weight:500;color:#8793a8;font-size:12px}
+.q{font-size:56px;line-height:1;color:#ffb866;animation:wob 2.4s ease-in-out infinite}
+.soon:active .q{animation:shake .3s}
+@keyframes wob{0%,100%{transform:rotate(-8deg) translateY(0)}50%{transform:rotate(8deg) translateY(-6px)}}
+@keyframes shake{25%{transform:translateX(-6px) rotate(-12deg)}75%{transform:translateX(6px) rotate(12deg)}}
+
+.footer{display:flex;gap:18px;flex-wrap:wrap;justify-content:center;margin-top:56px;color:#7d889c;font-size:13px}
+.footer a{color:#a5b0c4;text-decoration:none}
+.footer a:hover{color:#fff;text-decoration:underline}
+
+@media (prefers-reduced-motion:reduce){
+  .root *,.root *::before,.root *::after{animation:none!important;transition:none!important}
+  .reveal{opacity:1;transform:none}
+}

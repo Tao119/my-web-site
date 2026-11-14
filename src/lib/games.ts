@@ -6,6 +6,8 @@ export type GameEntry = {
   color: string;
   tags: string[];
   featured?: boolean;
+  /** true のゲームは一覧に出さない(URLを直接入力すれば開ける) */
+  hidden?: boolean;
 };
 
 export const games: GameEntry[] = [
@@ -19,12 +21,21 @@ export const games: GameEntry[] = [
     featured: true,
   },
   {
+    slug: "dopamine",
+    title: "DOPAMINE",
+    tagline: "ドーパミンを、さわって学ぶ。出典つきのシミュレーションで、報酬と予測のしくみを体験する神経科学ポータル。",
+    href: "/dopamine",
+    color: "#b66bff",
+    tags: ["体験型", "神経科学", "3D"],
+  },
+  {
     slug: "ito",
     title: "ito",
     tagline: "数字を言葉で例えて、みんなで順番に並べる協力ゲーム。",
     href: "/ito",
     color: "#4aa8ff",
     tags: ["オンライン", "みんなで", "会話"],
+    hidden: true,
   },
   {
     slug: "molkky",
@@ -33,6 +44,7 @@ export const games: GameEntry[] = [
     href: "/molkky",
     color: "#7ad07a",
     tags: ["スコア管理", "みんなで"],
+    hidden: true,
   },
   {
     slug: "karuta",
@@ -41,5 +53,8 @@ export const games: GameEntry[] = [
     href: "/karuta",
     color: "#ff6b8b",
     tags: ["ブラウザ", "反射神経"],
+    hidden: true,
   },
 ];
+
+export const visibleGames = games.filter((g) => !g.hidden);
