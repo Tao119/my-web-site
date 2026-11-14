@@ -1,11 +1,29 @@
-import { visibleGames } from "src/lib/games";
-import HubClient from "./HubClient";
+"use client";
+import Link from "next/link";
+import { Dispatch, SetStateAction, useContext } from "react";
+import { FadeIn, FadeInWithStagger } from "src/components/fadeIn";
 
-export const metadata = {
-  title: "Tao Games | ブラウザで遊べるゲーム集",
-  description: "松村タオが作った、ブラウザですぐ遊べるゲームの集まり。SHIBUYA RUSH、DOPAMINEなど。",
+const Page = () => {
+  return (
+    <div
+      className="p-home"
+      style={{
+        padding: "100px",
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "flex-start",
+        alignContent: "flex-start",
+        overflowY: "auto",
+        height: "100vh",
+        scrollbarWidth: "none",
+        msOverflowStyle: "none",
+        fontSize: "30px",
+      }}
+    >
+      <FadeIn style={{ height: "1000px", flexShrink: 0 }}>tao </FadeIn>
+      <FadeIn style={{ height: "1000px", flexShrink: 0 }}>matsumura </FadeIn>
+      <FadeIn style={{ height: "1000px", flexShrink: 0 }}>website </FadeIn>
+    </div>
+  );
 };
-
-export default function Page() {
-  return <HubClient games={visibleGames} />;
-}
+export default Page;
