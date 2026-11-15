@@ -28,8 +28,27 @@ const nextConfig = {
     return config;
   },
   async rewrites() {
-    // dopamine は静的に書き出して public/dopamine に置いてある
-    return [{ source: "/dopamine", destination: "/dopamine/index.html" }];
+    // 静的に書き出したゲームは public/games/<名前>/ にある。末尾なしの URL で index.html を返す
+    return [
+      { source: "/games/dopamine", destination: "/games/dopamine/index.html" },
+      { source: "/games/shibuya-rush", destination: "/games/shibuya-rush/index.html" },
+    ];
+  },
+  async redirects() {
+    // ゲームは /games/ 配下に集約した。旧URLは新URLへ転送する
+    return [
+      { source: "/shibuya-rush/index.html", destination: "/games/shibuya-rush", permanent: true },
+      { source: "/shibuya-rush/:path*", destination: "/games/shibuya-rush/:path*", permanent: true },
+      { source: "/shibuya-rush", destination: "/games/shibuya-rush", permanent: true },
+      { source: "/dopamine/:path*", destination: "/games/dopamine/:path*", permanent: true },
+      { source: "/dopamine", destination: "/games/dopamine", permanent: true },
+      { source: "/ito/:path*", destination: "/games/ito/:path*", permanent: true },
+      { source: "/ito", destination: "/games/ito", permanent: true },
+      { source: "/molkky/:path*", destination: "/games/molkky/:path*", permanent: true },
+      { source: "/molkky", destination: "/games/molkky", permanent: true },
+      { source: "/karuta/:path*", destination: "/games/karuta/:path*", permanent: true },
+      { source: "/karuta", destination: "/games/karuta", permanent: true },
+    ];
   },
   async headers() {
     return [
@@ -43,23 +62,23 @@ const nextConfig = {
         ],
       },
       {
-        source: "/shibuya-rush/Build/:file*.unityweb",
+        source: "/games/shibuya-rush/Build/:file*.unityweb",
         headers: [{ key: "Content-Encoding", value: "gzip" }, { key: "Cache-Control", value: "public, max-age=0, must-revalidate" }],
       },
       {
-        source: "/shibuya-rush/Build/:file*.wasm.unityweb",
+        source: "/games/shibuya-rush/Build/:file*.wasm.unityweb",
         headers: [{ key: "Content-Type", value: "application/wasm" }],
       },
       {
-        source: "/shibuya-rush/Build/:file*.framework.js.unityweb",
+        source: "/games/shibuya-rush/Build/:file*.framework.js.unityweb",
         headers: [{ key: "Content-Type", value: "application/javascript" }],
       },
       {
-        source: "/shibuya-rush/Build/:file*.data.unityweb",
+        source: "/games/shibuya-rush/Build/:file*.data.unityweb",
         headers: [{ key: "Content-Type", value: "application/octet-stream" }],
       },
       {
-        source: "/dopamine/(apple-icon|opengraph-image|twitter-image)",
+        source: "/games/dopamine/(apple-icon|opengraph-image|twitter-image)",
         headers: [{ key: "Content-Type", value: "image/png" }],
       },
       {

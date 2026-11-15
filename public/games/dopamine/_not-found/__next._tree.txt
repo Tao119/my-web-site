@@ -1,0 +1,4 @@
+:HL["/games/dopamine/_next/static/chunks/2ag34g2i5mssb.css","style"]
+:HL["/games/dopamine/_next/static/chunks/3c8_arukfg-1h.css","style"]
+:HL["/games/dopamine/_next/static/chunks/2-j4mkpqbv_dm.css","style"]
+0:{"tree":{"name":"","param":null,"prefetchHints":4176,"slots":{"children":{"name":"/_not-found","param":null,"prefetchHints":4192,"slots":{"children":{"name":"__PAGE__","param":null,"prefetchHints":4256,"slots":null}}}}},"staleTime":300,"buildId":"viArh53XGP6TfzuR-CUrS"}
